@@ -3,7 +3,66 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
-**Date:** 2026-09-19
+**Date:** 2026-09-19 (evening)
+**From:** Claude Code (asset integration + repo architecture)
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Integrate ground and crate tile assets into the game, correct sprite-sheet tile coordinates from visual inspection, and establish submodule architecture for the root repo so fresh clones work cleanly.
+
+## 2. Current state
+
+**What works:**
+- Ground and crate tile assets added to `CHRONO-GAMEAPP/assets/tiles/` (crate.png 16×16, ground_tileset.png 112×128)
+- Tile platform coordinates corrected in `tile_platform_component.dart` (lines 24–27) based on upscaled grid inspection
+- Both repos committed and pushed (GAMEAPP `3fe421f`, root `e997223`)
+- Git identity now consistent across all three repos (Rodel <rodellanoche@gmail.com>)
+- Root repo now uses `.gitmodules` for clean submodule cloning
+
+**What's broken or unfinished:**
+- **Platform tiles not yet visually verified in-game** — corrected coordinates based on sprite sheet inspection, but need playtest to confirm they render correctly (if wrong, adjust `_topLeftCol/_topMidCol/_topRightCol/_fillCol` in tile_platform_component.dart lines 24–27)
+- Next priority still: repeat-play question randomization
+
+**Files/folders touched (this session):**
+- `CHRONO-GAMEAPP/lib/game/components/tile_platform_component.dart` — corrected tile coordinates (row/col constants)
+- `CHRONO-GAMEAPP/assets/tiles/ground_tileset.png` (new) — 7×8 grid of 16px tiles
+- `CHRONO-GAMEAPP/assets/tiles/crate.png` (new) — 16×16 crate sprite
+- `CHRONO/.gitmodules` (new) — registered subprojects + GitHub remotes
+- Root repo — stopped tracking stray `.git_commit_msg.txt`
+
+## 3. Decisions made (and why)
+- **Chose option 1 for nested repos** — kept three separate git repos with `.gitmodules` submodule registration instead of flattening into one; maintains separate histories (GAMEAPP 14 commits, DASHBOARD 27), allows independent releases, fresh clones need `--recurse-submodules` flag
+- **Corrected tile coordinates from grid inspection** — previous guess had fill tile at (1,2) which has grass on top; switched to grass-topped set: left cap (1,1), mid (0,1), right (1,2), fill (1,4)
+- **Unified git identity to rodellanoche@gmail.com** — set locally in CHRONO-GAMEAPP; global config still uses school address so other projects unchanged
+
+## 4. Things we tried that did NOT work
+- **Initial tile coordinate guess** — comment in code said coordinates were best-effort before PNG was available; rendered upscaled grid showed fill tile had grass stripes (would look wrong under platforms) and caps came from different tile styles
+- **First attempt at platform rendering** — coords were (0,1), (0,2), (0,5), (1,2); corrected to (1,1), (0,1), (1,2), (1,4) based on visual inspection of actual PNG
+
+## 5. Next steps (in order)
+1. **Playtest platforms in-game** — run game, check if floating platforms and crates render correctly; if tile colors/shapes look wrong, adjust those four constants in tile_platform_component.dart and re-test
+2. **Implement question randomization** — same quiz can appear multiple times in a run; add shuffle/random-draw per attempt
+3. (Optional) Refactor `chrono_game.dart` below 300-line budget — extract level-state logic
+
+## 6. Constraints & conventions
+- **Git architecture:** three repos (root tracks subprojects via `.gitmodules`); clone with `git clone --recurse-submodules`
+- **Assets:** ground_tileset.png is 7 cols × 8 rows, tiles are 16×16px, 0-indexed from top-left
+- **Do not touch:** `.env` files (live credentials), quiz/HUD behavior
+
+## 7. Open questions
+- Do the platform tiles look correct in-game? (Need visual confirmation before moving on)
+- Should refactor happen before or after question randomization?
+
+## 8. Attachments / references
+- Commits: GAMEAPP `3fe421f` (assets + coordinates), root `e997223` (submodules)
+- GitHub: [rowdel-ctrl/CHRONOQUEST-GAME](https://github.com/rowdel-ctrl/CHRONOQUEST-GAME), [rowdel-ctrl/CHRONO-MAINREPO](https://github.com/rowdel-ctrl/CHRONO-MAINREPO)
+
+---
+
+**Date:** 2026-09-19 (baseline assessment)
 **From:** Claude Code (baseline assessment)
 **To:** Claude Code / Chat
 **Project:** ChronoQuest
