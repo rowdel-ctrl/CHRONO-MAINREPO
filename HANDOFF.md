@@ -3,6 +3,64 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-19 (night)
+**From:** Claude Code (dev no-login mode + platform tile verification)
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Let the game run without logging in so it can be tested freely, then use that to visually verify the platform/crate tiles that were still unchecked.
+
+## 2. Current state
+
+**What works:**
+- `--dart-define=DEV_SKIP_AUTH=true` skips login: router redirect disabled, app opens on character selection (or `DEV_START_ROUTE`, e.g. `/game/pre-colonial/1`). Ignored in release builds (`!kReleaseMode`).
+- Quiz results are dropped (not sent, not queued) in that mode, so they can't be flushed to a real student's account later.
+- Platforms and crates verified in a real render (screenshots via headless Chrome): grass top + orange rim, side borders now run the full 2-tile height, no seams between tiles. Crates render fine.
+- Analyzer clean, 8/8 tests pass (they never touch auth or draw platforms — screenshots were the only render check).
+
+**What's broken or unfinished:**
+- Lowest platforms spawn `groundY - 60` (enemy_spawner.dart `_spawnPlatform`), so they can overlap the player's head while running underneath. Not changed — depends on intended jump/platform gameplay.
+- Windows desktop build fails without Windows Developer Mode (plugin symlinks); web build works. Not changed (machine-wide setting).
+- Next priority still: repeat-play question randomization.
+
+**Files touched:**
+- `CHRONO-GAMEAPP/lib/core/constants.dart` — new `DevFlags` (`skipAuth`, `startRoute`)
+- `CHRONO-GAMEAPP/lib/core/router.dart` — initialLocation + redirect honor `DevFlags`
+- `CHRONO-GAMEAPP/lib/services/api_service.dart` — `submitResult` no-ops in skip mode
+- `CHRONO-GAMEAPP/lib/game/components/tile_platform_component.dart` — fill-row wall tiles, non-AA paint
+
+## 3. Decisions made (and why)
+- **Compile-time flag instead of editing/removing auth** — the login flow stays intact and unchanged in normal builds; nothing to revert before shipping.
+- **Drop results in skip mode** — a queued result would be flushed to whichever account logs in next.
+- **Fill row uses wall tiles (1,3)/(1,5) at the ends, (1,4) in the middle** — tile (1,4) is meant as interior only; using it at the ends made the side border stop after one row.
+- **Non-anti-aliased, unfiltered paint for tiles** — tiles are drawn separately at fractional camera positions; AA blended each tile edge with the background, leaving seams. The tile art itself is fully opaque (checked alpha), so the seams were a render issue, not an art issue.
+
+## 4. Things we tried that did NOT work
+- **`flutter run -d windows`** — "Building with plugins requires symlink support" (needs Developer Mode). Used `-d web-server` instead.
+- **`chrome --headless --screenshot --virtual-time-budget`** — captured only Flutter's loading bar (virtual time doesn't wait for the real debug-build load). Drove Chrome over CDP with a real-time wait instead.
+- **Reading the tileset on a transparent background** — dark tiles were unreadable; a magenta backdrop made edges/transparency clear.
+
+## 5. Next steps (in order)
+1. **Implement question randomization** — same quiz can appear multiple times in a run; add shuffle/random-draw per attempt.
+2. Decide platform gameplay: raise the minimum platform height or make them non-blocking so they don't sit on the player's head.
+3. (Optional) Refactor `chrono_game.dart` below 300 lines.
+
+## 6. Constraints & conventions
+- **Run without login:** `flutter run -d web-server --web-port 8123 --dart-define=DEV_SKIP_AUTH=true --dart-define=DEV_START_ROUTE=/game/pre-colonial/1` (use debug/profile, not release).
+- **Do not touch:** `.env` files (live credentials), quiz/HUD behavior.
+
+## 7. Open questions
+- Should low platforms stay as-is, or be moved higher / made pass-through?
+- Enable Windows Developer Mode so desktop builds work?
+
+## 8. Attachments / references
+- Commits: see git log in `CHRONO-GAMEAPP` (dev no-login mode + tile fixes) and root repo (HANDOFF + submodule bump).
+
+---
+
 **Date:** 2026-09-19 (evening)
 **From:** Claude Code (asset integration + repo architecture)
 **To:** Claude Code / Chat
