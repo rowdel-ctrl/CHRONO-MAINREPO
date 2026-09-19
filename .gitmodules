@@ -1,0 +1,6 @@
+[submodule "CHRONO-GAMEAPP"]
+	path = CHRONO-GAMEAPP
+	url = https://github.com/rowdel-ctrl/CHRONOQUEST-GAME.git
+[submodule "CHRONO-DASHBOARD"]
+	path = CHRONO-DASHBOARD
+	url = https://github.com/rowdel-ctrl/CHRONOQUEST-DASH
