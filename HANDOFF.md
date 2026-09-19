@@ -3,6 +3,53 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-19 (late night — platform height and layering)
+**From:** Claude Code (low-platform overlap fix)
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Settle the open question about low platforms overlapping the player's head.
+
+## 2. Current state
+
+**What works:**
+- **Finding:** platforms were never solid. `player_component.dart` only lets the player *land on top* (falling, feet within 20 px of the surface); there is no side or head collision. The overlap was visual only: player and platforms share the world at the same draw priority, so a platform added later was painted over the player. The earlier HANDOFF wording "make them non-blocking" was wrong; they already are.
+- **Fix 1, draw order:** `TilePlatformComponent.renderPriority = -1`, so platforms draw behind the player. Checked in a real render: before, a platform hid the player's torso; after, the whole player is drawn over it, even on the lowest platform.
+- **Fix 2, spawn height:** `EnemySpawner.platformMinHeight = 60` and `platformMaxHeight = 105` (was 60–160). The jump peaks at about 128 px (`jumpForce² / 2·gravity` = 480² / 1800), so before, roughly a third of platforms could not be reached from the ground.
+- 33/33 tests pass (3 new in `test/game/platform_layering_test.dart`: platform priority below the player, max height at least 15 px under the jump peak, min below max). Analyzer clean for the changed files.
+
+**What's broken or unfinished:**
+- Platforms still give no reason to jump up (nothing sits on them).
+- Left alone on purpose: jump force and platform thickness.
+
+**Files touched:**
+- `CHRONO-GAMEAPP/lib/game/components/tile_platform_component.dart` — `renderPriority`
+- `CHRONO-GAMEAPP/lib/game/components/enemy_spawner.dart` — `platformMinHeight` / `platformMaxHeight`
+- `CHRONO-GAMEAPP/test/game/platform_layering_test.dart` (new)
+
+## 3. Decisions made (and why)
+- **Keep platforms one-way (pass through from below).** An auto-runner can't stop or go back, so solid platforms would only frustrate. This is what the code already did.
+- **Do not raise platforms above the player's head.** With an 80 px player and 32 px thick platforms, clearing the head needs a top of about 128 px, which is the jump peak, so the top could not be reached. Both goals can't be met at the current jump.
+- **Do not change the jump force.** It changes the feel of the whole game and needs much more testing.
+
+## 4. Things we tried that did NOT work
+- **Running the dev command from Git Bash:** it rewrote `--dart-define=DEV_START_ROUTE=/game/...` into `C:/Program Files/Git/game/...`, so the router showed "Page not found". Run it from PowerShell.
+- **Screenshotting too early:** the debug web build loads about 660 script files. After connecting before the log said `lib\main.dart is being served`, the page stayed blank white, even for fresh browsers, until the server was restarted. Wait for that line, then take shots.
+
+## 5. Next steps (in order)
+1. (Optional) Put coins or a crate on some platforms so there is a reason to jump up.
+2. Write more questions per level (see the randomization entry).
+3. (Optional) Refactor `chrono_game.dart` below 300 lines.
+
+## 6. Constraints & conventions
+- Run the no-login dev command from PowerShell, not Git Bash (see the tile verification entry for the command).
+- **Do not touch:** `.env` files, quiz/HUD behavior.
+
+---
+
 **Date:** 2026-09-19 (late night — tile verification)
 **From:** Claude Code (dev no-login mode + platform tile verification; reconciles the chat session's tile-coordinate entry)
 **To:** Claude Code / Chat
@@ -26,7 +73,7 @@ Run the game without logging in, use it to verify the platform/crate tiles in a 
 - Question randomization is **done** (see the next entry).
 
 **What's broken or unfinished:**
-- Lowest platforms spawn `groundY - 60` (`enemy_spawner.dart` `_spawnPlatform`), so they can overlap the player's head. Not changed — depends on intended jump/platform gameplay.
+- Low platforms painting over the player: **fixed**, see the platform entry above.
 - Windows desktop build fails without Windows Developer Mode (plugin symlinks); web build works.
 
 **Earlier chat entry ("tile coordinate correction") — SUPERSEDED, do not apply.** It read the code's (row, col) constants as (col, row). Transposed, its three claims hold exactly: code (0,1) → tile r1c0 is the near-empty one, (1,4) → r4c1 is the crate icon, (1,2) → r2c1 is the teal-palette tile. But the code uses (row, col), and the tiles it really renders are right. Its proposed replacements are also (col, row): pasted into the code as (row, col), "(0,0),(1,0),(2,0)" becomes orange grass + a dark blob tile + teal grass — the palette mix it warned about. Its fill pick (5,5) is (55,44,83), lighter and bluer than the body (39,32,52), and would show as a patch. One finding of that entry does stand, corrected below.
@@ -53,9 +100,8 @@ Run the game without logging in, use it to verify the platform/crate tiles in a 
 
 ## 5. Next steps (in order)
 1. (Optional) Add a comment above the tile constants: coordinates are (row, col) in `ground_tileset.png`; rows 0–1 orange, 2–3 teal; the tileset is `sheet.png` cropped at x=111 (not col+7).
-2. Decide platform gameplay: raise the minimum platform height or make them non-blocking.
-3. Write more questions per level (see the next entry).
-4. (Optional) Refactor `chrono_game.dart` below 300 lines.
+2. Write more questions per level (see the randomization entry below).
+3. (Optional) Refactor `chrono_game.dart` below 300 lines.
 
 ## 6. Constraints & conventions
 - **All tile coordinates in this repo are (row, col), 0-indexed from the top-left.** State the order whenever writing a coordinate.
@@ -63,7 +109,6 @@ Run the game without logging in, use it to verify the platform/crate tiles in a 
 - **Do not touch:** `.env` files (live credentials), quiz/HUD behavior.
 
 ## 7. Open questions
-- Should low platforms stay as-is, or be moved higher / made pass-through?
 - Enable Windows Developer Mode so desktop builds work?
 - A teal (per-era) platform variant would need its own fill choice, since (3,4) is not a flat tile.
 - `sheet.png` (the original sheet) was deleted from the repo on purpose; the game never used it. Re-download from the source link below if needed.
@@ -111,15 +156,14 @@ Stop replays of a level from showing identical questions/option order (HANDOFF n
 
 ## 5. Next steps (in order)
 1. Write more questions per level in `assets/data/questions_<era>.json` (target: more than 10 for levels 1–9, more than 22 for level 10). Source `correctAnswer` can stay "A" — it is reshuffled at runtime.
-2. Decide platform gameplay (low platforms overlap the player's head) — still open (see the tile verification entry above).
-3. (Optional) Refactor `chrono_game.dart` below 300 lines.
+2. (Optional) Refactor `chrono_game.dart` below 300 lines.
 
 ## 6. Constraints & conventions
 - Run without login: see the tile verification entry above.
 - **Do not touch:** `.env` files, quiz/HUD behavior.
 
 ## 7. Open questions
-- Same as the tile verification entry above: platform height; Windows Developer Mode.
+- Windows Developer Mode for desktop builds (see the tile verification entry).
 
 ---
 
