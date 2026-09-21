@@ -3,6 +3,131 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-21 (adviser items: step 1 refactor + step 2 answer feedback)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+
+Do plan steps 1 and 2: get `chrono_game.dart` under 300 lines, then replace text-only right/wrong feedback with icons.
+
+## 2. Current state
+
+**What works:**
+
+- **Step 1 (refactor):** `chrono_game.dart` is 357 → 280 lines. The question flow (`showQuestion`, `showBossQuestion`, `handleAnswer`) moved unchanged to `lib/game/quiz_handler.dart` as an extension. The three duplicated life-loss blocks are now one `loseLife()` (returns true when the level failed). Playtested level 1: obstacle hits, correct answers, wrong answers and running out of hearts all behave as before.
+- **Step 2 (feedback icons):** after answering, a pop-in "TAMA!" (green check) or "MALI!" (red X) badge appears centred in the question header. The correct option gets a check and a wrong pick gets an X in the button's corner. Sounds, 800 ms auto-close on correct, and the wrong-answer explanation are unchanged. Playtested both paths in a real run.
+- `question_overlay.dart` was already 440 lines, so the answer button, explanation panel, timer chip and power-up button moved to `lib/game/overlays/question_widgets.dart` (overlay now 275).
+- 39/39 tests pass (6 new in `test/game/answer_feedback_test.dart`). Analyzer: only the 5 old `info` lints.
+
+**What's unfinished:**
+
+- Not playtested: the level 10 boss fight (10 warm-up questions first; its code moved unchanged) and falling into a gap (none came up).
+- `level_failed_screen.dart` shows 3 empty hearts while the game gives 10 (pre-existing; fix in the hearts step).
+- Nothing is committed yet. Planned: two commits in CHRONO-GAMEAPP (1. refactor: `chrono_game.dart`, `quiz_handler.dart`, the three import lines; 2. answer feedback: overlay files + test), then one root commit for HANDOFF + the submodule bump. Check `build/` is gitignored first so the APK isn't committed. No push.
+
+**APK:** a release APK was built from this state (85.6 MB, `CHRONO-GAMEAPP/build/app/outputs/flutter-apk/app-release.apk`) for playtesting on a phone. It talks to the deployed backend `chronoquest-backend.vercel.app` (not checked that it's up), so it needs a real student login; `DEV_SKIP_AUTH` only works in debug builds. Still 10 hearts per level. Signed with the debug key unless a release keystore exists. Not yet tried on a device: check touch, screen size, and whether the quiz card feels cramped (only checked at 1280x720).
+
+**Files touched (CHRONO-GAMEAPP):**
+
+- `lib/game/chrono_game.dart`, `lib/game/quiz_handler.dart` (new)
+- `lib/game/overlays/question_overlay.dart`, `question_widgets.dart` (new), `answer_feedback.dart` (new)
+- One import line each in `lib/game/components/boss_component.dart`, `player_component.dart`, `lib/screens/game/game_screen.dart`
+- `test/game/answer_feedback_test.dart` (new)
+
+## 3. Decisions made (and why)
+
+- **Max hearts will be 5** (user decision), regenerating 1 per 10 minutes (50 min for a full set). The code currently gives 10 per level (`GameConstants.livesPerLevel`), not 3 as the entry below assumed.
+- **Answer icons sit in the button corner, not beside the text.** Beside the text they took 44 px of width and made options wrap or truncate sooner.
+- **The badge is no taller than the header chips**, so it doesn't push the card down when it appears.
+- **Widget tests set `GoogleFonts.config.allowRuntimeFetching = false`**: tests have no network.
+
+## 4. Things we tried that did NOT work
+
+- **Rewriting a Dart file with PowerShell `Get-Content`/`Set-Content`** corrupted the UTF-8 box-drawing characters in comments. Use the Edit tool or `sed` from Git Bash.
+- **`getMaxScaleOnAxis()` to read a scale-0 transform** returns 1 (it counts the z axis). Read `transform.storage[0]` instead.
+
+## 5. Next steps (in order)
+
+1. User: playtest the APK on the phone (level 10 boss included), then OK steps 1-2. Then commit as planned above.
+2. Step 3: hit animation on correct answer (`EnemyComponent.defeat()`).
+3. Then idle animation, background depth layer, bigger sprite, hearts regen (5 max), tutorial, enemy variety.
+
+## 6. Constraints & conventions
+
+- Same as the entry below. Playtesting without a person: run the dev server from PowerShell, start headless Chrome with `--remote-debugging-port=9222`, and drive it over CDP (screenshot + mouse clicks). Wait for `lib\main.dart is being served` first; the first question appears about 30 s after load.
+
+---
+
+**Date:** 2026-09-21 (adviser feedback review)
+**From:** Claude chat (planning only, no code changed)
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Turn the adviser's game-mechanics feedback into an ordered plan, checked against the current codebase.
+
+## 2. Current state
+
+**What works:**
+- Nothing changed in code this session. Codebase is as in the 2026-09-19 entries (33/33 tests, randomization done, platform layering fixed).
+
+**Adviser's list (all 8 not started):**
+- [ ] Tutorial screens like other games
+- [ ] Hit/attack animation when an enemy is beaten with the correct answer
+- [ ] Hearts/lives regenerate over time (not jump back to 3)
+- [ ] More enemy/obstacle variety
+- [ ] Bigger character sprite
+- [ ] Simple 2D idle animation for the character
+- [ ] Extra translucent/low-opacity background depth layer
+- [ ] Visual/icon feedback for right/wrong answers instead of plain text
+
+**Still unfinished from before:** question content. Levels 1-9 have 5 questions each but need more than 10; level 10 needs more than 22. Until then replays still pad with placeholders.
+
+**Files touched:** none.
+
+## 3. Decisions made (and why)
+- **The "do not touch quiz/HUD behavior" rule is lifted for the adviser items only** (feedback icons, hit animation, tutorial). They cannot be done without touching quiz/HUD. This overrides the older entries below.
+- **Refactor `chrono_game.dart` before the UI work.** It is over the 300-line budget (351 last recorded; recheck) and the feedback icons and hit animation touch the quiz logic in that file.
+- **Bigger sprite is not a quick win.** Platform heights were tuned for an 80 px player and a ~128 px jump peak (`platformMaxHeight = 105`, and `test/game/platform_layering_test.dart` requires a 15 px margin). After resizing, recheck spawn heights, ground landing, and those tests.
+- **Background depth layer must stay behind platforms and slower than the world.** Platforms draw at `renderPriority = -1`, parallax layers at -10. Faster than the world would invert the depth again (the Phase 3 bug).
+- **Hearts regen: 1 heart every 10 minutes** (30 minutes for a full 3). Keep it as a single constant so it is easy to change after playtesting.
+- **Regen timer: backend is the source of truth, with a local copy.** Store the heart count and the time it last changed (no live countdown); on app open, work out how many hearts came back since then. When online and logged in, use the backend value so changing the phone clock can't cheat it. Keep a local copy (Hive) for offline play and for `DEV_SKIP_AUTH` testing, and sync to the backend when online. Check whether CBACK already stores hearts; if not, add a field and endpoint.
+- **Tutorial: show on first play, and also replayable** from a "How to play" button in a menu. Same screens for both. Build it from existing sprites and Flutter icons; no new art needed.
+
+## 4. Things we tried that did NOT work
+- Nothing failed this session.
+
+## 5. Next steps (in order)
+**Rule: one step at a time. Do not start the next step until the current one is perfect (see "Definition of perfect" in section 6).**
+
+1. User writes more questions in `assets/data/questions_<era>.json` (can run alongside the code work).
+2. Check the current line count of `chrono_game.dart`, then refactor below 300 lines (extract level/quiz-state logic).
+3. Quick wins: right/wrong visual feedback, hit animation on correct answer, idle animation, background depth layer.
+4. Bigger sprite, then recheck platform heights, landing, and the platform_layering tests.
+5. Hearts regen and tutorial screens (decisions are in section 3).
+6. Enemy/obstacle variety: start with 2-3 new ones. (Optional: coins or crates on platforms, still open from before.)
+
+## 6. Constraints & conventions
+- **Do not touch:** `.env` files (live credentials).
+- Quiz/HUD may be changed only for the adviser items above.
+- **Work one item at a time, in order.** Do not move to the next item until the current one is perfect. Also do not mix two items in one change.
+- **Definition of perfect:** it works in a real run (screenshot or playtest, not just tests), all tests pass, analyzer has no new issues, nothing else broke (quiz, HUD, hearts, level flow), and every file stays within the line budget. If any check fails, fix it before moving on. When it passes, report what was checked and wait for the user's OK before starting the next item.
+- Tile coordinates stay (row, col). Run the no-login dev command from PowerShell (see the tile verification entry).
+
+## 7. Open questions
+- None right now. Heart regen time, tutorial behavior, and timer location are decided in section 3.
+
+## 8. Attachments / references
+- Adviser consultation list is copied in section 2 above.
+
+---
+
 **Date:** 2026-09-19 (late night — platform height and layering)
 **From:** Claude Code (low-platform overlap fix)
 **To:** Claude Code / Chat
