@@ -3,6 +3,51 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-22 (bigger player sprite + parallax light-layer fix)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Implement the adviser's "bigger sprite" item, now unblocked by the fixed-resolution viewport (see the folded entries below for why it had to wait).
+
+## 2. Current state
+
+**Not yet committed in CHRONO-GAMEAPP:**
+- `lib/game/components/player_component.dart` — player `size` changed from `Vector2(64, 80)` to `Vector2(96, 120)` (1.5x). Nothing else in this file changed: `position = Vector2(0, game.groundY - size.y)`, ground/platform landing checks, and `respawn()` are all already expressed relative to `size.y`, and `RectangleHitbox()` (added with no explicit size) auto-fits whatever `size` is at add-time — so all of it picked up the new size with no further edits.
+- `test/game/fixed_resolution_test.dart` — updated the illustrative `playerHeight` constant used by "a sprite covers the same fraction of the screen on every device" from `80.0` to `120.0`, so the test still describes a real current number instead of a stale one; the test's logic (proportional scaling holds across devices) didn't depend on the specific value either way.
+- `lib/game/components/parallax_background.dart` — **separate fix, same session:** the user spotted (from a screenshot taken for the bigger-sprite check above) that the translucent light-rays layer was drawing in front of the mid-trees layer instead of behind it. Reordered the `loadParallax` list from `[back-trees, middle-trees, lights, front-trees]` to `[back-trees, lights, middle-trees, front-trees]`. This wasn't just a draw-order tweak: Flame's `ParallaxComponent` ties scroll speed to array position too (each layer scrolls faster than the one before it via `velocityMultiplierDelta`), so the old order also had the lights layer scrolling *faster* than the mid-trees — wrong for what's meant to be an ambient, distant effect. The reorder fixes both at once.
+
+**Why 96x120, not just "somewhat bigger":** checked native asset pixel sizes across the cast — player art is 52x68, enemies 52x64 (rendered at 60x72), and the boss is 80x90 (rendered at 120x140). That meant the boss was already upscaled ~1.5x from its native art, while the player was only upscaled ~1.2x — barely more than enemies get, which is very likely *why* the adviser flagged the hero as not reading as the hero. 96x120 is exactly 1.5x the player's native 52x68 (same width:height ratio as the old 64x80, just scaled up), matching the treatment the boss already gets instead of inventing a new ratio.
+
+**Verified:** `flutter analyze` clean at the same 5 known info lints. `flutter test test/data test/game test/models`: 92/92 pass, unchanged by either edit (no test asserts the production `onLoad()` size directly, and `parallax_background_test.dart`'s 2 tests inject an empty-layer `Parallax` to isolate the velocity math from real asset order, so the reorder didn't touch them). Confirmed both in real runs over CDP (`/game/spanish/1`, 1280×800): Rizal renders clearly larger than the approaching Spanish-soldier enemy, standing correctly on the ground with no clipping; separately, a before/after pair of screenshots confirmed the light rays now sit behind the tree trunks instead of overlapping in front of them. Also caught a jump next to a spawned platform in the same session (user asked to see one) — no clipping or landing issues from the bigger sprite there either.
+
+**What's unfinished:**
+- Not yet committed/pushed as of writing this entry — see the next session's update, same as the hearts-regen pattern below.
+- Did not re-verify very wide/narrow pillarboxed windows specifically for the sprite-size change — the fixed-resolution viewport should make that a non-issue (world units are device-independent), but wasn't explicitly reshot at another aspect ratio.
+
+## 3. Decisions made (and why)
+- **1.5x scale, derived from the boss's existing native-to-rendered ratio, not a round guess** — see "Why 96x120" above. Keeps the new size defensible against "why that number" rather than picking an arbitrary bump.
+- **Left `test/game/fixed_resolution_test.dart`'s constant in sync but changed nothing else test-side** — every other test that hardcodes a player size is a bare stand-in object for testing unrelated behavior (enemy despawn, camera tracking, parallax speed), not an assertion about the real player's dimensions, so leaving those at `64x80` doesn't make them wrong or stale.
+- **Light rays moved to right after the back-trees layer, not just swapped with front-trees** — the user's own framing ("should be second") plus the compositional logic (an ambient layer should be near-static, closest in speed to the furthest-back layer) both pointed at position 2 of 4, not position 4.
+
+## 4. Things we tried that did NOT work
+- (None — this one was a single clean value change with no surprises.)
+
+## 5. Next steps (in order)
+1. Commit and push — likely as two separate commits (sprite size, parallax reorder are unrelated fixes), pending user confirmation same as every other change in this file.
+2. Remaining adviser items: hit animation on correct answer, idle animation, enemy/obstacle variety.
+3. Level 10 boss fight playtest.
+
+## 6. Constraints & conventions
+- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
+- Same playtest recipe as the entries below: PowerShell dev server on port 8123, `tool/cdp_shot.js` against CDP debug port 9222.
+- `flutter test` gotcha from the entry below still applies: scope it to `test/data test/game test/models`, don't run it bare — `test/screens/tutorial_screen_test.dart` hard-hangs for up to 20 minutes in this sandbox.
+
+---
+
 **Date:** 2026-09-22 (persistent hearts regen)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -32,9 +77,10 @@ Implement the adviser's "hearts regen" item: a persistent pool of hearts (max 5,
 
 **New finding — `test/screens/tutorial_screen_test.dart` doesn't just flake, it hard-hangs in this environment:** running the full unscoped `flutter test` cost 20 minutes for nothing — its first two tests each hit a full `TimeoutException after 0:10:00: Test timed out after 10 minutes`, then a third was killed mid-run. The parallax-background entry below already documented this file's `google_fonts` real-network-font-fetch issue as an *intermittent, fast-rejecting* flake; in this sandbox (no network route) it instead hangs for the entire 10-minute test timeout, twice in a row, before anything else in the file gets a chance to run. It also has a nasty side effect: because `flutter test` doesn't guarantee alphabetical file order, `test/models/hearts_state_test.dart` (this session's new file) never even started before the 20 minutes were up — it only got verified by explicitly re-running `flutter test test/data test/game test/models`, which skips `test/screens/` entirely. **Until this is fixed, don't run a bare `flutter test` and wait — scope it to specific directories, or expect to lose up to 20 minutes per run.**
 
+**Update: committed and pushed** — `9dee494` in CHRONO-GAMEAPP, `fb19d80` at root (this doc + the submodule bump), both after the CDP playtest above confirmed the rendering.
+
 **What's unfinished:**
-- No real playtest yet: still need to confirm a level failure actually decrements the count shown on `level_failed_screen.dart`, that the level-select countdown ticks, and that the 0-hearts dialog/disabled button actually appear. Forcing 0 hearts needs either 5 real failures or a temporary debug hook; plan is to trust the unit-tested math above and confirm the wiring via one real failure, since all 5 would exercise the identical `consumeHeartOnLevelFailed()` path.
-- Not committed, not pushed.
+- The 0-hearts branch specifically (disabled retry button, the level-select dialog) was never seen in a real run — only its math, via the unit tests. Reaching it for real needs 5 genuine level failures or throwaway debug scaffolding; neither seemed worth it given how directly the render/gating code reads the same tested `HeartsState`.
 - **`test/screens/tutorial_screen_test.dart`'s network-fetch hang is not fixed** — likely needs `GoogleFonts.config.allowRuntimeFetching = false` set somewhere tests actually load (e.g. a `flutter_test_config.dart`, which doesn't exist yet), but that's unrelated to hearts regen and wasn't attempted here. Flagging as a strong candidate for its own session given it now costs a full 20 minutes whenever someone runs the unscoped suite.
 - Remaining adviser items (4 of 8 once this lands): hit animation on correct answer, idle animation, bigger sprite, enemy/obstacle variety.
 - Level 10 boss fight playtest — still never done, carried across every entry below.
@@ -49,11 +95,8 @@ Implement the adviser's "hearts regen" item: a persistent pool of hearts (max 5,
 - (None yet — this entry is implementation-only; real-run verification is still pending, see "What's unfinished.")
 
 ## 5. Next steps (in order)
-1. Confirm `flutter test` is green (it was still running in the background when this was written).
-2. Real CDP playtest: fail a level once, confirm `level_failed_screen.dart` shows 4/5 hearts (not the old hardcoded 3), confirm the level-select countdown displays and ticks down.
-3. Commit and push.
-4. Remaining adviser items: hit animation on correct answer, idle animation, bigger sprite, enemy/obstacle variety.
-5. Level 10 boss fight playtest.
+1. Remaining adviser items: hit animation on correct answer, idle animation, bigger sprite, enemy/obstacle variety.
+2. Level 10 boss fight playtest.
 
 ## 6. Constraints & conventions
 - Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
@@ -143,53 +186,8 @@ Implement the adviser's "tutorial screens" item: shown on first play, replayable
 
 ---
 
-**Date:** 2026-09-22 (adaptive screen: fixed-resolution viewport + quiz card fit)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Finish the adaptive-screen work the entry below only diagnosed: make the game world actually scale to the device, then fix the quiz card so it fits a phone.
-
-## 2. Current state
-
-**Committed in CHRONO-GAMEAPP (not pushed):**
-- `6edfb47` — **fixed 1280×720 virtual resolution.** `ChronoGame` now builds with `CameraComponent.withFixedResolution(width: 1280, height: 720)`. Flame scales that virtual canvas to the real device, so an 80px sprite covers the same screen fraction everywhere (11%, matching the desktop window that already looked right) instead of ~22% on a phone. `ParallaxBackground` moved to `camera.backdrop` — a direct game child renders in raw canvas pixels and would drift from the scaled world. `groundY`/`cameraRightEdgeX` needed no code change: `FlameGame.size` is the viewport's virtual size in this Flame version, so both became device-independent automatically.
-- `e858348` — **quiz card fits a landscape phone.** It was a fixed 500px column in a scroll view, tuned for ~720px windows; at ~360-412px phone heights it scrolled, leaving options C/D below the fold with the timer still running. `QuestionLayout` (new) picks compact metrics below a 560px overlay height and regular ones above it, so the desktop card is pixel-identical to before. `QuestionCard` (new) also wraps the card in `FittedBox(scaleDown)` as a safety net for whatever compact still doesn't cover — a long explanation, a large system font; it only shrinks, never grows, and taps still land through the transform. Split `question_overlay.dart` (275→140 lines) into `question_layout.dart` and `question_card.dart`; `question_widgets.dart`'s existing widgets now take an optional `QuestionLayout` (default `regular`), so its own tests needed no changes.
-
-**Verified on both:** analyzer at the 5 known `info` lints; 79/79 tests (4 new in `fixed_resolution_test.dart`, 27 new in `question_card_test.dart` — including a mutation check: forcing `regular` onto phone heights drops the wrong-answer card to 0.64-0.67 scale and fails the suite, confirming the tests catch the original bug). Confirmed in real runs: the world measured 699×393 centred with 87px bars at a real 873×393 viewport; the quiz card shows all 4 options with no scroll before answering, and after a wrong answer the MALI! badge, marked options, explanation and SUSUNOD button are all on screen at once — tapping SUSUNOD advances the level normally.
-
-**What's unfinished:**
-- The gap system still never fires (`GroundSpawner.update()` is empty) — unrelated to this work, carried from the entry below.
-- Dead `WallComponent` collision branch at `player_component.dart:181` — cosmetic, carried from the entry below.
-- Level 10 boss fight still not playtested.
-- Wide phones (~20:9) lose about 20% of screen width to pillarbox bars under the fixed 16:9 viewport — the tradeoff of this approach, not a bug. Fitting height only would fill the screen but needs re-checking spawn timing, since `cameraRightEdgeX` would then vary by device.
-- Uncommitted: `CHRONO-GAMEAPP/tool/cdp_shot.js` (now scripted: `--viewport WxH --steps "wait:N;click:x,y;shot:file.png"`) and `quiz_card_phone_preview.png`.
-
-## 3. Decisions made (and why)
-- **`GameConstants.virtualWidth/Height` were added, then the `chrono_game.dart` getters that used them were reverted to plain `size.x`/`size.y`.** Flame 1.37's `FlameGame.size` is `camera.viewport.virtualSize`, not the device canvas — once the viewport is set, `size` already *is* 1280×720 everywhere. A second hardcoded copy would silently diverge if the resolution ever changed in one place and not the other.
-- **Compact-layout threshold is a 560px overlay height, not a device list** — a phone in any orientation or a small desktop window both get the phone treatment, which is correct either way.
-- **`FittedBox(scaleDown)` kept as a second layer under the compact/regular split, not relied on alone** — scaling everything down for every phone would make already-short questions needlessly tiny; the two presets cover the common case, the FittedBox only catches the tail (long explanations, accessibility font sizes).
-
-## 4. Things we tried that did NOT work
-- **Hardcoding `virtualWidth`/`virtualHeight` into `groundY` and `cameraRightEdgeX`** — worked, but was redundant once traced into the Flame source (`flame-1.37.0/lib/src/game/flame_game.dart:121`); reverted to reading `size` directly, see section 3.
-- **Judging pillarbox width from a screenshot without checking its actual pixel dimensions** — an early phone-size Chrome window screenshotted at 796×280 (2.84:1, not the requested 812×375), which exaggerated the bars. `--window-size` includes browser chrome and isn't 1:1 with the page viewport. Switched `cdp_shot.js` to `Emulation.setDeviceMetricsOverride` for exact dimensions, confirmed by measuring the output PNG's pixels directly.
-
-## 5. Next steps (in order)
-1. Remaining adviser items (see the living checklist entry below for current status): hit animation on correct answer, idle animation, background depth layer, bigger sprite (now unblocked), hearts regen, tutorial, enemy/obstacle variety.
-2. Level 10 boss fight playtest.
-3. Decide whether to keep `tool/cdp_shot.js` (untracked; useful for future playtesting without a person).
-
-## 6. Constraints & conventions
-- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
-- **Definition of perfect** (see entries below): real run + all tests + no new analyzer issues + nothing else broken + line budgets. One item at a time.
-- Playtest without a person: start the dev server from PowerShell (not Git Bash), wait for `lib\main.dart is being served`, launch headless Chrome with `--remote-debugging-port=9222`, then `node tool/cdp_shot.js --viewport WxH --steps "wait:N;click:x,y;shot:file.png"` (steps run in order; omit `--viewport` to use the window's own size).
-
----
-
 ## Older entries (folded)
+- 2026-09-22 (adaptive screen: fixed-resolution viewport + quiz card fit) — Added `CameraComponent.withFixedResolution(1280, 720)` (`6edfb47`) so every sprite covers the same screen fraction on every device instead of ~2x bigger on a phone; explicitly flagged "bigger sprite" as now unblocked by this (done in the "bigger player sprite" entry above). Also fit the quiz card to a landscape phone via a compact/regular `QuestionLayout` split plus a `FittedBox(scaleDown)` safety net (`e858348`). 79/79 tests. Surfaced but left open: the gap system still never fires, a dead `WallComponent` collision branch at `player_component.dart:181`, wide (~20:9) phones losing ~20% of width to pillarboxing (an accepted tradeoff, not a bug), and whether to keep `tool/cdp_shot.js` (still undecided).
 - 2026-09-21 (adviser feedback review) — Turned the adviser's 8-item feedback list into an ordered plan (tutorial screens, hit animation, hearts regen, idle animation, background depth layer, bigger sprite, enemy/obstacle variety; answer feedback icons already done); decided hearts regen at 1/10min capped at 5, tutorial replayable from a menu button, background depth layer must stay slower than the world, `.env` files off-limits. No code changed that session. By 2026-09-22 both background depth layer and tutorial screens were done too (3 of 8) — hit animation, idle animation, bigger sprite, hearts regen, and enemy/obstacle variety remain.
 - 2026-09-21 (adviser items: step 1 refactor + step 2 answer feedback) — Refactored `chrono_game.dart` (357→280 lines) by moving the question flow into `lib/game/quiz_handler.dart` and collapsing three duplicated life-loss blocks into one `loseLife()`. Added pop-in TAMA!/MALI! answer feedback icons. Committed `2bd73e6`/`722d14c`, root `e2cb13c` bumped the submodule. 39/39 tests. Built a signed-debug release APK for phone playtesting (not yet tried on a device at that point). Decided max hearts will be 5, regenerating 1 per 10 minutes.
 - 2026-09-21 (screen-size finding + crate obstacles + tiled ground) — Found the game didn't adapt to screen size at all (raw device pixels, no viewport scaling — the 80px player was ~22% of a phone screen vs ~11% at 1280×720), which the next entry's `FixedResolutionViewport` fixed; switched all ground obstacles to crates (`022221a`) and tiled the ground with a grass cap over an era-coloured body (`04bc0a1`), deleting the screen-space `GroundComponent` that had been silently painting over any gap. 48/48 tests. Also surfaced two bugs: the gap system never fires (`GroundSpawner.update()` is empty — status as of the last check, not since revisited), and `level_failed_screen.dart` hardcoded 3 empty hearts regardless of actual lives (fixed in the 2026-09-22 "persistent hearts regen" entry above).
