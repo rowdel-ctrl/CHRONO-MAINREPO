@@ -3,6 +3,103 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-22 (Tier 1: hit/idle animation, housekeeping; test hang root-caused but NOT fixed)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Implement Tier 1 of `NEXT_STEPS_CHECKLIST.md`: the `flutter test` hang, hit animation on correct answer, idle animation, and the 3-file housekeeping decision.
+
+## 2. Current state
+
+**Not yet committed in CHRONO-GAMEAPP:**
+- `lib/game/components/player_component.dart` — added `triggerCheer()`, mirroring `triggerHurt()`'s exact structure (own delayed revert, not the update()-loop transition reset).
+- `lib/game/quiz_handler.dart` — calls `player.triggerCheer()` on a correct answer, right after `overlays.remove('QuestionOverlay')`.
+- `lib/screens/home/character_selection_screen.dart` — `_IdleAvatar` now cycles the 4 walk frames on a `Timer.periodic` (450ms/frame), on top of its existing bob `AnimationController`.
+- `test/game/player_reactions_test.dart` (new, 4 tests) — asserts the animation the player is actually switched to on each quiz outcome. See Decisions for why this replaced a screenshot.
+- `tool/` — staged to commit as a permanent dev tool (was untracked since it was introduced). Gained a `scroll:<x>,<y>,<dy>` step this session, which does **not** work on Flutter web (see "did NOT work").
+- `CHRONO-GAMEAPP/quiz_card_phone_preview.png` — deleted (confirmed zero references anywhere via grep).
+
+**Root repo:**
+- `HANDOFF(template).md` — staged to commit (a genuine reusable blank template, not scratch).
+- `NEXT_STEPS_CHECKLIST.md` — Tier 1 outcomes recorded, plus three newly-surfaced items.
+
+**The `flutter test` hang was NOT fixed — the attempted fix was written, tested, and reverted.** It is now thoroughly root-caused instead; see Decisions. `test/flutter_test_config.dart` and the `pubspec.yaml`/`pubspec.lock` dev-dependency additions that supported it were all reverted, so the tree is back to the established baseline on that front.
+
+**Verified:** `flutter analyze` clean at the same 5 known info lints. `flutter test test/data test/game test/models`: **96/96 pass in 23 seconds** (the 92 baseline plus the 4 new `player_reactions_test.dart` cases). The idle-avatar change was confirmed in a real CDP run at 1280×800: two screenshots ~500ms apart on character selection show Lapu-Lapu's stance genuinely change (wide stride with sword extended vs. a narrower, lower stance) — a real sprite-frame change, not just the pre-existing vertical bob.
+
+**What's unfinished:**
+- The test hang itself. `test/screens/tutorial_screen_test.dart` still hangs exactly as it did before this session. What's gained is knowing precisely why, and that the obvious fixes are dead ends — see Decisions.
+- No live playtest of `triggerCheer()` — deliberately replaced with tests (see Decisions), not skipped for time.
+
+## 3. Decisions made (and why)
+- **The hang is fully root-caused, in three parts.** (1) The "TimeoutException after 0:10:00" everyone assumed was a per-test timeout is actually **`pumpAndSettle()`'s own default** (`flutter_test/lib/src/widget_tester.dart:692-695`: `Duration timeout = const Duration(minutes: 10)`) — so the symptom is "frames never stop being scheduled," not "a test is slow." (2) The thing that never completes is **`path_provider`**: before google_fonts checks `allowRuntimeFetching`, it looks for a cached font on disk via `getApplicationSupportDirectory()`, a platform-channel call with no native handler in a plain widget test, which hangs rather than throwing. Faking it (exactly as google_fonts' own suite does in `test/load_font_if_necessary_test.dart`) really does make the tutorial file fail in ~5s instead of hanging. (3) **But that fix can't land, because the 92/92 green depends on the hang.** With `path_provider` faked, font loading gets far enough to actually throw "Poppins not found and fetching disabled", and `test/data test/game test/models` drops to **64/92** — `question_card_test.dart` and `answer_feedback_test.dart` render Poppins text and had been passing only because that load hung forever in the background as a harmless dangling Future.
+- **Reverted rather than shipped.** A change that trades "one file hangs" for "28 tests fail" is a regression, however well-understood. The tree is back to baseline and the finding is written down instead.
+- **The real fix is to bundle Poppins `.ttf` files** under `assets/fonts/` and declare them in `pubspec.yaml`, so the font resolves locally with no network and no platform channel — which would also remove a runtime font fetch from the shipped app. Blocked here: no network, and no Poppins `.ttf` exists anywhere on this machine (checked `C:\Windows\Fonts`, the pub cache, the Flutter SDK, and the repo).
+- **`triggerCheer()` verified by test, not screenshot.** It reuses the jump pose (no character has cheer art — `assets/characters/` has only `_walk_1-4`, `_jump`, `_hurt`), so a cheering player and a jumping player render an identical frame and a screenshot would prove nothing. `test/game/player_reactions_test.dart` asserts the actual animation object instead: correct → `jumpAnim` not `walkAnimation`, wrong → `hurtAnim` not `jumpAnim`, score still awarded, and cheering bails out mid-hurt. Stronger evidence than a photo, and permanent.
+- **Idle animation scoped to `_IdleAvatar` only** — `tutorial_screen.dart` and `background_history_screen.dart` also show a static `_walk_1` frame, but they're smaller, secondary displays sitting behind a generic multi-asset illustration widget and a `CircleAvatar.backgroundImage` respectively; changing either cost more scope/risk than a "quick, independent" Tier 1 item should.
+- **`quiz_card_phone_preview.png` deleted; `tool/` and `HANDOFF(template).md` kept and staged to commit** — the screenshot had zero references anywhere (checked via grep). The other two are genuinely useful and intentional.
+
+## 4. Things we tried that did NOT work
+- **`GoogleFonts.config.allowRuntimeFetching = false` in a `flutter_test_config.dart`.** Redundant (the affected test file already sets it itself) *and* actively harmful globally — it forces the throw path for every test that renders Poppins.
+- **Suppressing the resulting exception via `reportTestException`.** Strictly worse: the exception is what *aborts* the test, so swallowing it let the test run on and `pumpAndSettle` spin its full 10 minutes. Turned a 4-second honest failure into a 10-minute hang.
+- **Leaving fetching enabled so the failed fetch returns null instead of throwing.** Also fails — 5/27 on `question_card_test.dart`.
+- **Diagnosing a hang by piping through `| tail -N`.** `tail` without `-f` can't know the last N lines until EOF, so it buffers everything and prints nothing until the process exits — a slow-but-working run and a truly hung one look identical. This cost real time treating "no output yet" as proof of a hang. Use no pipe, `head`, or `--reporter expanded`.
+- **`Input.dispatchMouseEvent` with `type: 'mouseWheel'` to scroll Flutter web** (added as a `scroll` step to `tool/cdp_shot.js`). Flutter's web engine ignores it; the page doesn't move. `Input.synthesizeScrollGesture` is the likely fix. This blocks scripted playtests of anything gated behind a scroll, e.g. reaching level select past `background_history_screen.dart`'s "scroll down to continue".
+- **Booting straight into `/game/:era/:level` via `DEV_START_ROUTE` with a fresh browser profile.** Renders blank — that route needs a character already selected in Hive, which a fresh profile doesn't have.
+- **`TaskStop` alone to stop a `flutter test` run.** On Windows it stops the tracked wrapper but leaves the `dart` → `dartvm`/`dartaotruntime` → `flutter_tester` tree running orphaned; four abandoned runs accumulated before this was noticed. Kill the specific PIDs with PowerShell `Stop-Process -Id`, then confirm with `Get-Process`.
+
+## 5. Next steps (in order)
+1. Commit and push — nothing from this session is committed yet, pending user confirmation.
+2. Bundle Poppins `.ttf` files (needs network) — the one fix that actually resolves the test hang, and it removes a runtime font fetch from the shipped app as a bonus.
+3. Triage the three items newly surfaced in `NEXT_STEPS_CHECKLIST.md`: the crashing blank-animation fallback at `player_component.dart:70`, the non-working CDP scroll step, and the blank `/game/...` direct route.
+4. Tier 2 of `NEXT_STEPS_CHECKLIST.md`: the gap system, obstacle variety.
+
+## 6. Constraints & conventions
+- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
+- `flutter test` still must be scoped to `test/data test/game test/models`. `test/screens/` still hangs — unchanged by this session.
+- When diagnosing a possibly-hanging command, never pipe it through `| tail`. Use no pipe, `head`, or `--reporter expanded`.
+- After stopping a background `flutter test`, verify no orphaned `dart`/`flutter_tester` processes are left behind.
+
+---
+
+**Date:** 2026-09-22 (outstanding-work checklist)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+User asked for a full checklist of everything left to do on the project, ordered so the fastest/easiest items come first.
+
+## 2. Current state
+Wrote `NEXT_STEPS_CHECKLIST.md` at the repo root instead of folding the full list into this file — HANDOFF.md is a session log, not an ongoing tracker, and the project already has precedent for a separate standalone checklist (`CAMERA_REBUILD_CHECKLIST.md`). Before writing it, verified every item against real git/code state rather than trusting older HANDOFF prose:
+- Confirmed via `git log`/`git status` in the CHRONO-GAMEAPP submodule that hearts regen (`9dee494`), the bigger sprite (`9692c48`), and the parallax light-layer fix (`35b022b`) are genuinely committed — 5 of the adviser's original 8 feedback items are done (also fixed the entry below, which still said "not yet committed" even though it already was — see its updated "Current state").
+- Confirmed by reading the actual code that 3 adviser items are genuinely still open: no player-side reaction to a correct answer (`lib/game/quiz_handler.dart:39`, the `if (isCorrect)` branch only awards score and defeats the enemy/boss), no player idle animation (only `BossComponent` has a real `idleSprite`; the character-select preview at `lib/screens/home/character_selection_screen.dart:508` is a single static `_walk_1.png` frame, not a loop), and obstacle variety is thin — enemies already have 2 types per era chosen at random (`enemy_component.dart:73-81`), but every obstacle is the same `WallComponent` behavior (one reskinned PNG per era) plus one shared `crate.png`, both dealing identical damage (`player_component.dart:186-199`).
+- Found the gap system is still dead code, confirmed directly (not just carried over from an old note): `GroundSpawner.update()` in `lib/game/components/gap_component.dart:176` is an empty no-op, and `spawnInitialGround()` lays down one 1,000,000-wide `GroundSection` covering the whole level — a gap is never actually left unfilled, so falling-in-a-gap is unreachable content, not just untested.
+- Confirmed 3 untracked files still need a keep-or-drop decision: `tool/` (the CDP playtest script) and `quiz_card_phone_preview.png` in the CHRONO-GAMEAPP submodule, `HANDOFF(template).md` at the repo root.
+
+No code changed this session.
+
+## 3. Decisions made (and why)
+- **A separate `NEXT_STEPS_CHECKLIST.md` file, not a section in this file** — matches the `CAMERA_REBUILD_CHECKLIST.md` precedent and keeps this file's per-session entries short, per its own stated convention.
+- **Grouped into 4 tiers by independence/effort, not the adviser's original list order** — Tier 1 (hit/idle animation, the test-hang fix, the 3-file housekeeping decision) needs no new decisions from the user; Tier 2 (gap system, obstacle variety) needs one small decision first; Tier 3 (Level 10 boss playtest, quiz question content) isn't really a coding task; Tier 4 (aspect-ratio/0-hearts polish) is optional and already low-risk.
+
+## 4. Things we tried that did NOT work
+- (None — this was a read/verify/write-checklist session, no code attempted.)
+
+## 5. Next steps (in order)
+See `NEXT_STEPS_CHECKLIST.md` at the repo root — start at Tier 1, top to bottom.
+
+## 6. Constraints & conventions
+- `flutter test` gotcha still applies until Tier 1's fix lands: scope to `test/data test/game test/models`, don't run it bare.
+
+---
+
 **Date:** 2026-09-22 (bigger player sprite + parallax light-layer fix)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -15,7 +112,7 @@ Implement the adviser's "bigger sprite" item, now unblocked by the fixed-resolut
 
 ## 2. Current state
 
-**Not yet committed in CHRONO-GAMEAPP:**
+**Committed in CHRONO-GAMEAPP** (`9692c48`, `35b022b`) **and pushed** (`45241ad` at root, this doc + submodule bump):
 - `lib/game/components/player_component.dart` — player `size` changed from `Vector2(64, 80)` to `Vector2(96, 120)` (1.5x). Nothing else in this file changed: `position = Vector2(0, game.groundY - size.y)`, ground/platform landing checks, and `respawn()` are all already expressed relative to `size.y`, and `RectangleHitbox()` (added with no explicit size) auto-fits whatever `size` is at add-time — so all of it picked up the new size with no further edits.
 - `test/game/fixed_resolution_test.dart` — updated the illustrative `playerHeight` constant used by "a sprite covers the same fraction of the screen on every device" from `80.0` to `120.0`, so the test still describes a real current number instead of a stale one; the test's logic (proportional scaling holds across devices) didn't depend on the specific value either way.
 - `lib/game/components/parallax_background.dart` — **separate fix, same session:** the user spotted (from a screenshot taken for the bigger-sprite check above) that the translucent light-rays layer was drawing in front of the mid-trees layer instead of behind it. Reordered the `loadParallax` list from `[back-trees, middle-trees, lights, front-trees]` to `[back-trees, lights, middle-trees, front-trees]`. This wasn't just a draw-order tweak: Flame's `ParallaxComponent` ties scroll speed to array position too (each layer scrolls faster than the one before it via `velocityMultiplierDelta`), so the old order also had the lights layer scrolling *faster* than the mid-trees — wrong for what's meant to be an ambient, distant effect. The reorder fixes both at once.
@@ -25,8 +122,7 @@ Implement the adviser's "bigger sprite" item, now unblocked by the fixed-resolut
 **Verified:** `flutter analyze` clean at the same 5 known info lints. `flutter test test/data test/game test/models`: 92/92 pass, unchanged by either edit (no test asserts the production `onLoad()` size directly, and `parallax_background_test.dart`'s 2 tests inject an empty-layer `Parallax` to isolate the velocity math from real asset order, so the reorder didn't touch them). Confirmed both in real runs over CDP (`/game/spanish/1`, 1280×800): Rizal renders clearly larger than the approaching Spanish-soldier enemy, standing correctly on the ground with no clipping; separately, a before/after pair of screenshots confirmed the light rays now sit behind the tree trunks instead of overlapping in front of them. Also caught a jump next to a spawned platform in the same session (user asked to see one) — no clipping or landing issues from the bigger sprite there either.
 
 **What's unfinished:**
-- Not yet committed/pushed as of writing this entry — see the next session's update, same as the hearts-regen pattern below.
-- Did not re-verify very wide/narrow pillarboxed windows specifically for the sprite-size change — the fixed-resolution viewport should make that a non-issue (world units are device-independent), but wasn't explicitly reshot at another aspect ratio.
+- Did not re-verify very wide/narrow pillarboxed windows specifically for the sprite-size change — the fixed-resolution viewport should make that a non-issue (world units are device-independent), but wasn't explicitly reshot at another aspect ratio. Tracked in `NEXT_STEPS_CHECKLIST.md` (Tier 4).
 
 ## 3. Decisions made (and why)
 - **1.5x scale, derived from the boss's existing native-to-rendered ratio, not a round guess** — see "Why 96x120" above. Keeps the new size defensible against "why that number" rather than picking an arbitrary bump.
@@ -37,9 +133,7 @@ Implement the adviser's "bigger sprite" item, now unblocked by the fixed-resolut
 - (None — this one was a single clean value change with no surprises.)
 
 ## 5. Next steps (in order)
-1. Commit and push — likely as two separate commits (sprite size, parallax reorder are unrelated fixes), pending user confirmation same as every other change in this file.
-2. Remaining adviser items: hit animation on correct answer, idle animation, enemy/obstacle variety.
-3. Level 10 boss fight playtest.
+See `NEXT_STEPS_CHECKLIST.md` at the repo root (written in the entry above this one) — it supersedes the numbered lists in this and every older entry below.
 
 ## 6. Constraints & conventions
 - Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
@@ -104,89 +198,9 @@ Implement the adviser's "hearts regen" item: a persistent pool of hearts (max 5,
 
 ---
 
-**Date:** 2026-09-22 (shared 4-layer parallax background)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Replace the per-era parallax background art with one shared 4-layer background (user-supplied) used across all eras — this also satisfies the adviser's "extra translucent/low-opacity background depth layer" item.
-
-## 2. Current state
-
-**Committed in CHRONO-GAMEAPP:**
-- `742f028` — `lib/game/components/parallax_background.dart` now loads 4 fixed layers for every era instead of per-era `_far`/`_near` pairs: `parallax-forest-back-trees.png`, `parallax-forest-middle-trees.png`, `parallax-forest-lights.png` (the new depth layer — translucent light rays), `parallax-forest-front-trees.png`, all in `assets/backgrounds/`. `velocityMultiplierDelta` changed from `(2.2, 1.0)` (tuned for 2 layers) to `(1.4, 1.0)` (4 layers), per the user's supplied snippet. Removed the now-dead `_backgroundAssetKeyForEra` era lookup; the dynamic camera-re-anchoring `update()` logic (drives `baseVelocity` from real camera movement each frame) is unchanged. Deleted the 10 now-unused per-era PNGs: `precolonial/spanish/american/ww2/modern` × `_far`/`_near`.
-- `pubspec.yaml` needed no change — `assets/backgrounds/` was already declared as a whole folder.
-
-**Verified:** analyzer at the same 5 known `info` lints; `parallax_background_test.dart` (2/2) unaffected — it injects an empty-layer `Parallax` directly, so it covers only the velocity math, not asset loading. Confirmed in a real run: a CDP screenshot at 1280×720 on the Spanish-era level 1 shows all 4 layers rendering with correct depth (far trees + glowing sky, mid trees, translucent light rays, big dark front trunks). Full suite otherwise green; one pre-existing failure in `tutorial_screen_test.dart` belongs to separate uncommitted tutorial-screen work already sitting in the tree before this session (`lib/screens/tutorial/`, `test/screens/`, edits to `router.dart`/`storage_service.dart`/`character_selection_screen.dart`) — not touched here.
-
-**What's unfinished:**
-- Not pushed yet.
-- Only checked at 1280×720 — not explicitly reverified at phone aspect ratios this session (the fixed-resolution viewport from the entry below should make this a non-issue).
-
-## 3. Decisions made (and why)
-- **One shared background for all eras, not five separate sets** — user-directed: supplied a single 4-layer forest set to replace the per-era pairs entirely rather than matching it into the old per-era naming scheme.
-- **Old per-era PNGs deleted, not left unused** (user decision) — a single shared background no longer needs per-era lookup, so keeping them around had no benefit.
-- **`velocityMultiplierDelta` set to `(1.4, 1.0)`**, per the user's supplied snippet, so each of the 4 layers scrolls a bit faster than the one behind it.
-
-## 4. Things we tried that did NOT work
-- **`--viewport WxH` with `$(pwd)` as the `cdp_shot.js` output path** — Git Bash path-mangling turned `$(pwd)` into a doubled `F:\f\CHRONO\...` path. Use a relative filename instead.
-- **`taskkill /IM chrome.exe` during cleanup** — kills *all* Chrome processes system-wide, not just the headless instance started for the screenshot. Find the specific PID instead (`netstat -ano` on the debug port) and kill that.
-
-## 5. Next steps (in order)
-1. Push this commit (and the tutorial-screens one in the entry below).
-2. Remaining adviser items: hit animation on correct answer, idle animation, bigger sprite, hearts regen, enemy/obstacle variety.
-3. Level 10 boss fight playtest (carried from the entry below).
-
-## 6. Constraints & conventions
-- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
-- Playtest without a person: start the dev server from PowerShell on **port 8123**, not any other port — `tool/cdp_shot.js` hardcodes `:8123` for the game and `:9222` for the CDP debug port. Wait for `lib\main.dart is being served`, launch headless Chrome with `--remote-debugging-port=9222`, then `node tool/cdp_shot.js --viewport WxH --steps "wait:N;shot:file.png"` (relative output path, not `$(pwd)`).
-
----
-
-**Date:** 2026-09-22 (how-to-play tutorial)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Implement the adviser's "tutorial screens" item: shown on first play, replayable from a menu button, same screens for both.
-
-## 2. Current state
-
-**Committed in CHRONO-GAMEAPP:**
-- `69605d3` — new `lib/screens/tutorial/tutorial_screen.dart` (322 lines), a 6-step `PageView` (character, obstacles/enemies, coins/artifacts, quiz check/X, hearts, power-ups), built entirely from sprites and icons that already exist elsewhere in the game, including the real TAMA!/MALI! check/X icons from `answer_feedback.dart` — no new art. `lib/services/storage_service.dart` gets `hasSeenTutorial()`/`markTutorialSeen()`, mirroring the existing `getCharacter`/`saveCharacter` Hive pattern. `lib/core/router.dart` gets a `/tutorial` route. `lib/screens/home/character_selection_screen.dart` auto-launches it once (checked in `initState` via a post-frame callback) and adds a "How to play" book-icon button (top-right) to replay it anytime.
-
-**Verified:** 83/83 tests pass (4 new in `test/screens/tutorial_screen_test.dart`), analyzer at the same 5 known `info` lints. Confirmed in a real run over CDP: all 6 steps render with real sprites; first-play auto-launch works; "SIMULAN NA!" on the last step lands on character selection; the book icon reopens the tutorial; "LAKTAWAN" (Skip) pops back to character selection correctly.
-
-**What's unfinished:**
-- Not pushed yet.
-- `tool/cdp_shot.js` and `quiz_card_phone_preview.png` still uncommitted/undecided (carried from the entry below).
-- Remaining adviser items (5 of 8 now open): hit animation, idle animation, bigger sprite, hearts regen, enemy/obstacle variety.
-- Level 10 boss fight still not playtested.
-
-## 3. Decisions made (and why)
-- **First-play detection is a Hive flag checked in `CharacterSelectionScreen.initState`**, not a router redirect — it's a one-time UX nudge, not an auth gate, and matches `EraSelectionScreen`'s existing pattern for post-build side effects.
-- **Skip and Done share one `_finish()`**: `pop()` if reachable (pushed from the How-to-play button), else `go('/character-selection')` (first-play auto-launch has nothing to pop to).
-
-## 4. Things we tried that did NOT work
-- **Widget-testing Skip/Done by asserting on the destination screen's content.** Hive's `box.put()` only commits its in-memory value after the real disk-write Future resolves (confirmed by reading Hive's source), so `_finish()`'s `await` needs real async time to ever reach `pop()`/`go()` — `tester.runAsync()` is required. But `google_fonts` schedules its own real background font-load Future per weight, which rejects when the font isn't bundled (expected with `allowRuntimeFetching = false`); normally that stays harmlessly dangling for a fake-time test, but `runAsync` gives it real time to actually reject, surfacing as a spurious, intermittent failure unrelated to navigation (this is the pre-existing `tutorial_screen_test.dart` flake noted in the parallax-background entry above — not reproducible on demand, not caused by that session). Settled on testing the storage-flag side effect only (reliable) and verifying real navigation via a CDP playtest instead, per this file's own "Definition of perfect".
-
-## 5. Next steps (in order)
-1. Push this commit (and the parallax-background one in the entry above).
-2. Remaining adviser items: hit animation on correct answer, idle animation, bigger sprite, hearts regen, enemy/obstacle variety.
-3. Level 10 boss fight playtest.
-
-## 6. Constraints & conventions
-- Same as the entry above.
-
----
-
 ## Older entries (folded)
+- 2026-09-22 (shared 4-layer parallax background) — Replaced 5 per-era parallax background sets with one shared 4-layer forest set (`742f028`: back-trees/lights/middle-trees/front-trees, `velocityMultiplierDelta` (1.4, 1.0)), satisfying the adviser's background-depth-layer item; deleted the 10 now-unused per-era PNGs. Confirmed via a real CDP screenshot at 1280×720. Surfaced the Git-Bash-`$(pwd)`-path-mangling and blanket-`taskkill`-kills-all-Chrome gotchas later folded into this file's general playtest notes.
+- 2026-09-22 (how-to-play tutorial) — Added a 6-step `PageView` tutorial (`69605d3`, character/obstacles/coins/quiz-check/hearts/power-ups), shown once on first play and replayable via a book-icon button on character selection; built entirely from existing sprites/icons, no new art. 83/83 tests. First surfaced that `tutorial_screen_test.dart`'s Skip/Done widget tests trip a `google_fonts` background font-fetch rejection under `runAsync` — later found (persistent-hearts entry) to be a full 10-minute hard-hang in this sandbox, not just an intermittent flake.
 - 2026-09-22 (adaptive screen: fixed-resolution viewport + quiz card fit) — Added `CameraComponent.withFixedResolution(1280, 720)` (`6edfb47`) so every sprite covers the same screen fraction on every device instead of ~2x bigger on a phone; explicitly flagged "bigger sprite" as now unblocked by this (done in the "bigger player sprite" entry above). Also fit the quiz card to a landscape phone via a compact/regular `QuestionLayout` split plus a `FittedBox(scaleDown)` safety net (`e858348`). 79/79 tests. Surfaced but left open: the gap system still never fires, a dead `WallComponent` collision branch at `player_component.dart:181`, wide (~20:9) phones losing ~20% of width to pillarboxing (an accepted tradeoff, not a bug), and whether to keep `tool/cdp_shot.js` (still undecided).
 - 2026-09-21 (adviser feedback review) — Turned the adviser's 8-item feedback list into an ordered plan (tutorial screens, hit animation, hearts regen, idle animation, background depth layer, bigger sprite, enemy/obstacle variety; answer feedback icons already done); decided hearts regen at 1/10min capped at 5, tutorial replayable from a menu button, background depth layer must stay slower than the world, `.env` files off-limits. No code changed that session. By 2026-09-22 both background depth layer and tutorial screens were done too (3 of 8) — hit animation, idle animation, bigger sprite, hearts regen, and enemy/obstacle variety remain.
 - 2026-09-21 (adviser items: step 1 refactor + step 2 answer feedback) — Refactored `chrono_game.dart` (357→280 lines) by moving the question flow into `lib/game/quiz_handler.dart` and collapsing three duplicated life-loss blocks into one `loseLife()`. Added pop-in TAMA!/MALI! answer feedback icons. Committed `2bd73e6`/`722d14c`, root `e2cb13c` bumped the submodule. 39/39 tests. Built a signed-debug release APK for phone playtesting (not yet tried on a device at that point). Decided max hearts will be 5, regenerating 1 per 10 minutes.
