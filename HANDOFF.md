@@ -3,6 +3,52 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-22 (adaptive screen: fixed-resolution viewport + quiz card fit)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Finish the adaptive-screen work the entry below only diagnosed: make the game world actually scale to the device, then fix the quiz card so it fits a phone.
+
+## 2. Current state
+
+**Committed in CHRONO-GAMEAPP (not pushed):**
+- `6edfb47` — **fixed 1280×720 virtual resolution.** `ChronoGame` now builds with `CameraComponent.withFixedResolution(width: 1280, height: 720)`. Flame scales that virtual canvas to the real device, so an 80px sprite covers the same screen fraction everywhere (11%, matching the desktop window that already looked right) instead of ~22% on a phone. `ParallaxBackground` moved to `camera.backdrop` — a direct game child renders in raw canvas pixels and would drift from the scaled world. `groundY`/`cameraRightEdgeX` needed no code change: `FlameGame.size` is the viewport's virtual size in this Flame version, so both became device-independent automatically.
+- `e858348` — **quiz card fits a landscape phone.** It was a fixed 500px column in a scroll view, tuned for ~720px windows; at ~360-412px phone heights it scrolled, leaving options C/D below the fold with the timer still running. `QuestionLayout` (new) picks compact metrics below a 560px overlay height and regular ones above it, so the desktop card is pixel-identical to before. `QuestionCard` (new) also wraps the card in `FittedBox(scaleDown)` as a safety net for whatever compact still doesn't cover — a long explanation, a large system font; it only shrinks, never grows, and taps still land through the transform. Split `question_overlay.dart` (275→140 lines) into `question_layout.dart` and `question_card.dart`; `question_widgets.dart`'s existing widgets now take an optional `QuestionLayout` (default `regular`), so its own tests needed no changes.
+
+**Verified on both:** analyzer at the 5 known `info` lints; 79/79 tests (4 new in `fixed_resolution_test.dart`, 27 new in `question_card_test.dart` — including a mutation check: forcing `regular` onto phone heights drops the wrong-answer card to 0.64-0.67 scale and fails the suite, confirming the tests catch the original bug). Confirmed in real runs: the world measured 699×393 centred with 87px bars at a real 873×393 viewport; the quiz card shows all 4 options with no scroll before answering, and after a wrong answer the MALI! badge, marked options, explanation and SUSUNOD button are all on screen at once — tapping SUSUNOD advances the level normally.
+
+**What's unfinished:**
+- The gap system still never fires (`GroundSpawner.update()` is empty) — unrelated to this work, carried from the entry below.
+- Dead `WallComponent` collision branch at `player_component.dart:181` — cosmetic, carried from the entry below.
+- Level 10 boss fight still not playtested.
+- Wide phones (~20:9) lose about 20% of screen width to pillarbox bars under the fixed 16:9 viewport — the tradeoff of this approach, not a bug. Fitting height only would fill the screen but needs re-checking spawn timing, since `cameraRightEdgeX` would then vary by device.
+- Uncommitted: `CHRONO-GAMEAPP/tool/cdp_shot.js` (now scripted: `--viewport WxH --steps "wait:N;click:x,y;shot:file.png"`) and `quiz_card_phone_preview.png`.
+
+## 3. Decisions made (and why)
+- **`GameConstants.virtualWidth/Height` were added, then the `chrono_game.dart` getters that used them were reverted to plain `size.x`/`size.y`.** Flame 1.37's `FlameGame.size` is `camera.viewport.virtualSize`, not the device canvas — once the viewport is set, `size` already *is* 1280×720 everywhere. A second hardcoded copy would silently diverge if the resolution ever changed in one place and not the other.
+- **Compact-layout threshold is a 560px overlay height, not a device list** — a phone in any orientation or a small desktop window both get the phone treatment, which is correct either way.
+- **`FittedBox(scaleDown)` kept as a second layer under the compact/regular split, not relied on alone** — scaling everything down for every phone would make already-short questions needlessly tiny; the two presets cover the common case, the FittedBox only catches the tail (long explanations, accessibility font sizes).
+
+## 4. Things we tried that did NOT work
+- **Hardcoding `virtualWidth`/`virtualHeight` into `groundY` and `cameraRightEdgeX`** — worked, but was redundant once traced into the Flame source (`flame-1.37.0/lib/src/game/flame_game.dart:121`); reverted to reading `size` directly, see section 3.
+- **Judging pillarbox width from a screenshot without checking its actual pixel dimensions** — an early phone-size Chrome window screenshotted at 796×280 (2.84:1, not the requested 812×375), which exaggerated the bars. `--window-size` includes browser chrome and isn't 1:1 with the page viewport. Switched `cdp_shot.js` to `Emulation.setDeviceMetricsOverride` for exact dimensions, confirmed by measuring the output PNG's pixels directly.
+
+## 5. Next steps (in order)
+1. Remaining adviser items (see the living checklist entry below for current status): hit animation on correct answer, idle animation, background depth layer, bigger sprite (now unblocked), hearts regen, tutorial, enemy/obstacle variety.
+2. Level 10 boss fight playtest.
+3. Decide whether to keep `tool/cdp_shot.js` (untracked; useful for future playtesting without a person).
+
+## 6. Constraints & conventions
+- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
+- **Definition of perfect** (see entries below): real run + all tests + no new analyzer issues + nothing else broken + line budgets. One item at a time.
+- Playtest without a person: start the dev server from PowerShell (not Git Bash), wait for `lib\main.dart is being served`, launch headless Chrome with `--remote-debugging-port=9222`, then `node tool/cdp_shot.js --viewport WxH --steps "wait:N;click:x,y;shot:file.png"` (steps run in order; omit `--viewport` to use the window's own size).
+
+---
+
 **Date:** 2026-09-21 (screen-size finding + crate obstacles + tiled ground)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -128,15 +174,17 @@ Turn the adviser's game-mechanics feedback into an ordered plan, checked against
 **What works:**
 - Nothing changed in code this session. Codebase is as in the 2026-09-19 entries (33/33 tests, randomization done, platform layering fixed).
 
-**Adviser's list (all 8 not started):**
-- [ ] Tutorial screens like other games
-- [ ] Hit/attack animation when an enemy is beaten with the correct answer
-- [ ] Hearts/lives regenerate over time (not jump back to 3)
-- [ ] More enemy/obstacle variety
-- [ ] Bigger character sprite
-- [ ] Simple 2D idle animation for the character
-- [ ] Extra translucent/low-opacity background depth layer
-- [ ] Visual/icon feedback for right/wrong answers instead of plain text
+**Adviser's list (status checked against the code on 2026-09-21; 1 of 8 done):**
+- [ ] Tutorial screens like other games — not started (no tutorial or "How to play" code exists)
+- [ ] Hit/attack animation when an enemy is beaten with the correct answer — not started (`EnemyComponent.defeat()` only plays the sound and calls `removeFromParent()`)
+- [ ] Hearts/lives regenerate over time (not jump back to 3) — not started (`GameConstants.livesPerLevel = 10`, no regen logic; decided max is 5)
+- [ ] More enemy/obstacle variety — not started, and currently *less* varied: all ground obstacles are now the same crate (`022221a`)
+- [ ] Bigger character sprite — not started; no longer blocked, its viewport prerequisite is done
+- [ ] Simple 2D idle animation for the character — not started (the only idle animation is the bobbing avatar on the character selection screen, not the in-game player)
+- [ ] Extra translucent/low-opacity background depth layer — not started
+- [x] Visual/icon feedback for right/wrong answers instead of plain text — **done** (`722d14c`: check/X icons and TAMA!/MALI! badge)
+
+Related, not on the adviser's list: the fixed 1280×720 virtual resolution is **done** (`6edfb47`), the prerequisite for the bigger-sprite item — platform heights and `platform_layering_test.dart` needed no change, since that tuning was already in world units and the viewport only changes how those units map to the screen. The quiz card also **now fits a landscape phone** (`e858348`).
 
 **Still unfinished from before:** question content. Levels 1-9 have 5 questions each but need more than 10; level 10 needs more than 22. Until then replays still pad with placeholders.
 
@@ -179,76 +227,8 @@ Turn the adviser's game-mechanics feedback into an ordered plan, checked against
 
 ---
 
-**Date:** 2026-09-19 (late night — tile verification)
-**From:** Claude Code (dev no-login mode + platform tile verification; reconciles the chat session's tile-coordinate entry)
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Run the game without logging in, use it to verify the platform/crate tiles in a real render, and settle a conflict: a chat-session entry claimed the tile coordinates were wrong, based on static analysis of `sheet.png`.
-
-## 2. Current state
-
-**What works:**
-- `--dart-define=DEV_SKIP_AUTH=true` skips login: router redirect disabled, app opens on character selection (or `DEV_START_ROUTE`, e.g. `/game/pre-colonial/1`). Ignored in release builds (`!kReleaseMode`). Quiz results are dropped (not sent, not queued) in that mode so they can't be flushed to a real student's account.
-- **Platform tile constants are correct — no change needed.** The six constants in `tile_platform_component.dart` (lines 25–30), all **(row, col)** into `ground_tileset.png`: topLeft (1,1), topMid (0,1), topRight (1,2), fillLeft (1,3), fill (1,4), fillRight (1,5). Verified by pixel comparison, not by eye:
-  - A 3-tile platform composed from exactly these six tiles matches the in-game screenshots with **0 of 1,485 opaque pixels differing**, in three separate frames (two undimmed, one under the quiz overlay). A 4-tile platform matches ~97%; the residue is 1–2 px columns per tile (sub-pixel camera position), and shifting it ±1 px makes it far worse.
-  - All six are the orange palette (0 teal pixels each). The teal variant is rows 2–3 of the tileset; nothing in the code uses it.
-  - Fill (1,4) is exactly (39,32,52), identical to the body colour of the other five tiles, so there is no seam.
-  - (1,1) renders as the left end of the grass block, (0,1) as a grass-topped strip tile (not blank).
-- Crates render fine. 30/30 tests pass; analyzer has no warnings/errors (5 pre-existing `info` lints in `login_screen.dart` / `background_history_screen.dart`, untouched).
-- Question randomization is **done** (see the next entry).
-
-**What's broken or unfinished:**
-- Low platforms painting over the player: **fixed**, see the platform entry above.
-- Windows desktop build fails without Windows Developer Mode (plugin symlinks); web build works.
-
-**Earlier chat entry ("tile coordinate correction") — SUPERSEDED, do not apply.** It read the code's (row, col) constants as (col, row). Transposed, its three claims hold exactly: code (0,1) → tile r1c0 is the near-empty one, (1,4) → r4c1 is the crate icon, (1,2) → r2c1 is the teal-palette tile. But the code uses (row, col), and the tiles it really renders are right. Its proposed replacements are also (col, row): pasted into the code as (row, col), "(0,0),(1,0),(2,0)" becomes orange grass + a dark blob tile + teal grass — the palette mix it warned about. Its fill pick (5,5) is (55,44,83), lighter and bluer than the body (39,32,52), and would show as a patch. One finding of that entry does stand, corrected below.
-
-**Source-sheet fact worth keeping:** `ground_tileset.png` is `sheet.png` cropped at **pixel x=111, y=0** (pixel-exact, 0 of 14,336 differ). That is *not* the 16px-aligned "col+7" (x=112): a tile read at `x=16*(c+7)` is 1 px off. To find a tileset tile in the sheet, use x = 111 + 16·col, y = 16·row.
-
-**Files touched:**
-- `CHRONO-GAMEAPP/lib/core/constants.dart` — new `DevFlags` (`skipAuth`, `startRoute`)
-- `CHRONO-GAMEAPP/lib/core/router.dart` — initialLocation + redirect honor `DevFlags`
-- `CHRONO-GAMEAPP/lib/services/api_service.dart` — `submitResult` no-ops in skip mode
-- `CHRONO-GAMEAPP/lib/game/components/tile_platform_component.dart` — fill-row wall tiles, non-AA paint (constants unchanged this session)
-
-## 3. Decisions made (and why)
-- **Left the six constants alone** — decided by pixel-matching the render, which is the ground truth, over static sheet analysis.
-- **Compile-time flag instead of editing/removing auth** — login flow unchanged in normal builds; nothing to revert before shipping.
-- **Drop results in skip mode** — a queued result would be flushed to whichever account logs in next.
-- **Fill row uses wall tiles (1,3)/(1,5) at the ends, (1,4) in the middle** — (1,4) is interior only; at the ends it made the side border stop after one row.
-- **Non-anti-aliased, unfiltered paint for tiles** — tiles are drawn separately at fractional camera positions; AA blended each tile edge with the background, leaving seams. The art is fully opaque, so it was a render issue, not an art issue.
-
-## 4. Things we tried that did NOT work
-- **`flutter run -d windows`** — needs Developer Mode; used `-d web-server`.
-- **`chrome --headless --screenshot --virtual-time-budget`** — captured only the loading bar; drove Chrome over CDP with a real-time wait instead.
-- **Static analysis of `sheet.png` alone (the chat entry)** — tile (row, col) vs (col, row) was ambiguous and nothing checked it against the render.
-
-## 5. Next steps (in order)
-1. (Optional) Add a comment above the tile constants: coordinates are (row, col) in `ground_tileset.png`; rows 0–1 orange, 2–3 teal; the tileset is `sheet.png` cropped at x=111 (not col+7).
-2. Write more questions per level (see the randomization entry below).
-3. (Optional) Refactor `chrono_game.dart` below 300 lines.
-
-## 6. Constraints & conventions
-- **All tile coordinates in this repo are (row, col), 0-indexed from the top-left.** State the order whenever writing a coordinate.
-- **Run without login:** `flutter run -d web-server --web-port 8123 --dart-define=DEV_SKIP_AUTH=true --dart-define=DEV_START_ROUTE=/game/pre-colonial/1` (use debug/profile, not release).
-- **Do not touch:** `.env` files (live credentials), quiz/HUD behavior.
-
-## 7. Open questions
-- Enable Windows Developer Mode so desktop builds work?
-- A teal (per-era) platform variant would need its own fill choice, since (3,4) is not a flat tile.
-- `sheet.png` (the original sheet) was deleted from the repo on purpose; the game never used it. Re-download from the source link below if needed.
-
-## 8. Attachments / references
-- Source art: "A platformer in the forest" by Buch, CC0 — https://opengameart.org/content/a-platformer-in-the-forest (17×8 grid of 16px tiles, 272×128).
-- Commits: see git log in `CHRONO-GAMEAPP` (dev no-login mode + tile fixes) and root repo.
-
----
-
 ## Older entries (folded)
+- 2026-09-19 (tile verification) — Confirmed by pixel comparison (0 of 1,485 opaque pixels differ) that the platform tile constants in `tile_platform_component.dart` were already correct as (row, col) into `ground_tileset.png`; a chat-session entry claiming otherwise had transposed the coordinates and was superseded. Added `DevFlags`/`DEV_SKIP_AUTH` for no-login testing (results dropped in that mode, so they can't be flushed to a real account). Worth keeping: `ground_tileset.png` is `sheet.png` cropped at pixel x=111 (not the 16px-aligned x=112); tiles are drawn non-anti-aliased to avoid seams between fractional-position draws. 30/30 tests.
 - 2026-09-19 (platform height and layering) — Platforms were never solid; `player_component.dart` only lets the player land on top, so the head overlap was purely a draw-order bug. Fixed with `TilePlatformComponent.renderPriority = -1` and by narrowing spawn heights to `platformMinHeight = 60` / `platformMaxHeight = 105` (the jump peaks at ~128 px = jumpForce²/2·gravity), guarded by `test/game/platform_layering_test.dart`. Decided to keep platforms one-way and not to touch jump force. Two gotchas worth keeping: run the dev command from PowerShell, since **Git Bash rewrites `--dart-define=DEV_START_ROUTE=/game/...` into `C:/Program Files/Git/game/...`** and the router 404s; and never screenshot before the log prints `lib\main.dart is being served`, or the page stays blank white until the server is restarted.
 - 2026-09-19 (question randomization) — `QuestionBank.getQuestions` now draws a random subset per attempt and reshuffles options per call (`Question.withShuffledOptions` remaps `correctAnswer` by position). No real variety yet: levels 1–9 have 5 questions but need >10, level 10 has 22 of 22, so replays still pad placeholders until the user writes more content. 30/30 tests. Files: `models/question.dart`, `data/question_bank.dart`, + new tests.
 - 2026-09-19 (evening) — Added ground/crate tile art, registered the root repo submodules in `.gitmodules`, unified git identity. Its tile coordinates were later checked in a real render and are correct (see top entry).
