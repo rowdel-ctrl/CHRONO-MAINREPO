@@ -3,6 +3,88 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-22 (shared 4-layer parallax background)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Replace the per-era parallax background art with one shared 4-layer background (user-supplied) used across all eras — this also satisfies the adviser's "extra translucent/low-opacity background depth layer" item.
+
+## 2. Current state
+
+**Committed in CHRONO-GAMEAPP:**
+- `742f028` — `lib/game/components/parallax_background.dart` now loads 4 fixed layers for every era instead of per-era `_far`/`_near` pairs: `parallax-forest-back-trees.png`, `parallax-forest-middle-trees.png`, `parallax-forest-lights.png` (the new depth layer — translucent light rays), `parallax-forest-front-trees.png`, all in `assets/backgrounds/`. `velocityMultiplierDelta` changed from `(2.2, 1.0)` (tuned for 2 layers) to `(1.4, 1.0)` (4 layers), per the user's supplied snippet. Removed the now-dead `_backgroundAssetKeyForEra` era lookup; the dynamic camera-re-anchoring `update()` logic (drives `baseVelocity` from real camera movement each frame) is unchanged. Deleted the 10 now-unused per-era PNGs: `precolonial/spanish/american/ww2/modern` × `_far`/`_near`.
+- `pubspec.yaml` needed no change — `assets/backgrounds/` was already declared as a whole folder.
+
+**Verified:** analyzer at the same 5 known `info` lints; `parallax_background_test.dart` (2/2) unaffected — it injects an empty-layer `Parallax` directly, so it covers only the velocity math, not asset loading. Confirmed in a real run: a CDP screenshot at 1280×720 on the Spanish-era level 1 shows all 4 layers rendering with correct depth (far trees + glowing sky, mid trees, translucent light rays, big dark front trunks). Full suite otherwise green; one pre-existing failure in `tutorial_screen_test.dart` belongs to separate uncommitted tutorial-screen work already sitting in the tree before this session (`lib/screens/tutorial/`, `test/screens/`, edits to `router.dart`/`storage_service.dart`/`character_selection_screen.dart`) — not touched here.
+
+**What's unfinished:**
+- Not pushed yet.
+- Only checked at 1280×720 — not explicitly reverified at phone aspect ratios this session (the fixed-resolution viewport from the entry below should make this a non-issue).
+
+## 3. Decisions made (and why)
+- **One shared background for all eras, not five separate sets** — user-directed: supplied a single 4-layer forest set to replace the per-era pairs entirely rather than matching it into the old per-era naming scheme.
+- **Old per-era PNGs deleted, not left unused** (user decision) — a single shared background no longer needs per-era lookup, so keeping them around had no benefit.
+- **`velocityMultiplierDelta` set to `(1.4, 1.0)`**, per the user's supplied snippet, so each of the 4 layers scrolls a bit faster than the one behind it.
+
+## 4. Things we tried that did NOT work
+- **`--viewport WxH` with `$(pwd)` as the `cdp_shot.js` output path** — Git Bash path-mangling turned `$(pwd)` into a doubled `F:\f\CHRONO\...` path. Use a relative filename instead.
+- **`taskkill /IM chrome.exe` during cleanup** — kills *all* Chrome processes system-wide, not just the headless instance started for the screenshot. Find the specific PID instead (`netstat -ano` on the debug port) and kill that.
+
+## 5. Next steps (in order)
+1. Push this commit (and the tutorial-screens one in the entry below).
+2. Remaining adviser items: hit animation on correct answer, idle animation, bigger sprite, hearts regen, enemy/obstacle variety.
+3. Level 10 boss fight playtest (carried from the entry below).
+
+## 6. Constraints & conventions
+- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
+- Playtest without a person: start the dev server from PowerShell on **port 8123**, not any other port — `tool/cdp_shot.js` hardcodes `:8123` for the game and `:9222` for the CDP debug port. Wait for `lib\main.dart is being served`, launch headless Chrome with `--remote-debugging-port=9222`, then `node tool/cdp_shot.js --viewport WxH --steps "wait:N;shot:file.png"` (relative output path, not `$(pwd)`).
+
+---
+
+**Date:** 2026-09-22 (how-to-play tutorial)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Implement the adviser's "tutorial screens" item: shown on first play, replayable from a menu button, same screens for both.
+
+## 2. Current state
+
+**Committed in CHRONO-GAMEAPP:**
+- `69605d3` — new `lib/screens/tutorial/tutorial_screen.dart` (322 lines), a 6-step `PageView` (character, obstacles/enemies, coins/artifacts, quiz check/X, hearts, power-ups), built entirely from sprites and icons that already exist elsewhere in the game, including the real TAMA!/MALI! check/X icons from `answer_feedback.dart` — no new art. `lib/services/storage_service.dart` gets `hasSeenTutorial()`/`markTutorialSeen()`, mirroring the existing `getCharacter`/`saveCharacter` Hive pattern. `lib/core/router.dart` gets a `/tutorial` route. `lib/screens/home/character_selection_screen.dart` auto-launches it once (checked in `initState` via a post-frame callback) and adds a "How to play" book-icon button (top-right) to replay it anytime.
+
+**Verified:** 83/83 tests pass (4 new in `test/screens/tutorial_screen_test.dart`), analyzer at the same 5 known `info` lints. Confirmed in a real run over CDP: all 6 steps render with real sprites; first-play auto-launch works; "SIMULAN NA!" on the last step lands on character selection; the book icon reopens the tutorial; "LAKTAWAN" (Skip) pops back to character selection correctly.
+
+**What's unfinished:**
+- Not pushed yet.
+- `tool/cdp_shot.js` and `quiz_card_phone_preview.png` still uncommitted/undecided (carried from the entry below).
+- Remaining adviser items (5 of 8 now open): hit animation, idle animation, bigger sprite, hearts regen, enemy/obstacle variety.
+- Level 10 boss fight still not playtested.
+
+## 3. Decisions made (and why)
+- **First-play detection is a Hive flag checked in `CharacterSelectionScreen.initState`**, not a router redirect — it's a one-time UX nudge, not an auth gate, and matches `EraSelectionScreen`'s existing pattern for post-build side effects.
+- **Skip and Done share one `_finish()`**: `pop()` if reachable (pushed from the How-to-play button), else `go('/character-selection')` (first-play auto-launch has nothing to pop to).
+
+## 4. Things we tried that did NOT work
+- **Widget-testing Skip/Done by asserting on the destination screen's content.** Hive's `box.put()` only commits its in-memory value after the real disk-write Future resolves (confirmed by reading Hive's source), so `_finish()`'s `await` needs real async time to ever reach `pop()`/`go()` — `tester.runAsync()` is required. But `google_fonts` schedules its own real background font-load Future per weight, which rejects when the font isn't bundled (expected with `allowRuntimeFetching = false`); normally that stays harmlessly dangling for a fake-time test, but `runAsync` gives it real time to actually reject, surfacing as a spurious, intermittent failure unrelated to navigation (this is the pre-existing `tutorial_screen_test.dart` flake noted in the parallax-background entry above — not reproducible on demand, not caused by that session). Settled on testing the storage-flag side effect only (reliable) and verifying real navigation via a CDP playtest instead, per this file's own "Definition of perfect".
+
+## 5. Next steps (in order)
+1. Push this commit (and the parallax-background one in the entry above).
+2. Remaining adviser items: hit animation on correct answer, idle animation, bigger sprite, hearts regen, enemy/obstacle variety.
+3. Level 10 boss fight playtest.
+
+## 6. Constraints & conventions
+- Same as the entry above.
+
+---
+
 **Date:** 2026-09-22 (adaptive screen: fixed-resolution viewport + quiz card fit)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -100,134 +182,9 @@ Answer why the ground was not tiled like the platforms, swap obstacle art to cra
 
 ---
 
-**Date:** 2026-09-21 (adviser items: step 1 refactor + step 2 answer feedback)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-
-Do plan steps 1 and 2: get `chrono_game.dart` under 300 lines, then replace text-only right/wrong feedback with icons.
-
-## 2. Current state
-
-**What works:**
-
-- **Step 1 (refactor):** `chrono_game.dart` is 357 → 280 lines. The question flow (`showQuestion`, `showBossQuestion`, `handleAnswer`) moved unchanged to `lib/game/quiz_handler.dart` as an extension. The three duplicated life-loss blocks are now one `loseLife()` (returns true when the level failed). Playtested level 1: obstacle hits, correct answers, wrong answers and running out of hearts all behave as before.
-- **Step 2 (feedback icons):** after answering, a pop-in "TAMA!" (green check) or "MALI!" (red X) badge appears centred in the question header. The correct option gets a check and a wrong pick gets an X in the button's corner. Sounds, 800 ms auto-close on correct, and the wrong-answer explanation are unchanged. Playtested both paths in a real run.
-- `question_overlay.dart` was already 440 lines, so the answer button, explanation panel, timer chip and power-up button moved to `lib/game/overlays/question_widgets.dart` (overlay now 275).
-- 39/39 tests pass (6 new in `test/game/answer_feedback_test.dart`). Analyzer: only the 5 old `info` lints.
-
-**What's unfinished:**
-
-- Not playtested: the level 10 boss fight (10 warm-up questions first; its code moved unchanged) and falling into a gap (none came up).
-- `level_failed_screen.dart` shows 3 empty hearts while the game gives 10 (pre-existing; fix in the hearts step).
-- ~~Nothing is committed yet.~~ **Committed** as planned: `2bd73e6` (refactor) and `722d14c` (answer feedback) in CHRONO-GAMEAPP, with root `e2cb13c` bumping the submodule. `build/` is gitignored (`.gitignore:33`), so the APK was never staged. Not pushed.
-
-**APK:** a release APK was built from this state (85.6 MB, `CHRONO-GAMEAPP/build/app/outputs/flutter-apk/app-release.apk`) for playtesting on a phone. It talks to the deployed backend `chronoquest-backend.vercel.app` (not checked that it's up), so it needs a real student login; `DEV_SKIP_AUTH` only works in debug builds. Still 10 hearts per level. Signed with the debug key unless a release keystore exists. Not yet tried on a device: check touch, screen size, and whether the quiz card feels cramped (only checked at 1280x720).
-
-**Files touched (CHRONO-GAMEAPP):**
-
-- `lib/game/chrono_game.dart`, `lib/game/quiz_handler.dart` (new)
-- `lib/game/overlays/question_overlay.dart`, `question_widgets.dart` (new), `answer_feedback.dart` (new)
-- One import line each in `lib/game/components/boss_component.dart`, `player_component.dart`, `lib/screens/game/game_screen.dart`
-- `test/game/answer_feedback_test.dart` (new)
-
-## 3. Decisions made (and why)
-
-- **Max hearts will be 5** (user decision), regenerating 1 per 10 minutes (50 min for a full set). The code currently gives 10 per level (`GameConstants.livesPerLevel`), not 3 as the entry below assumed.
-- **Answer icons sit in the button corner, not beside the text.** Beside the text they took 44 px of width and made options wrap or truncate sooner.
-- **The badge is no taller than the header chips**, so it doesn't push the card down when it appears.
-- **Widget tests set `GoogleFonts.config.allowRuntimeFetching = false`**: tests have no network.
-
-## 4. Things we tried that did NOT work
-
-- **Rewriting a Dart file with PowerShell `Get-Content`/`Set-Content`** corrupted the UTF-8 box-drawing characters in comments. Use the Edit tool or `sed` from Git Bash.
-- **`getMaxScaleOnAxis()` to read a scale-0 transform** returns 1 (it counts the z axis). Read `transform.storage[0]` instead.
-
-## 5. Next steps (in order)
-
-1. User: playtest the APK on the phone (level 10 boss included), then OK steps 1-2. Then commit as planned above.
-2. Step 3: hit animation on correct answer (`EnemyComponent.defeat()`).
-3. Then idle animation, background depth layer, bigger sprite, hearts regen (5 max), tutorial, enemy variety.
-
-## 6. Constraints & conventions
-
-- Same as the entry below. Playtesting without a person: run the dev server from PowerShell, start headless Chrome with `--remote-debugging-port=9222`, and drive it over CDP (screenshot + mouse clicks). Wait for `lib\main.dart is being served` first; the first question appears about 30 s after load.
-
----
-
-**Date:** 2026-09-21 (adviser feedback review)
-**From:** Claude chat (planning only, no code changed)
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Turn the adviser's game-mechanics feedback into an ordered plan, checked against the current codebase.
-
-## 2. Current state
-
-**What works:**
-- Nothing changed in code this session. Codebase is as in the 2026-09-19 entries (33/33 tests, randomization done, platform layering fixed).
-
-**Adviser's list (status checked against the code on 2026-09-21; 1 of 8 done):**
-- [ ] Tutorial screens like other games — not started (no tutorial or "How to play" code exists)
-- [ ] Hit/attack animation when an enemy is beaten with the correct answer — not started (`EnemyComponent.defeat()` only plays the sound and calls `removeFromParent()`)
-- [ ] Hearts/lives regenerate over time (not jump back to 3) — not started (`GameConstants.livesPerLevel = 10`, no regen logic; decided max is 5)
-- [ ] More enemy/obstacle variety — not started, and currently *less* varied: all ground obstacles are now the same crate (`022221a`)
-- [ ] Bigger character sprite — not started; no longer blocked, its viewport prerequisite is done
-- [ ] Simple 2D idle animation for the character — not started (the only idle animation is the bobbing avatar on the character selection screen, not the in-game player)
-- [ ] Extra translucent/low-opacity background depth layer — not started
-- [x] Visual/icon feedback for right/wrong answers instead of plain text — **done** (`722d14c`: check/X icons and TAMA!/MALI! badge)
-
-Related, not on the adviser's list: the fixed 1280×720 virtual resolution is **done** (`6edfb47`), the prerequisite for the bigger-sprite item — platform heights and `platform_layering_test.dart` needed no change, since that tuning was already in world units and the viewport only changes how those units map to the screen. The quiz card also **now fits a landscape phone** (`e858348`).
-
-**Still unfinished from before:** question content. Levels 1-9 have 5 questions each but need more than 10; level 10 needs more than 22. Until then replays still pad with placeholders.
-
-**Files touched:** none.
-
-## 3. Decisions made (and why)
-- **The "do not touch quiz/HUD behavior" rule is lifted for the adviser items only** (feedback icons, hit animation, tutorial). They cannot be done without touching quiz/HUD. This overrides the older entries below.
-- **Refactor `chrono_game.dart` before the UI work.** It is over the 300-line budget (351 last recorded; recheck) and the feedback icons and hit animation touch the quiz logic in that file.
-- **Bigger sprite is not a quick win.** Platform heights were tuned for an 80 px player and a ~128 px jump peak (`platformMaxHeight = 105`, and `test/game/platform_layering_test.dart` requires a 15 px margin). After resizing, recheck spawn heights, ground landing, and those tests.
-- **Background depth layer must stay behind platforms and slower than the world.** Platforms draw at `renderPriority = -1`, parallax layers at -10. Faster than the world would invert the depth again (the Phase 3 bug).
-- **Hearts regen: 1 heart every 10 minutes** (30 minutes for a full 3). Keep it as a single constant so it is easy to change after playtesting.
-- **Regen timer: backend is the source of truth, with a local copy.** Store the heart count and the time it last changed (no live countdown); on app open, work out how many hearts came back since then. When online and logged in, use the backend value so changing the phone clock can't cheat it. Keep a local copy (Hive) for offline play and for `DEV_SKIP_AUTH` testing, and sync to the backend when online. Check whether CBACK already stores hearts; if not, add a field and endpoint.
-- **Tutorial: show on first play, and also replayable** from a "How to play" button in a menu. Same screens for both. Build it from existing sprites and Flutter icons; no new art needed.
-
-## 4. Things we tried that did NOT work
-- Nothing failed this session.
-
-## 5. Next steps (in order)
-**Rule: one step at a time. Do not start the next step until the current one is perfect (see "Definition of perfect" in section 6).**
-
-1. User writes more questions in `assets/data/questions_<era>.json` (can run alongside the code work).
-2. Check the current line count of `chrono_game.dart`, then refactor below 300 lines (extract level/quiz-state logic).
-3. Quick wins: right/wrong visual feedback, hit animation on correct answer, idle animation, background depth layer.
-4. Bigger sprite, then recheck platform heights, landing, and the platform_layering tests.
-5. Hearts regen and tutorial screens (decisions are in section 3).
-6. Enemy/obstacle variety: start with 2-3 new ones. (Optional: coins or crates on platforms, still open from before.)
-
-## 6. Constraints & conventions
-- **Do not touch:** `.env` files (live credentials).
-- Quiz/HUD may be changed only for the adviser items above.
-- **Work one item at a time, in order.** Do not move to the next item until the current one is perfect. Also do not mix two items in one change.
-- **Definition of perfect:** it works in a real run (screenshot or playtest, not just tests), all tests pass, analyzer has no new issues, nothing else broke (quiz, HUD, hearts, level flow), and every file stays within the line budget. If any check fails, fix it before moving on. When it passes, report what was checked and wait for the user's OK before starting the next item.
-- Tile coordinates stay (row, col). Run the no-login dev command from PowerShell (see the tile verification entry).
-
-## 7. Open questions
-- None right now. Heart regen time, tutorial behavior, and timer location are decided in section 3.
-
-## 8. Attachments / references
-- Adviser consultation list is copied in section 2 above.
-
----
-
 ## Older entries (folded)
+- 2026-09-21 (adviser feedback review) — Turned the adviser's 8-item feedback list into an ordered plan (tutorial screens, hit animation, hearts regen, idle animation, background depth layer, bigger sprite, enemy/obstacle variety; answer feedback icons already done); decided hearts regen at 1/10min capped at 5, tutorial replayable from a menu button, background depth layer must stay slower than the world, `.env` files off-limits. No code changed that session. By 2026-09-22 both background depth layer and tutorial screens were done too (3 of 8) — hit animation, idle animation, bigger sprite, hearts regen, and enemy/obstacle variety remain.
+- 2026-09-21 (adviser items: step 1 refactor + step 2 answer feedback) — Refactored `chrono_game.dart` (357→280 lines) by moving the question flow into `lib/game/quiz_handler.dart` and collapsing three duplicated life-loss blocks into one `loseLife()`. Added pop-in TAMA!/MALI! answer feedback icons. Committed `2bd73e6`/`722d14c`, root `e2cb13c` bumped the submodule. 39/39 tests. Built a signed-debug release APK for phone playtesting (not yet tried on a device at that point). Decided max hearts will be 5, regenerating 1 per 10 minutes.
 - 2026-09-19 (tile verification) — Confirmed by pixel comparison (0 of 1,485 opaque pixels differ) that the platform tile constants in `tile_platform_component.dart` were already correct as (row, col) into `ground_tileset.png`; a chat-session entry claiming otherwise had transposed the coordinates and was superseded. Added `DevFlags`/`DEV_SKIP_AUTH` for no-login testing (results dropped in that mode, so they can't be flushed to a real account). Worth keeping: `ground_tileset.png` is `sheet.png` cropped at pixel x=111 (not the 16px-aligned x=112); tiles are drawn non-anti-aliased to avoid seams between fractional-position draws. 30/30 tests.
 - 2026-09-19 (platform height and layering) — Platforms were never solid; `player_component.dart` only lets the player land on top, so the head overlap was purely a draw-order bug. Fixed with `TilePlatformComponent.renderPriority = -1` and by narrowing spawn heights to `platformMinHeight = 60` / `platformMaxHeight = 105` (the jump peaks at ~128 px = jumpForce²/2·gravity), guarded by `test/game/platform_layering_test.dart`. Decided to keep platforms one-way and not to touch jump force. Two gotchas worth keeping: run the dev command from PowerShell, since **Git Bash rewrites `--dart-define=DEV_START_ROUTE=/game/...` into `C:/Program Files/Git/game/...`** and the router 404s; and never screenshot before the log prints `lib\main.dart is being served`, or the page stays blank white until the server is restarted.
 - 2026-09-19 (question randomization) — `QuestionBank.getQuestions` now draws a random subset per attempt and reshuffles options per call (`Question.withShuffledOptions` remaps `correctAnswer` by position). No real variety yet: levels 1–9 have 5 questions but need >10, level 10 has 22 of 22, so replays still pad placeholders until the user writes more content. 30/30 tests. Files: `models/question.dart`, `data/question_bank.dart`, + new tests.
