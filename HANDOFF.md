@@ -3,6 +3,153 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-26 (Phase 1 — player control)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Implement GAMEPLAY-V2.md Phase 1 (Section 15 prompt/criteria): refactor `chrono_game.dart`
+into separate concerns, add Flame's `JoystickComponent` + two `HudButtonComponent`s (jump,
+attack), unlock the player's X so movement is joystick-driven instead of a constant
+auto-advance, and switch the camera to genuinely follow the player. Attack button present but
+inert (Phase 2 wires it up). Enemies still open the quiz on contact — combat is Phase 2.
+
+## 2. Current state
+
+**Refactored**, per the Section 15 prompt — `chrono_game.dart` (now 294 lines, was 303) split
+into:
+
+- `lib/game/game_camera.dart` — `updateCamera()` extension, the pre-existing camera-follow
+  line moved verbatim.
+- `lib/game/game_spawning.dart` — `setupSpawning()`/`updateSpawning()` extension wrapping the
+  ground/enemy spawner setup that used to live inline in `onLoad()`/`update()`.
+- `lib/game/game_collision.dart` — `PlayerGroundCollision.resolveGroundContact()` extension on
+  `PlayerComponent`, the hand-rolled ground/platform AABB check moved out of
+  `player_component.dart`'s `update()` verbatim. This is deliberately the same code Section 11
+  flags as what Phase 4's Tiled migration has to re-point — kept in its own file for that
+  reason, not just line-budget hygiene.
+- `lib/game/game_input.dart` — new: builds the joystick + jump/attack buttons.
+
+**Player movement** (`player_component.dart`): `position.x += forwardSpeed * dt` (constant,
+one-directional) replaced with `position.x += forwardSpeed * relativeDelta.x * dt`, reading
+`game.gameInput.joystick.relativeDelta.x` every frame — signed, so both direction and speed
+come from how far the knob is pulled. `forwardSpeed` (150.0) kept as the name/value of the
+*cap*, not an unconditional rate. Player can't walk left of world x=0 (no ground/background
+authored further left yet; Phase 4 gives levels real bounds).
+
+**Facing direction**: a real bug, caught by `player_movement_test.dart`, not just implemented
+and assumed correct. First attempt used Flame's `flipHorizontallyAroundCenter()` — confirmed
+against the installed Flame source that for a non-center anchor (this player uses
+`Anchor.topLeft`, the default) that method compensates by adding the full sprite width to
+`position.x`. Since `position.x` *is* `worldX` here — read by the camera, the hand-rolled
+ground collision, and the spawner's distance tracking — every direction change silently
+teleported the player's world position by ±96 units. Fixed by mirroring only inside a
+`render()` override (`canvas.translate(size.x, 0); canvas.scale(-1, 1);`, saved/restored around
+just the `super.render()` call) — a pure rendering effect that never touches
+`position`/`transform`, so nothing else can be affected by it.
+
+**`enemy_spawner.dart` distance math fixed** per the Phase 1 prompt: used to accumulate
+`PlayerComponent.forwardSpeed * dt` — a compile-time constant, correct only while the player
+auto-advanced. Now tracks the player's furthest-right `worldX` (a high-water mark) and only
+counts forward progress past the previous best, so standing still adds nothing and backtracking
+over already-spawned ground never re-triggers a spawn on the way back.
+
+**On-screen controls**: joystick bottom-left, jump/attack buttons bottom-right, added to
+`camera.viewport` (not `world` or the game directly) — both `JoystickComponent` and
+`HudButtonComponent` mix in `ComponentViewportMargin`, whose margin math needs a parent that
+provides a size; `camera.viewport` is the `FixedResolutionViewport` this game already uses, so
+margins land against the fixed 1280x720 virtual resolution rather than the raw device canvas.
+**The knob/background/button art is plain Flame `CircleComponent`/`TextComponent` shapes, not
+the Kenney CC0 on-screen-control art Section 3 calls for** — same "plumbing now, real asset
+later" split Phase 0 used for audio. Swapping in real Kenney art is a follow-up, not blocked on
+anything.
+
+**Removed the full-screen tap-to-jump `GestureDetector`** in `game_screen.dart` — it would have
+competed with the joystick/buttons' own `DragCallbacks`/`TapCallbacks` for the same touches in
+the gesture arena. Jump is now only the dedicated button. Updated the HUD's first-jump hint
+text (`hud_overlay.dart`) from "TAP SCREEN TO JUMP" to "JOYSTICK TO MOVE • TAP JUMP" since the
+old copy described a control that no longer exists.
+
+**Protected values untouched**: gravity (900), jump force (-480), platform spawn heights
+(60-105) — confirmed unchanged, only the ground-contact *check* moved files, not its numbers.
+
+**Tests**: `flutter analyze` clean (same 5 pre-existing info-level issues in files this phase
+never touched — `login_screen.dart`, `background_history_screen.dart`). Added
+`test/game/player_movement_test.dart` (movement direction/clamp/facing, ground-contact
+resolution) and `test/game/enemy_spawner_distance_test.dart` (the four distance-math cases:
+standing still, one full interval, backtrack-then-recross, resume past the high-water mark) —
+10 new tests, all passing. Full scoped run (`flutter test test/data test/game test/models`,
+per the existing convention below) — **106 tests, all passing.**
+
+## 3. Decisions made (and why)
+
+- **Kept `PlayerComponent.forwardSpeed`'s name and value (150.0), repurposed as a cap rather
+  than a rate.** Existing code depends on the literal value for reasons unrelated to how it's
+  applied: `parallax_background.dart` uses it only as a tuning-ratio reference
+  (`_referenceBaseVelocity / PlayerComponent.forwardSpeed`), and that file already derives its
+  actual scroll speed from real camera-position deltas each frame — so it needed zero changes.
+  Renaming or changing the value would have been unnecessary churn for a value that's still
+  correct as "the game's characteristic forward speed."
+- **`resolveGroundContact()` reads raw `position`/`size` fields, not the hitbox/transform.**
+  Confirmed this means it's unaffected by the `render()`-only facing flip (scale is never
+  touched) — the two features are provably independent, not just untested-and-hoped.
+- **Didn't restore crate contact damage**, even though the crate-harmless comment in
+  `player_component.dart` says to "restore the damage once [Phase 1] lands." Re-read Section 5:
+  the full `-1 HP` treatment is bundled with knockback and invincibility frames, both explicit
+  Phase 2 deliverables (Section 14 lists "Contact damage: knockback + invincibility frames"
+  under Phase 2, not Phase 1). Restoring bare damage now, without knockback, would ship a
+  partial version of that spec — left for Phase 2 as written.
+- **Didn't attempt to source real Kenney control art this phase.** Kenney's actual page
+  structure didn't resolve cleanly through the tools available (title/URL guesses returned
+  404s or an uncertain AI-summarized page), and chasing it further risked spending the session
+  hunting binary assets instead of the actual player-control mechanic the phase is graded on.
+  Plain Flame shapes are a fully real, functional, testable control surface — only the skin is
+  a placeholder, same tradeoff Phase 0 made for audio content.
+
+## 4. Things we tried that did NOT work
+
+- **`flipHorizontallyAroundCenter()` for facing direction.** Looked correct, compiled clean,
+  and would have shipped broken if the movement tests hadn't been written first — see Section 2.
+  This is the headline finding of this phase: write the test, don't just eyeball the diff,
+  especially for anything touching `position` on a component whose position is reused as
+  world-authoritative state.
+- **Running the full `flutter test` suite unscoped.** Confirmed (again) that `test/screens/`
+  hangs — this was already documented below (2026-09-22 Tier 1 entry) and the scoped-run
+  convention already existed; this session re-discovered it live by watching a `flutter test`
+  invocation sit at zero output for 30+ minutes before checking process CPU deltas (static
+  across checks = genuinely hung, not just slow) and bisecting down to
+  `test/screens/tutorial_screen_test.dart`. No code changes needed — just don't run it unscoped.
+
+## 5. Next steps (in order)
+1. **Playtest on a real phone for ten minutes** — Section 15's own words: "the most important
+   playtest in the project." Nothing here can substitute for it: does the joystick feel good
+   under a thumb, is the dead zone reasonable, does the jump button's position clash with the
+   joystick's reach. Fix control feel before starting Phase 2 — everything else is built on top
+   of it.
+2. Phase 2 — combat and Kaalaman (attack hitbox, charge system, Walker/Heavy enemies, contact
+   damage + knockback + i-frames, distance-based level end). See GAMEPLAY-V2.md Section 15.
+3. Swap the placeholder joystick/button shapes for real Kenney CC0 on-screen-control art
+   whenever there's a spare hour — purely cosmetic, not blocking.
+4. Content debt carried over (unchanged): `questions_nationalism.json`, era 4/5
+   `historicalText` split, audio still needs a human ear on real files.
+
+## 6. Constraints & conventions
+- `flutter test` must stay scoped to `test/data test/game test/models` — `test/screens/`
+  (`tutorial_screen_test.dart`) hangs, pre-existing, unrelated to this phase (zero diff against
+  the pre-Phase-1 branch). Confirmed again this session.
+- Any component that flips/scales for a visual effect and whose `position` is read elsewhere as
+  world-authoritative state (this player's `worldX`) must flip via a `render()`-local canvas
+  transform, never `flipHorizontally()`/`flipHorizontallyAroundCenter()` — those are
+  transform-based and, for non-center anchors, mutate `position` as a side effect.
+- Do not change gravity (900), jump force (-480), or platform spawn heights (60-105) — verified
+  unchanged this phase, still the rule for every phase after this one too.
+- Do not rename `HeartsState`, the provider fields, or the Hive keys (Phase 0 rule, still applies).
+
+---
+
 **Date:** 2026-09-25 (Phase 0/0.5 end-to-end CDP verification, before Phase 1)
 **From:** Claude Code
 **To:** Claude Code / Chat
