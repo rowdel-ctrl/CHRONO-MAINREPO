@@ -1,6 +1,6 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **design proposal**, not yet implemented. Revision 4 — six-era curriculum structure
+Status: **design proposal**, not yet implemented. Revision 5 — Era 3 level count corrected (6→7, total 43) and BOW week numbers added, on top of the revision 4 codebase corrections. Six-era curriculum structure
 from the DepEd three-term Budget of Work, built around off-the-shelf components, corrected
 against a full read of the codebase (Task M, 2026-09-24).
 Companion to `GAMEPLAY.md`, which documents the game as it exists today.
@@ -89,14 +89,37 @@ on purpose, because the curriculum is uneven:
 |---|---|
 | 1 | 10 |
 | 2 | 5 |
-| 3 | 6 |
+| 3 | 7 |
 | 4 | 8 |
 | 5 | 8 |
 | 6 | 5 |
-| **Total** | **42** |
+| **Total** | **43** |
+
+> **Correction, 2026-09-25:** an earlier revision of this document miscounted Era 3 as 6
+> levels; recounting the source PDF's competency groups for Pag-usbong ng Nasyonalismo gives
+> **7**: [1] / [2-3] / [4-5] / [6] / [7] / [8-9] / [10]. All level-count references in this
+> document have been corrected to 43. Caught after Phase 0.5 had already implemented 6 — a
+> one-field fix in the registry (`levelCount` for era 3, and the boss position), not a
+> rebuild, since it was caught before Phase 4 content was authored against it.
 
 Every level therefore maps to one named competency and is defensible as "this level teaches
 this." Do not normalise these to a uniform 10.
+
+### Curriculum weeks, sourced
+
+The `weeks` array for every level's `curriculum` tag, transcribed from the same
+`ChronoQuest_Level_Topics` PDF that produced the era table above (itself sourced from
+`G5_BOW_AP_5_-_Three-Term_v2.pdf` / `G6_BOW_AP_6_-_Three-Term_V2.pdf`, DepEd, 29 June 2026).
+This is real BOW data, not invented — use it directly rather than leaving `weeks` empty.
+
+| Era | Level → weeks |
+|---|---|
+| 1 (G5 T1) | 1:[1] · 2:[2] · 3:[3] · 4:[4] · 5:[5] · 6:[6] · 7:[7] · 8:[8] · 9:[9] · 10:[10] (boss) |
+| 2 (G5 T2) | 1:[1,2] · 2:[3,4,5] · 3:[6,7] · 4:[8] · 5:[9,10] (boss) |
+| 3 (G5 T3) | 1:[1] · 2:[2,3] · 3:[4,5] · 4:[6] · 5:[7] · 6:[8,9] · 7:[10] (boss) |
+| 4 (G6 T1) | 1:[1] · 2:[2] · 3:[3] · 4:[4] · 5:[5] · 6:[6] · 7:[7,8] · 8:[9,10] (boss) |
+| 5 (G6 T2) | 1:[1,2] · 2:[3] · 3:[4] · 4:[5] · 5:[6] · 6:[7] · 7:[8,9] · 8:[10] (boss) |
+| 6 (G6 T3) | 1:[1,2,3] · 2:[4] · 3:[5,6] · 4:[7,8] · 5:[9,10] (boss) |
 
 ### Every level carries its curriculum tag
 
@@ -417,10 +440,16 @@ is not worth the time unless someone is grading it.
 **Tint the parallax per era.** There is exactly one background set (forest), so all six eras
 look identical. That is a large part of why the game doesn't feel like a real game. You do
 not need new backgrounds — apply Flame's **`PaintDecorator.tint()`** to the existing parallax
-component, roughly one line per era. (Verified: `ParallaxComponent` extends `PositionComponent`,
-which carries a built-in `decorator` property, so `component.decorator = PaintDecorator.tint(color)`
-works directly. Use a **semi-transparent** colour — e.g. `Color(0x66C9A227)` — so detail stays
-visible through the tint.)
+component, roughly one line per era. Use a **semi-transparent** colour — e.g. `Color(0x66C9A227)`
+— so detail stays visible through the tint.
+
+> **Do not assign `component.decorator =`.** The Flame docs show that form, and it is wrong for
+> anything extending `PositionComponent`: `decorator` is a `late` field the component already
+> populates with its own `Transform2DDecorator`, which applies position and scale. Overwriting
+> it discards the transform. Chain instead:
+> `decorator.replaceLast(PaintDecorator.tint(color))` — `replaceLast` appends on the first call
+> and swaps on later ones, so a repeated `onLoad` cannot stack tints. Confirmed against the
+> installed Flame source during Phase 0.
 
 | Era | Tint | Feel |
 |---|---|---|
@@ -689,7 +718,7 @@ playing exactly as it does today, which is what makes it safe to verify.
   heights, so this needs a tracked anchor updated as the player crosses solid ground.
 - `gap_component.dart`'s `GroundSpawner` lays one 1,000,000-wide ground section with an empty
   `update()`. It is dead code that Tiled replaces entirely — delete it rather than porting it.
-- **Then author levels.** 42 of them, per the Section 1 counts. This is content work, not
+- **Then author levels.** 43 of them, per the Section 1 counts. This is content work, not
   engineering — see risks.
 
 ### Phase 5 — Boss (2-3 days for the simple version)
@@ -932,14 +961,14 @@ Plan your own time around these — nobody else is doing them.
 ## 16. Risks and honest caveats
 
 **Level authoring is still the real cost.** Tiled makes it dramatically faster than
-hand-writing JSON, but designing 42 levels is content work that no tool removes. If the
+hand-writing JSON, but designing 43 levels is content work that no tool removes. If the
 deadline tightens, **cut eras rather than quality** — three well-built eras beat six
 procedurally-mush ones. Cut from the end (Eras 5 and 6) so each grade keeps a coherent
 opening sequence, and say in the paper that the remaining eras are authored but unpopulated.
 
 **Question bank depth is the hard bottleneck.** Levels currently have only 5 questions each.
 V2 makes this worse, not better: gates and artifacts re-roll on a wrong answer, so a level
-consumes more questions per run than before. **You need 10-12 minimum per level**, and at 42
+consumes more questions per run than before. **You need 10-12 minimum per level**, and at 43
 levels that is roughly **450-500 questions**, each tied to a specific BOW competency.
 
 This is the single largest piece of work in the project and it depends on no code whatsoever.
@@ -1023,7 +1052,7 @@ Found while cross-checking this design against the asset list. Worth fixing in t
 
 ---
 
-*Revision 4, 2026-09-24. Written against `GAMEPLAY.md` (current implementation) and the
+*Revision 5, 2026-09-25. Written against `GAMEPLAY.md` (current implementation) and the
 bundled asset list. Revision 1 hand-rolled the controls, level format and effects; this
 revision replaces all three with existing components and adds Sections 1 and 15. Section 1
 supersedes the earlier five-era structure and is derived from the DepEd three-term Budget of

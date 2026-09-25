@@ -3,6 +3,70 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-25 (Era 3 level-count correction + real BOW weeks)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Two corrections to Phase 0.5 (previous entry, below), both driven by a `GAMEPLAY-V2.md`
+revision 5 the user made after that phase shipped: Era 3 (`nationalism`) has **7** levels, not
+6 — the original doc miscounted its BOW competency groups — and Section 1 now has real,
+sourced BOW week numbers for every level, so `CurriculumTag.weeks` no longer needs to stay
+empty.
+
+## 2. Current state
+
+**Not yet committed, all in CHRONO-GAMEAPP:**
+- `lib/core/constants.dart` — `EraData.levelCount` (a bare `int`) replaced with
+  `EraData.levelWeeks` (`List<List<int>>`, one entry per level). The era's level count is now
+  simply `levelWeeks.length` — a second field that could drift out of sync with it would be the
+  same mistake `boss_component.dart`'s duplicate boss-name map already was, avoided the same way.
+  `nationalism`'s list gained its 7th entry (`[10]`, now the boss level); every other era's list
+  is unchanged in length, only newly carrying real weeks instead of an empty array.
+- `EraData.levels` (the computed getter) now builds each `CurriculumTag` with
+  `weeks: levelWeeks[i]` instead of leaving it at the `CurriculumTag` default of `const []`.
+- All six eras' `levelWeeks` transcribed directly from `GAMEPLAY-V2.md` Section 1's "Curriculum
+  weeks, sourced" table and cross-checked twice against it value-by-value after typing them in.
+- `lib/models/level.dart`, `lib/game/chrono_game.dart` — two stale doc-comment references to
+  the old "10/5/6/8/8/5" count (from the previous entry, written before this correction existed)
+  updated to "10/5/7/8/8/5" / "43 total".
+
+**Verified:** `flutter analyze` clean at the same 5 known pre-existing lints. `flutter test
+test/data test/game test/models`: **96/96**, unchanged — no test hardcoded era 3's old count.
+`grep` confirms no remaining `levelCount: 6` or stale "42 total" references in `lib/`. Not
+re-verified live over CDP this round — the registry-driven `levels` getter is the same code
+path the Phase 0.5 entry already confirmed working end-to-end (including for `nationalism`
+specifically), and this change only feeds it a longer list plus non-empty `weeks`, so a second
+live pass would be re-testing the same mechanism rather than new risk. Worth a quick look next
+time the dev server's already up: `nationalism` should show 7 level nodes with the boss on 7.
+
+## 3. Decisions made (and why)
+- **`levelCount` removed rather than kept alongside `levelWeeks`.** Keeping both would mean two
+  places that have to agree on one era's level count, with nothing enforcing it — exactly the
+  kind of drift this whole phase exists to eliminate. `levelWeeks.length` is the count.
+- **Wrote the real weeks in, didn't leave `CurriculumTag.weeks` empty pending a "second pass."**
+  The reason it was left empty originally was the absence of sourced data, not a design
+  preference — now that `GAMEPLAY-V2.md` has it (transcribed from the actual DepEd BOW PDFs per
+  the doc's own revision-5 note), populating it is the same "don't fabricate curriculum data"
+  principle from before, applied to real data instead of missing data.
+
+## 4. Things we tried that did NOT work
+- (None — a data-shape change with no surprises once the source table was in hand.)
+
+## 5. Next steps (in order)
+1. Commit this correction to `v2-phase-0`.
+2. Spot-check `nationalism` shows 7 levels (see Verified) next time CDP tooling is already up —
+   not blocking, since the underlying mechanism is already proven.
+3. Phase 1 — player control (see the Phase 0.5 entry below for detail).
+
+## 6. Constraints & conventions
+- Same as the Phase 0.5 entry below — nothing new this round.
+
+---
+
 **Date:** 2026-09-25 (GAMEPLAY-V2 Phase 0.5 — era/level registry)
 **From:** Claude Code
 **To:** Claude Code / Chat
