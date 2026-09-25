@@ -3,6 +3,120 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-25 (GAMEPLAY-V2 Phase 0.5 — era/level registry)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Implement Phase 0.5 of `GAMEPLAY-V2.md` **[prerequisite]**: a `Level` data model and a single
+era/level registry for the six eras from Section 1 (10/5/6/8/8/5 levels, 42 total), replacing
+every hardcoded five-era list and `level == 10` boss check across the codebase. No gameplay
+behaviour change — the game must play exactly as before, just driven by data instead of literals.
+
+## 2. Current state
+
+**Not yet committed, all in CHRONO-GAMEAPP:**
+- `lib/models/level.dart` (new) — `CurriculumTag` (grade, term, weeks) and `Level` (eraId,
+  index, curriculum, isBoss). No separate "question pool reference" field: a level's questions
+  are already looked up by exactly its `(eraId, index)` pair via `QuestionBank.getQuestions`,
+  so a third field would only duplicate that.
+- `lib/core/constants.dart` — `EraData` gains `grade`, `term`, `levelCount`, and a computed
+  `levels` getter (`List.generate(levelCount, ...)`, last one `isBoss: true`). `eraGradeMap` is
+  gone, folded into `EraData.grade`. `allEras` reordered to Section 1's era 1-6 order and gains
+  a sixth entry, **`nationalism`** (Era 3, Pag-usbong ng Nasyonalismo) — the era the old
+  five-era list was missing entirely.
+- 18 other files switched from hardcoded era-id lists / `== 10` checks to registry reads:
+  `question_bank.dart`, `chrono_game.dart` (new `isBossLevel` getter), `hud_overlay.dart`,
+  `game_screen.dart`, `era_progress.dart` (`isLevelUnlocked`, `averageLevelScore`),
+  `level_select_screen.dart`, `level_node.dart`, `era_selection_screen.dart`,
+  `era_complete_screen.dart`, `background_history_screen.dart`, `gap_component.dart`,
+  `wall_component.dart`, `boss_component.dart`, `audio_service.dart`,
+  `parallax_background.dart` (wires up the `era3Nasyonalismo` tint Phase 0 left unreachable),
+  `progress_provider.dart`, `api_service.dart`.
+- `test/data/question_bank_test.dart` — one test switched from `spanish` to `pre-colonial` for
+  its boss-level assertion, since which level number is "the boss level" is now era-specific
+  and spanish's shrank from 10 to 5 (see Decisions).
+
+**Verified:** `flutter analyze` clean at the same 5 known pre-existing lints. `flutter test
+test/data test/game test/models`: **96/96**. `grep` confirms zero remaining `== 10` boss
+checks and zero remaining five-element era-id literals. Live CDP playtest against a
+cache-disabled fresh build confirmed: all six eras appear in era-selection for the right grade
+(pre-colonial/spanish/nationalism for grade5); level-select shows the exact Section 1 count for
+every era (10/5/6/8/8/5, spot-checked all six); the boss node lands on the last level of each;
+and a real Nationalism-era level plays correctly end to end — ochre tint, grey ground, no
+console errors — proving every one of that era's reused-asset mappings (wall, boss, BGM, ground
+colour, tint) actually resolves rather than just compiling.
+
+## 3. Decisions made (and why)
+- **The five existing era id strings (`pre-colonial`/`spanish`/`american`/`ww2`/`modern`) are
+  kept exactly as they are — not renamed to match Section 1's new titles.** They're the join
+  key for every already-recorded record of progress, locally (Hive) and on the backend
+  (`QuizResult`/`EraProgress` documents are keyed by this string). Section 1 never actually asks
+  for a rename, only for the era the old list was missing — Era 3 — which is why the only new
+  id added is `'nationalism'`. Mapped onto Section 1's era numbers by best content overlap:
+  pre-colonial→1, spanish→2, american→4, ww2→5, modern→6.
+- **Known content gap, left deliberately alone:** Section 1 notes eras 4 and 5 each span more
+  than one visual period (era 4 Spanish→American, era 5 American→WW2→Modern), and some
+  narrative currently sitting in `american`'s `historicalText` (Commonwealth, 1935) arguably
+  belongs on the era 4/5 boundary rather than fully inside era 4. Re-splitting that text
+  accurately needs the source BOW PDFs (Appendix D), not a code change — guessing at it would
+  risk shipping incorrect Philippine history in a thesis product. Left as-is; flagged here
+  rather than silently "fixed."
+- **`CurriculumTag.weeks` is left empty for every level.** Grade and term come straight from
+  Section 1's own table, but the specific BOW week numbers per competency group aren't in
+  `GAMEPLAY-V2.md` itself — only in the DepEd PDFs it cites. A fabricated week number would be
+  worse than an honestly-missing one, since CHRONO-DASHBOARD would report it to teachers as fact.
+- **Era 3 (`nationalism`) reuses Spanish's enemy set, wall art, ground colour, and boss
+  (Governor)** — exactly what GAMEPLAY-V2.md Section 1 itself prescribes ("Era 3 reuses
+  spanish_wall.png, which is period-correct"; "reuse the Governor if time runs out"). Its
+  `historicalText`, subtitle, and guide (Marcelo H. del Pilar) are new, written from general
+  knowledge of the Propaganda Movement / GOMBURZA / La Liga Filipina — solid, uncontroversial
+  history, distinct from the exact-week curriculum mapping above that genuinely needs a source
+  document. No `questions_nationalism.json` was written (that's content authoring, out of
+  scope); `QuestionBank`'s existing missing-file fallback already covers it with generated
+  placeholders, same as any level whose real pool runs short.
+- **`ChronoGame.isBossLevel`** (`currentLevel == getEraById(currentEra).levels.length`) replaces
+  three separate `currentLevel == 10` sites in one place, rather than inlining the registry
+  lookup at each. `EraProgress.isLevelUnlocked`/`averageLevelScore` do the equivalent lookup
+  directly since they only have an `eraId` field, not a live game reference.
+- **Deleted `boss_component.dart`'s private `_getBossNameForEra` map** rather than adding a
+  `'nationalism'` entry to it — it was a verbatim duplicate of `EraData.bossName` for every
+  existing era, a second source of truth that could silently drift. Reads the registry directly
+  now.
+- **Two extra hardcoded sites fixed along the way, not in Phase 0.5's own file list:**
+  `level_node.dart` printed a hardcoded `'Level 10'` label on every boss node regardless of the
+  real level number (harmless while every era had 10 levels; wrong the moment one doesn't), and
+  `era_complete_screen.dart` had a static "Average sa mga Level (1–9)" string. Both are now
+  level-count-driven. The doc says its file list "is the starting point, but grep for others."
+
+## 4. Things we tried that did NOT work
+- (None new this session — see the entry below for the cache/auto-reload pitfalls found while
+  verifying Phase 0, both now fixed permanently in `tool/cdp_shot.js`.)
+
+## 5. Next steps (in order)
+1. Commit this phase to `v2-phase-0` (or a new `v2-phase-0.5` branch, per the doc's "branch per
+   phase" rule — see Constraints).
+2. Phase 1 — player control: refactor `chrono_game.dart` into input/camera/spawning/collision
+   files, add `JoystickComponent` + jump/attack `HudButtonComponent`s, unlock the player's X.
+   Do not change gravity (900), jump force (-480), or platform heights (60-105).
+3. Content debt, whenever there's time for it (not blocking, not this project's engineering):
+   write `assets/data/questions_nationalism.json`, and get the BOW PDFs to re-split the
+   era 4/5 historicalText boundary and fill in real `CurriculumTag.weeks` values.
+
+## 6. Constraints & conventions
+- **Era ids are now load-bearing identifiers, not display strings — never rename one without a
+  migration plan.** They key Hive storage and backend documents for every player's recorded
+  progress. Adding a new era (as this phase did for `'nationalism'`) is safe; renaming an
+  existing one orphans that era's history.
+- `flutter test` must still be scoped to `test/data test/game test/models`; `test/screens/`
+  still hangs (see the 2026-09-22 Tier 1 entry, folded below).
+- Do not rename `HeartsState`, the provider fields, or the Hive keys (Phase 0 rule, still applies).
+
+---
+
 **Date:** 2026-09-25 (GAMEPLAY-V2 Phase 0 — free wins)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -282,49 +396,14 @@ See `NEXT_STEPS_CHECKLIST.md` at the repo root — start at Tier 1, top to botto
 
 ---
 
-**Date:** 2026-09-22 (bigger player sprite + parallax light-layer fix)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Implement the adviser's "bigger sprite" item, now unblocked by the fixed-resolution viewport (see the folded entries below for why it had to wait).
-
-## 2. Current state
-
-**Committed in CHRONO-GAMEAPP** (`9692c48`, `35b022b`) **and pushed** (`45241ad` at root, this doc + submodule bump):
-- `lib/game/components/player_component.dart` — player `size` changed from `Vector2(64, 80)` to `Vector2(96, 120)` (1.5x). Nothing else in this file changed: `position = Vector2(0, game.groundY - size.y)`, ground/platform landing checks, and `respawn()` are all already expressed relative to `size.y`, and `RectangleHitbox()` (added with no explicit size) auto-fits whatever `size` is at add-time — so all of it picked up the new size with no further edits.
-- `test/game/fixed_resolution_test.dart` — updated the illustrative `playerHeight` constant used by "a sprite covers the same fraction of the screen on every device" from `80.0` to `120.0`, so the test still describes a real current number instead of a stale one; the test's logic (proportional scaling holds across devices) didn't depend on the specific value either way.
-- `lib/game/components/parallax_background.dart` — **separate fix, same session:** the user spotted (from a screenshot taken for the bigger-sprite check above) that the translucent light-rays layer was drawing in front of the mid-trees layer instead of behind it. Reordered the `loadParallax` list from `[back-trees, middle-trees, lights, front-trees]` to `[back-trees, lights, middle-trees, front-trees]`. This wasn't just a draw-order tweak: Flame's `ParallaxComponent` ties scroll speed to array position too (each layer scrolls faster than the one before it via `velocityMultiplierDelta`), so the old order also had the lights layer scrolling *faster* than the mid-trees — wrong for what's meant to be an ambient, distant effect. The reorder fixes both at once.
-
-**Why 96x120, not just "somewhat bigger":** checked native asset pixel sizes across the cast — player art is 52x68, enemies 52x64 (rendered at 60x72), and the boss is 80x90 (rendered at 120x140). That meant the boss was already upscaled ~1.5x from its native art, while the player was only upscaled ~1.2x — barely more than enemies get, which is very likely *why* the adviser flagged the hero as not reading as the hero. 96x120 is exactly 1.5x the player's native 52x68 (same width:height ratio as the old 64x80, just scaled up), matching the treatment the boss already gets instead of inventing a new ratio.
-
-**Verified:** `flutter analyze` clean at the same 5 known info lints. `flutter test test/data test/game test/models`: 92/92 pass, unchanged by either edit (no test asserts the production `onLoad()` size directly, and `parallax_background_test.dart`'s 2 tests inject an empty-layer `Parallax` to isolate the velocity math from real asset order, so the reorder didn't touch them). Confirmed both in real runs over CDP (`/game/spanish/1`, 1280×800): Rizal renders clearly larger than the approaching Spanish-soldier enemy, standing correctly on the ground with no clipping; separately, a before/after pair of screenshots confirmed the light rays now sit behind the tree trunks instead of overlapping in front of them. Also caught a jump next to a spawned platform in the same session (user asked to see one) — no clipping or landing issues from the bigger sprite there either.
-
-**What's unfinished:**
-- Did not re-verify very wide/narrow pillarboxed windows specifically for the sprite-size change — the fixed-resolution viewport should make that a non-issue (world units are device-independent), but wasn't explicitly reshot at another aspect ratio. Tracked in `NEXT_STEPS_CHECKLIST.md` (Tier 4).
-
-## 3. Decisions made (and why)
-- **1.5x scale, derived from the boss's existing native-to-rendered ratio, not a round guess** — see "Why 96x120" above. Keeps the new size defensible against "why that number" rather than picking an arbitrary bump.
-- **Left `test/game/fixed_resolution_test.dart`'s constant in sync but changed nothing else test-side** — every other test that hardcodes a player size is a bare stand-in object for testing unrelated behavior (enemy despawn, camera tracking, parallax speed), not an assertion about the real player's dimensions, so leaving those at `64x80` doesn't make them wrong or stale.
-- **Light rays moved to right after the back-trees layer, not just swapped with front-trees** — the user's own framing ("should be second") plus the compositional logic (an ambient layer should be near-static, closest in speed to the furthest-back layer) both pointed at position 2 of 4, not position 4.
-
-## 4. Things we tried that did NOT work
-- (None — this one was a single clean value change with no surprises.)
-
-## 5. Next steps (in order)
-See `NEXT_STEPS_CHECKLIST.md` at the repo root (written in the entry above this one) — it supersedes the numbered lists in this and every older entry below.
-
-## 6. Constraints & conventions
-- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
-- Same playtest recipe as the entries below: PowerShell dev server on port 8123, `tool/cdp_shot.js` against CDP debug port 9222.
-- `flutter test` gotcha from the entry below still applies: scope it to `test/data test/game test/models`, don't run it bare — `test/screens/tutorial_screen_test.dart` hard-hangs for up to 20 minutes in this sandbox.
-
----
-
 ## Older entries (folded)
+- 2026-09-22 (bigger player sprite + parallax light-layer fix) — Player `size` 64x80→96x120
+  (1.5x, matching the boss's own native-to-rendered upscale ratio) so the hero reads as bigger
+  than regular enemies. Same session, reordered the parallax layers
+  (`[back-trees, lights, middle-trees, front-trees]`) to fix light rays drawing in front of the
+  mid-trees instead of behind them — also fixed their scroll speed, since Flame ties
+  `velocityMultiplierDelta` to array position. Committed `9692c48`/`35b022b`, root `45241ad`.
+  92/92 tests, confirmed via real CDP screenshots. Never re-verified at other aspect ratios.
 - 2026-09-22 (persistent hearts regen) — Added the persistent pool that gates *starting or retrying* a level (max 5, +1 per 10 real-world minutes, accrues while the app is closed): new pure `lib/models/hearts_state.dart` (`regenerated`/`consumed`/`afterLevelFailed`/`timeUntilNext`, computed lazily from a stored epoch-ms anchor rather than a running `Timer`), two flat Hive keys (`hearts_count`, `hearts_regen_start_ms`), `GameState.hearts` on `GameNotifier`, and the level-select countdown + 0-hearts dialog. Committed `9dee494`, root `fb19d80`. 92/92 tests. Decided explicitly (with the user) that it gates attempts only and leaves in-level HP alone — that was still 10 at the time; GAMEPLAY-V2 Phase 0 later dropped it to 5 and renamed this pool to **Energy** in the UI. Also fixed `level_failed_screen.dart`'s long-standing hardcoded 3-empty-hearts bug and extracted `level_node.dart` to stay under the line budget. Its big find — `test/screens/tutorial_screen_test.dart` doesn't flake but *hard-hangs* 10 minutes at a time, so never run a bare `flutter test` — is root-caused in full in the Tier 1 entry above. Never verified: the 0-hearts branch in a real run (only its unit-tested math).
 - 2026-09-22 (shared 4-layer parallax background) — Replaced 5 per-era parallax background sets with one shared 4-layer forest set (`742f028`: back-trees/lights/middle-trees/front-trees, `velocityMultiplierDelta` (1.4, 1.0)), satisfying the adviser's background-depth-layer item; deleted the 10 now-unused per-era PNGs. Confirmed via a real CDP screenshot at 1280×720. Surfaced the Git-Bash-`$(pwd)`-path-mangling and blanket-`taskkill`-kills-all-Chrome gotchas later folded into this file's general playtest notes.
 - 2026-09-22 (how-to-play tutorial) — Added a 6-step `PageView` tutorial (`69605d3`, character/obstacles/coins/quiz-check/hearts/power-ups), shown once on first play and replayable via a book-icon button on character selection; built entirely from existing sprites/icons, no new art. 83/83 tests. First surfaced that `tutorial_screen_test.dart`'s Skip/Done widget tests trip a `google_fonts` background font-fetch rejection under `runAsync` — later found (persistent-hearts entry) to be a full 10-minute hard-hang in this sandbox, not just an intermittent flake.
