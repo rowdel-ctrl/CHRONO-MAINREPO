@@ -17,6 +17,10 @@ and the level-complete screen's fabricated results.
 
 ## 2. Current state
 
+Correctly on `v2-phase-0` as of this entry (Phase 0 is commit `bb006ef` in CHRONO-GAMEAPP; this
+doc + `GAMEPLAY.md`/`GAMEPLAY-V2.md` are `3568db6` at root) — an earlier draft of this entry's
+Next Steps had this backwards, claiming it landed on `main`.
+
 **Not yet committed, all in CHRONO-GAMEAPP unless noted:**
 - `pubspec.yaml` / `pubspec.lock` — added `flame_audio: ^2.12.2` (pulls `audioplayers`).
 - `lib/services/audio_service.dart` — stub replaced with a real `flame_audio` implementation.
@@ -56,10 +60,50 @@ established baseline. `flutter build web --debug` and `flutter build apk --debug
 succeed — the APK first from a cleared module cache with no CLI flags, and again after the
 real audio landed. All 18 MP3s confirmed shipping at full size in the web bundle.
 
-**NOT verified — needs a human:** nobody has heard the audio or seen the tints; neither is
-checkable headlessly. Play one level per era. Every sound should now work, so listen for all
-of jump / coin / correct / wrong / hurt plus the era BGM starting on entry and stopping on
-exit — and check the five BGM loops actually sound different from each other.
+**Verified visually, over CDP** (`tool/cdp_shot.js`, web build at 1280x720):
+- **All five reachable era tints render and are clearly distinct** — era 1 warm green, era 2
+  sepia/amber, era 4 dusty gold, era 5 desaturated blue-grey, era 6 hazy cyan. Eras 2 and 4
+  are the closest pair (both warm/gold); still distinguishable, but they are the ones to
+  re-check on a phone screen.
+- **In-level HP is 5**, shown as five hearts in the HUD at level start.
+- **Energy reads as its own system** on both level-select and level-failed: "ENERHIYA" label,
+  gold bolts for available and a dim outline bolt for spent, with the regen countdown live.
+  Level-failed's subtitle now says "Naubusan ng buhay" and keeps a heart icon, so the
+  ran-out-of-HP cause and the Energy pool no longer share an icon.
+- **The level-complete screen no longer fabricates results.** Reached without a result payload
+  it shows "0/0 TAMA / +0 PUNTOS"; the old code would have shown "8/10" and "+80" at level 1
+  (`7 + level % 3`), so this is a decisive check that it reads the real value.
+- Incidental: the unattended auto-runner failed a level during a long wait and the Energy pool
+  correctly dropped to 4/5 with a countdown — the consume path works end to end.
+- **Chased down a real-looking bug that turned out not to be one.** An early screenshot showed
+  the level starting at 4/5 in-level HP with the player in its hurt pose, before anything had
+  been touched. Instrumented `loseLife()`/`PlayerComponent.onLoad`/`GroundSection.onLoad` with
+  temporary prints and reproduced it: `loseLife()` fired at `t=0.00s` with `playerY=2894.1` —
+  physically impossible from one frame of gravity (~0.25px), so the player's *starting* position
+  was already wrong, not something that fell. Root cause: **Chrome was serving a stale, cached
+  copy of the compiled `chrono_game.dart` module left over from before a dev-server restart**,
+  mixed with fresh modules for everything else — a Frankenstein bundle where `game.size`/
+  `groundY` no longer matched what the rest of the game expected. Restarting `flutter run`
+  does not change the DDC module URLs, so the browser's normal HTTP cache keeps serving the old
+  bytes indefinitely. Confirmed by disabling the cache (`Network.setCacheDisabled`) and
+  re-running: `game.size=[1280,720]`, `groundY=660`, `position=[0,540]` — all correct — and
+  `loseLife()` never fires on an idle level start. **No code changed as a result; the game was
+  never actually broken.** Fixed for good in the tooling instead: `tool/cdp_shot.js` now always
+  disables the cache before navigating. Debug prints were reverted.
+- **Separate, pre-existing artifact surfaced along the way:** `flutter run -d web-server`
+  without the Dart Debug Chrome extension retries its debug-service handshake forever, and
+  reloads the page on its own roughly every 20-30s while doing so. A `shot` step landing mid-
+  reload comes back black with a bare HUD; a `wait` spanning one looks like the game froze.
+  Neither is a bug in the game. Documented at the top of `tool/cdp_shot.js` so it isn't
+  mistaken for a regression again — retake the screenshot rather than trusting one that looks
+  wrong.
+
+**Still NOT verified — needs a human:** the audio. Nothing here can hear it. Play one level
+per era and listen for jump / coin / correct / wrong / hurt, plus the era BGM starting on
+entry and stopping on exit, and check the five BGM loops sound different from each other.
+The *real-result* path into the level-complete screen also still needs one genuine
+playthrough — only the empty-result fallback was exercised above, since scripting a full
+10-question level is not practical.
 
 ## 3. Decisions made (and why)
 - **The bundled sound files were 4-byte placeholders — now resolved, but worth recording.**
@@ -102,6 +146,17 @@ exit — and check the five BGM loops actually sound different from each other.
   Inventing era 3's content in Phase 0 would be doing Phase 0.5's job.
 - **`_points` now shows the game's real accumulated score**, not the old
   `_correct * 10 + bonus` re-derivation, which silently dropped the speed bonus.
+- **Crates no longer cost HP** (`player_component.dart`, post-Phase-0 tuning at the user's
+  request after playtesting). They still break on contact, so nothing clips through. Reason:
+  the spawner runs *two* parallel crate timers (3-7s and 4-8s, `enemy_spawner.dart:55-69`) —
+  a leftover from when obstacles were a mix of walls and crates, both timers kept "to preserve
+  the combined obstacle cadence" — so a crate lands every ~2.7s. Unavoidable for a one-button
+  auto-runner, and dropping HP to 5 turned that from survivable into a drained bar in under a
+  minute. **This deviates from GAMEPLAY-V2 section 5**, which wants hazards to deal -1 HP with
+  knockback; that design assumes the Phase 1 movement controls, where the player can stop and
+  time a jump. Restore the damage when those land, and place crates deliberately in Phase 4
+  rather than on a timer. Net effect today: the only live damage source in a level is a wrong
+  quiz answer — wall collisions and gap falls are both dead paths, since nothing spawns either.
 
 ## 4. Things we tried that did NOT work
 - **Clearing `build/audioplayers_android` to fix the Kotlin failure.** Reasonable first guess
@@ -111,15 +166,15 @@ exit — and check the five BGM loops actually sound different from each other.
   block anything here — both web and APK builds succeed — so it was left alone.
 
 ## 5. Next steps (in order)
-1. **Play it.** One level per era: all SFX and the era BGM should be audible, and the tints
-   should read as different. This is the whole of what Phase 0 still needs from a human.
-2. This landed on `main`, not the `v2-phase-0` branch `GAMEPLAY-V2.md` ground rule 2 asks
-   for. Worth deciding whether to hold to that convention from Phase 0.5 onward, since the
-   later phases are the ones that can actually break the game mid-flight.
-3. Correct the `decorator` claim in `GAMEPLAY-V2.md` section 10 (see Decisions), and the
+1. **Listen to it.** The visuals are verified (see Current state); the audio is not, and
+   cannot be from here. One level per era, ears on. Also worth one genuine level completion
+   to exercise the real-result path into the level-complete screen.
+2. Correct the `decorator` claim in `GAMEPLAY-V2.md` section 10 (see Decisions), and the
    now-stale "sound files are silent placeholders" text in its section 10 / Phase 0.
-4. Phase 0.5 — the era/level registry. It is the stated prerequisite for all gameplay phases,
+3. Phase 0.5 — the era/level registry. It is the stated prerequisite for all gameplay phases,
    and it is what makes era 3's tint reachable.
+4. Commit the crate-HP fix and the `cdp_shot.js` changes (`player_component.dart`,
+   `tool/cdp_shot.js`) to `v2-phase-0` — verified but not yet committed as of this entry.
 
 ## 6. Constraints & conventions
 - `flutter test` must still be scoped to `test/data test/game test/models`; `test/screens/`
