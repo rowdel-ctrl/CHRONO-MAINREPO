@@ -3,6 +3,129 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-25 (Phase 0/0.5 end-to-end CDP verification, before Phase 1)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Before starting Phase 1, verify Phase 0/0.5 end-to-end with actual measurements instead of
+eyeballed screenshots: pixel-diff the six era tints, confirm level counts and boss positions
+match Section 1 exactly, and confirm the level-complete score matches a real computed result
+rather than just some plausible-looking display text.
+
+## 2. Current state
+
+**New, committed to `tool/`:**
+- `tool/png_util.js` — dependency-free PNG decoder (Node's built-in `zlib` only) with
+  `meanRGB`/`rgbDistance`/`pixelDiff` helpers. Turns a `cdp_shot.js` screenshot into real pixel
+  values instead of something only a human can eyeball.
+- `tool/cdp_shot.js` — gained `--port` (test a plain-static `flutter build web` bundle instead
+  of the dev server), a `console:`/`clearconsole` step (read back `debugPrint` output — how a
+  script can learn a shuffled quiz question's correct-answer letter without knowing it in
+  advance), and now always calls `Page.bringToFront` before running steps.
+
+**Verified, all against a `flutter build web --profile` bundle on a plain static file server
+(no DWDS) — see Decisions for why:**
+- **Tints**: mean background colour sampled from all six eras' actual game canvas (not
+  level-select) plus a same-era reshoot as a noise-floor control. Every cross-era pair differs
+  by 23.5-79.3 in RGB distance; the same-era control (two shots of pre-colonial ~1.5s apart)
+  differs by 0.38 — every era is 60-200x further from every other era than from itself. Full
+  pixel-diff agrees: ~98-99% of sampled pixels differ beyond threshold cross-era vs 14.7% for
+  the control (background dust-particle animation, not colour). Incidental finding: spanish vs
+  nationalism is the closest pair (23.5), not spanish vs american (33.9) as Phase 0's eyeballed
+  note guessed — expected, since nationalism deliberately reuses spanish's palette, but the two
+  eras' own tints (sepia/amber vs warm ochre) still read as distinct on top of it.
+- **Level counts and boss positions**: counted level-select nodes directly from screenshot
+  pixels (classifying each x-position by exact match against the three *opaque* node-fill
+  colours — `AppColors.primary`/`Colors.grey.shade700`/`AppColors.accent` — which render
+  identically regardless of era, unlike the alpha-blended connector and border colours, which
+  blend with each era's own background gradient and so differ per era; matching only the
+  opaque constants is what makes one classifier work across all six colour schemes with no
+  per-era tuning). Counted exactly 10/5/7/8/8/5 = 43 nodes across the six eras, matching
+  Section 1 exactly, and the last node in every era is 54px wide vs 42px for the rest — the
+  boss node, always last, confirming `isBoss` position for every era, not just eyeballed for one.
+- **Level-complete score**: played pre-colonial level 1 to completion for real — all 10
+  questions answered correctly via temporary `debugPrint`s revealing each shuffled question's
+  correct-answer letter (removed after). Recorded each answer's real elapsed time and the
+  final coin count from the trace, then independently reconstructed the expected score from
+  the documented rules alone (10 base × 10 questions, 0 speed bonuses since real answering
+  latency was never under 10s, +50 perfect bonus, +5 × 31 coins collected along the way) =
+  **305**. That number matches both the engine's own internal `score` at `levelComplete()` and
+  the level-complete screen's displayed "+305 PUNTOS" exactly — three independent sources
+  (manual reconstruction, internal state, UI) agreeing, not just "a number is shown."
+
+**Not re-verified this round:** audio (still needs a human, per the Phase 0 entry) and the
+other five eras' full level-complete flow (only pre-colonial was played to completion; the
+other five share the same code path, so this wasn't repeated five more times).
+
+## 3. Decisions made (and why)
+- **Tested against a static `flutter build web --profile` bundle, not `flutter run
+  -d web-server`.** The dev server's periodic self-reload (documented in `cdp_shot.js`,
+  ~20-30s) would have wiped a 10-question, multi-minute playthrough partway through with no
+  warning. A static build has no DWDS, no reload, and (once the one-time Flutter/CanvasKit
+  bootstrap finishes) loads in ~1-2s instead of the dev server's 45-55s per full reload — worth
+  doing for any verification longer than a couple of screenshots. Built via PowerShell, not Git
+  Bash, to avoid the documented `--dart-define=DEV_START_ROUTE=...` path-mangling gotcha.
+- **A second, worse freeze cause found and fixed in the tooling: OS-level window focus, not
+  just the CDP tab.** `Page.bringToFront` selects the right *tab* but does nothing if the
+  Chrome *window* itself isn't the foreground OS window — this session's Chrome was launched
+  detached and had no window focus at all, so the game sat completely frozen (`elapsedSeconds`
+  climbing, `dt` not) through several minutes of waits until the actual window was raised via
+  PowerShell's `SetForegroundWindow`. `cdp_shot.js`'s existing rAF-throttling note only covered
+  the tab-level case; now documents both.
+- **The question overlay's timer keeps running in real wall-clock time while the Flame engine
+  is paused.** `QuestionOverlayWidget`'s `Timer.periodic` is a plain Flutter timer, independent
+  of `pauseEngine()` — so `elapsedSeconds` (and therefore the speed bonus) reflects genuine
+  real-world seconds since the question appeared, including any gap between separate script
+  invocations while a human or agent is reading a screenshot. This is *why* every one of the 10
+  answers in the score verification missed the <10s speed bonus (real per-question turnaround
+  was 18-59s) — correctly reflected in the final score, not a bug in the timer or the test.
+- **Coin income was not scripted or predicted in advance, only measured after the fact.** Coins
+  auto-collect on contact with no player action, so their count over a run is a function of
+  spawn-timer luck, not something to forecast. Reading the final `playerCoins` from the same
+  debug trace that reported the answers is enough to reconstruct the exact expected score
+  without needing to control or predict coin timing.
+- **`png_util.js`'s node classifier matches exact opaque RGB constants, not a background-
+  relative brightness threshold.** The first version classified by absolute brightness/hue and
+  worked for the spanish/pre-colonial screenshots (dark brown gradient) but collapsed american
+  and modern (blue/indigo gradients) into "1 giant node," because the connector and border
+  colours are `.withValues(alpha:...)` and blend with whatever gradient is behind them — a
+  different RGB per era. The three fill colours are plain opaque `color:` values with no alpha,
+  so they're the one thing genuinely constant across all six screenshots.
+
+## 4. Things we tried that did NOT work
+- **Classifying level-select nodes by absolute background brightness + one hardcoded connector
+  RGB.** Correct for the two eras it was tuned against, silently wrong (a single merged "node")
+  for the other four with different background gradients — see Decisions.
+- **Trying to answer questions quickly enough for the speed bonus, across separate script
+  invocations.** Real wall-clock time passes between "read the screenshot" and "send the next
+  click" regardless of how fast that happens in agent-time; every answer landed past 10s. Not a
+  failure of the verification — the expected-score formula was built to use whatever elapsed
+  time actually happened, not to assume a bonus that testing conditions couldn't reliably hit.
+
+## 5. Next steps (in order)
+1. Phase 1 — player control (see the Phase 0.5 entry below for detail). This entry's
+   verification is the explicit prerequisite check the user asked for before starting it.
+2. Content debt carried over from Phase 0.5 (unchanged): `questions_nationalism.json`, the
+   real BOW-PDF-sourced era 4/5 historicalText split.
+3. Audio still needs a human (Phase 0 entry, unchanged).
+
+## 6. Constraints & conventions
+- For any CDP-scripted verification longer than a couple of screenshots, prefer a static
+  `flutter build web --profile` bundle on a plain static server (`tool/cdp_shot.js --port`)
+  over the dev server — see Decisions.
+- Before a scripted run with waits longer than a few seconds, confirm the Chrome *window* has
+  real OS focus (not just the CDP tab) — see Decisions. `cdp_shot.js` handles the tab; the
+  window is on you.
+- `flutter test` must still be scoped to `test/data test/game test/models`; `test/screens/`
+  still hangs (see the 2026-09-22 Tier 1 entry, folded below).
+- Do not rename `HeartsState`, the provider fields, or the Hive keys (Phase 0 rule, still applies).
+
+---
+
 **Date:** 2026-09-25 (Era 3 level-count correction + real BOW weeks)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -363,104 +486,28 @@ playthrough — only the empty-result fallback was exercised above, since script
 
 ---
 
-**Date:** 2026-09-22 (Tier 1: hit/idle animation, housekeeping; test hang root-caused but NOT fixed)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Implement Tier 1 of `NEXT_STEPS_CHECKLIST.md`: the `flutter test` hang, hit animation on correct answer, idle animation, and the 3-file housekeeping decision.
-
-## 2. Current state
-
-**Not yet committed in CHRONO-GAMEAPP:**
-- `lib/game/components/player_component.dart` — added `triggerCheer()`, mirroring `triggerHurt()`'s exact structure (own delayed revert, not the update()-loop transition reset).
-- `lib/game/quiz_handler.dart` — calls `player.triggerCheer()` on a correct answer, right after `overlays.remove('QuestionOverlay')`.
-- `lib/screens/home/character_selection_screen.dart` — `_IdleAvatar` now cycles the 4 walk frames on a `Timer.periodic` (450ms/frame), on top of its existing bob `AnimationController`.
-- `test/game/player_reactions_test.dart` (new, 4 tests) — asserts the animation the player is actually switched to on each quiz outcome. See Decisions for why this replaced a screenshot.
-- `tool/` — staged to commit as a permanent dev tool (was untracked since it was introduced). Gained a `scroll:<x>,<y>,<dy>` step this session, which does **not** work on Flutter web (see "did NOT work").
-- `CHRONO-GAMEAPP/quiz_card_phone_preview.png` — deleted (confirmed zero references anywhere via grep).
-
-**Root repo:**
-- `HANDOFF(template).md` — staged to commit (a genuine reusable blank template, not scratch).
-- `NEXT_STEPS_CHECKLIST.md` — Tier 1 outcomes recorded, plus three newly-surfaced items.
-
-**The `flutter test` hang was NOT fixed — the attempted fix was written, tested, and reverted.** It is now thoroughly root-caused instead; see Decisions. `test/flutter_test_config.dart` and the `pubspec.yaml`/`pubspec.lock` dev-dependency additions that supported it were all reverted, so the tree is back to the established baseline on that front.
-
-**Verified:** `flutter analyze` clean at the same 5 known info lints. `flutter test test/data test/game test/models`: **96/96 pass in 23 seconds** (the 92 baseline plus the 4 new `player_reactions_test.dart` cases). The idle-avatar change was confirmed in a real CDP run at 1280×800: two screenshots ~500ms apart on character selection show Lapu-Lapu's stance genuinely change (wide stride with sword extended vs. a narrower, lower stance) — a real sprite-frame change, not just the pre-existing vertical bob.
-
-**What's unfinished:**
-- The test hang itself. `test/screens/tutorial_screen_test.dart` still hangs exactly as it did before this session. What's gained is knowing precisely why, and that the obvious fixes are dead ends — see Decisions.
-- No live playtest of `triggerCheer()` — deliberately replaced with tests (see Decisions), not skipped for time.
-
-## 3. Decisions made (and why)
-- **The hang is fully root-caused, in three parts.** (1) The "TimeoutException after 0:10:00" everyone assumed was a per-test timeout is actually **`pumpAndSettle()`'s own default** (`flutter_test/lib/src/widget_tester.dart:692-695`: `Duration timeout = const Duration(minutes: 10)`) — so the symptom is "frames never stop being scheduled," not "a test is slow." (2) The thing that never completes is **`path_provider`**: before google_fonts checks `allowRuntimeFetching`, it looks for a cached font on disk via `getApplicationSupportDirectory()`, a platform-channel call with no native handler in a plain widget test, which hangs rather than throwing. Faking it (exactly as google_fonts' own suite does in `test/load_font_if_necessary_test.dart`) really does make the tutorial file fail in ~5s instead of hanging. (3) **But that fix can't land, because the 92/92 green depends on the hang.** With `path_provider` faked, font loading gets far enough to actually throw "Poppins not found and fetching disabled", and `test/data test/game test/models` drops to **64/92** — `question_card_test.dart` and `answer_feedback_test.dart` render Poppins text and had been passing only because that load hung forever in the background as a harmless dangling Future.
-- **Reverted rather than shipped.** A change that trades "one file hangs" for "28 tests fail" is a regression, however well-understood. The tree is back to baseline and the finding is written down instead.
-- **The real fix is to bundle Poppins `.ttf` files** under `assets/fonts/` and declare them in `pubspec.yaml`, so the font resolves locally with no network and no platform channel — which would also remove a runtime font fetch from the shipped app. Blocked here: no network, and no Poppins `.ttf` exists anywhere on this machine (checked `C:\Windows\Fonts`, the pub cache, the Flutter SDK, and the repo).
-- **`triggerCheer()` verified by test, not screenshot.** It reuses the jump pose (no character has cheer art — `assets/characters/` has only `_walk_1-4`, `_jump`, `_hurt`), so a cheering player and a jumping player render an identical frame and a screenshot would prove nothing. `test/game/player_reactions_test.dart` asserts the actual animation object instead: correct → `jumpAnim` not `walkAnimation`, wrong → `hurtAnim` not `jumpAnim`, score still awarded, and cheering bails out mid-hurt. Stronger evidence than a photo, and permanent.
-- **Idle animation scoped to `_IdleAvatar` only** — `tutorial_screen.dart` and `background_history_screen.dart` also show a static `_walk_1` frame, but they're smaller, secondary displays sitting behind a generic multi-asset illustration widget and a `CircleAvatar.backgroundImage` respectively; changing either cost more scope/risk than a "quick, independent" Tier 1 item should.
-- **`quiz_card_phone_preview.png` deleted; `tool/` and `HANDOFF(template).md` kept and staged to commit** — the screenshot had zero references anywhere (checked via grep). The other two are genuinely useful and intentional.
-
-## 4. Things we tried that did NOT work
-- **`GoogleFonts.config.allowRuntimeFetching = false` in a `flutter_test_config.dart`.** Redundant (the affected test file already sets it itself) *and* actively harmful globally — it forces the throw path for every test that renders Poppins.
-- **Suppressing the resulting exception via `reportTestException`.** Strictly worse: the exception is what *aborts* the test, so swallowing it let the test run on and `pumpAndSettle` spin its full 10 minutes. Turned a 4-second honest failure into a 10-minute hang.
-- **Leaving fetching enabled so the failed fetch returns null instead of throwing.** Also fails — 5/27 on `question_card_test.dart`.
-- **Diagnosing a hang by piping through `| tail -N`.** `tail` without `-f` can't know the last N lines until EOF, so it buffers everything and prints nothing until the process exits — a slow-but-working run and a truly hung one look identical. This cost real time treating "no output yet" as proof of a hang. Use no pipe, `head`, or `--reporter expanded`.
-- **`Input.dispatchMouseEvent` with `type: 'mouseWheel'` to scroll Flutter web** (added as a `scroll` step to `tool/cdp_shot.js`). Flutter's web engine ignores it; the page doesn't move. `Input.synthesizeScrollGesture` is the likely fix. This blocks scripted playtests of anything gated behind a scroll, e.g. reaching level select past `background_history_screen.dart`'s "scroll down to continue".
-- **Booting straight into `/game/:era/:level` via `DEV_START_ROUTE` with a fresh browser profile.** Renders blank — that route needs a character already selected in Hive, which a fresh profile doesn't have.
-- **`TaskStop` alone to stop a `flutter test` run.** On Windows it stops the tracked wrapper but leaves the `dart` → `dartvm`/`dartaotruntime` → `flutter_tester` tree running orphaned; four abandoned runs accumulated before this was noticed. Kill the specific PIDs with PowerShell `Stop-Process -Id`, then confirm with `Get-Process`.
-
-## 5. Next steps (in order)
-1. Commit and push — nothing from this session is committed yet, pending user confirmation.
-2. Bundle Poppins `.ttf` files (needs network) — the one fix that actually resolves the test hang, and it removes a runtime font fetch from the shipped app as a bonus.
-3. Triage the three items newly surfaced in `NEXT_STEPS_CHECKLIST.md`: the crashing blank-animation fallback at `player_component.dart:70`, the non-working CDP scroll step, and the blank `/game/...` direct route.
-4. Tier 2 of `NEXT_STEPS_CHECKLIST.md`: the gap system, obstacle variety.
-
-## 6. Constraints & conventions
-- Consult `CHRONO-GAMEAPP/.claude/skills/flutter-flame-gamedev` before writing any Flame code.
-- `flutter test` still must be scoped to `test/data test/game test/models`. `test/screens/` still hangs — unchanged by this session.
-- When diagnosing a possibly-hanging command, never pipe it through `| tail`. Use no pipe, `head`, or `--reporter expanded`.
-- After stopping a background `flutter test`, verify no orphaned `dart`/`flutter_tester` processes are left behind.
-
----
-
-**Date:** 2026-09-22 (outstanding-work checklist)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-User asked for a full checklist of everything left to do on the project, ordered so the fastest/easiest items come first.
-
-## 2. Current state
-Wrote `NEXT_STEPS_CHECKLIST.md` at the repo root instead of folding the full list into this file — HANDOFF.md is a session log, not an ongoing tracker, and the project already has precedent for a separate standalone checklist (`CAMERA_REBUILD_CHECKLIST.md`). Before writing it, verified every item against real git/code state rather than trusting older HANDOFF prose:
-- Confirmed via `git log`/`git status` in the CHRONO-GAMEAPP submodule that hearts regen (`9dee494`), the bigger sprite (`9692c48`), and the parallax light-layer fix (`35b022b`) are genuinely committed — 5 of the adviser's original 8 feedback items are done (also fixed the entry below, which still said "not yet committed" even though it already was — see its updated "Current state").
-- Confirmed by reading the actual code that 3 adviser items are genuinely still open: no player-side reaction to a correct answer (`lib/game/quiz_handler.dart:39`, the `if (isCorrect)` branch only awards score and defeats the enemy/boss), no player idle animation (only `BossComponent` has a real `idleSprite`; the character-select preview at `lib/screens/home/character_selection_screen.dart:508` is a single static `_walk_1.png` frame, not a loop), and obstacle variety is thin — enemies already have 2 types per era chosen at random (`enemy_component.dart:73-81`), but every obstacle is the same `WallComponent` behavior (one reskinned PNG per era) plus one shared `crate.png`, both dealing identical damage (`player_component.dart:186-199`).
-- Found the gap system is still dead code, confirmed directly (not just carried over from an old note): `GroundSpawner.update()` in `lib/game/components/gap_component.dart:176` is an empty no-op, and `spawnInitialGround()` lays down one 1,000,000-wide `GroundSection` covering the whole level — a gap is never actually left unfilled, so falling-in-a-gap is unreachable content, not just untested.
-- Confirmed 3 untracked files still need a keep-or-drop decision: `tool/` (the CDP playtest script) and `quiz_card_phone_preview.png` in the CHRONO-GAMEAPP submodule, `HANDOFF(template).md` at the repo root.
-
-No code changed this session.
-
-## 3. Decisions made (and why)
-- **A separate `NEXT_STEPS_CHECKLIST.md` file, not a section in this file** — matches the `CAMERA_REBUILD_CHECKLIST.md` precedent and keeps this file's per-session entries short, per its own stated convention.
-- **Grouped into 4 tiers by independence/effort, not the adviser's original list order** — Tier 1 (hit/idle animation, the test-hang fix, the 3-file housekeeping decision) needs no new decisions from the user; Tier 2 (gap system, obstacle variety) needs one small decision first; Tier 3 (Level 10 boss playtest, quiz question content) isn't really a coding task; Tier 4 (aspect-ratio/0-hearts polish) is optional and already low-risk.
-
-## 4. Things we tried that did NOT work
-- (None — this was a read/verify/write-checklist session, no code attempted.)
-
-## 5. Next steps (in order)
-See `NEXT_STEPS_CHECKLIST.md` at the repo root — start at Tier 1, top to bottom.
-
-## 6. Constraints & conventions
-- `flutter test` gotcha still applies until Tier 1's fix lands: scope to `test/data test/game test/models`, don't run it bare.
-
----
-
 ## Older entries (folded)
+- 2026-09-22 (Tier 1: hit/idle animation, housekeeping; test hang root-caused but NOT fixed) —
+  Added `PlayerComponent.triggerCheer()` on a correct answer (verified by asserting the real
+  animation object in `player_reactions_test.dart`, not a screenshot — cheer reuses the jump
+  pose, so a photo can't tell them apart) and an idle-avatar cycle on character selection.
+  Committed `tool/` as a permanent dev tool for the first time. **Fully root-caused the
+  `flutter test` hang** (`test/screens/tutorial_screen_test.dart`, still unfixed): the
+  "10-minute timeout" is `pumpAndSettle()`'s own default, not a per-test limit; the thing that
+  never completes is `path_provider`'s `getApplicationSupportDirectory()` platform-channel call
+  inside google_fonts' font lookup, which hangs instead of throwing with no native handler
+  present; faking it makes the file fail fast (~5s) but drops `test/data test/game test/models`
+  from 92/92 to 64/92, because `question_card_test.dart`/`answer_feedback_test.dart` were only
+  ever passing because that same hang ran harmlessly in the background. Reverted rather than
+  traded one failure for 28. **Real fix**: bundle Poppins `.ttf` under `assets/fonts/` so the
+  font resolves locally with no platform channel at all — blocked on no network access to fetch
+  the font file. 96/96 tests (baseline 92 + 4 new).
+- 2026-09-22 (outstanding-work checklist) — Wrote `NEXT_STEPS_CHECKLIST.md` at the repo root
+  (a session log isn't an ongoing tracker) after verifying every item against real git/code
+  state: hearts regen, the bigger sprite, and the parallax light-layer fix were genuinely
+  committed; player idle/hit-reaction animation and obstacle variety were genuinely still open;
+  the gap system was confirmed dead code by reading it directly, not just carried over from an
+  old note. Grouped into 4 effort/independence tiers. No code changed.
 - 2026-09-22 (bigger player sprite + parallax light-layer fix) — Player `size` 64x80→96x120
   (1.5x, matching the boss's own native-to-rendered upscale ratio) so the hero reads as bigger
   than regular enemies. Same session, reordered the parallax layers
