@@ -1,6 +1,9 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **design proposal**, not yet implemented. Revision 5 — Era 3 level count corrected (6→7, total 43) and BOW week numbers added, on top of the revision 4 codebase corrections. Six-era curriculum structure
+Status: **design proposal**, not yet implemented. Revision 7 — crates cut entirely (broken,
+redundant with era walls); ground fill/tile render order flagged as a bug. On top of
+revision 6's hearts reversal, revision 5's Era 3 correction, and the revision 4 codebase
+corrections. Six-era curriculum structure
 from the DepEd three-term Budget of Work, built around off-the-shelf components, corrected
 against a full read of the codebase (Task M, 2026-09-24).
 Companion to `GAMEPLAY.md`, which documents the game as it exists today.
@@ -271,8 +274,24 @@ Walkers with a floating Y offset.
 `ColorEffect` (white tint) → `ScaleEffect` (slight grow) → `OpacityEffect` (fade) over ~0.3s,
 then drop 2-3 coins. No custom animation code.
 
-**Hazards** stay as they are conceptually (crates, era walls as scenery obstacles, gaps) but
-now do `-1 HP` with knockback instead of the old life loss.
+**Crates are cut.** They were the original game's only non-era-themed hazard — a single generic
+box (`crate.png`) with no thematic identity, unlike the era walls, which are about to become
+Section 6's knowledge-gates. Keeping both meant two flavors of "static thing you jump or take
+a hit from," one of them meaningless. Removing crates also shrinks the object vocabulary for
+the 43 hand-authored Phase 4 levels — one fewer thing to consider placing per level, forty-some
+times over.
+
+> **Correction, 2026-09-26:** cut after a real-device playtest surfaced a broken collision on
+> them; on inspection they added no thematic value era walls didn't already cover. `crate.png`
+> is no longer used by this design. If Phase 1 already shipped crate-collision code, remove it
+> rather than fix it.
+
+**Hazards**, going forward, are era walls (→ gates, Section 6) and gaps. **Gaps stay deferred to
+Phase 4** for the same reason the object-despawn fix does (Section 14): the current procedural
+spawner is dead weight Tiled replaces entirely, so patching real gaps into it now is work
+that gets thrown away in a few weeks. Until Phase 4, levels simply have no ground-fall hazard
+— acceptable mid-development. Contact damage in general (enemies, walls) is `-1 HP` with
+knockback, per Section 4.
 
 **Falling in a gap:** -1 HP and respawn at the last ground segment you were standing on. The
 existing `playerFellInGap` logic covers most of this; it needs a respawn anchor instead of a
@@ -377,26 +396,36 @@ Era 3 has no boss sprite yet; see Section 1.
 
 ---
 
-## 8. Lives, HP, and Energy — untangling the two systems
+## 8. Lives — one heart pool, everywhere
 
-Right now two unrelated systems share the same heart icon, which is confusing for everyone
-including the developers.
+> **Correction, 2026-09-26:** this section originally proposed splitting the game's one heart
+> system into two — in-level HP (resets every attempt) and a renamed "Energy" gate (persistent,
+> menu-only) — reasoning that two unrelated systems sharing one icon was confusing. That
+> reasoning was mine, not the user's, and after playing the Phase 1 build the actual answer
+> came back the opposite way: **one shared heart pool, one icon, no second name.** This
+> revision replaces the split entirely. If Phase 0's Energy rename already landed, it needs to
+> be reverted along with this.
 
-**In-level HP** — the action-layer resource.
-- Starts at **5**, not 10. Ten hits is so much buffer that nothing feels dangerous.
-- Lost to: enemy contact, crates/walls, falling in a gap.
-- **No longer lost to wrong answers.**
-- Hits 0: level failed.
-- UI: keeps the `heart_full` / `heart_empty` icons, shown in-game only.
+**Five hearts, one pool, shared by everything.**
 
-**Persistent Energy** — the "can I start a level" gate, formerly "persistent hearts".
-- Rename it to **Energy** and give it a **different icon**. A Flutter `Icons.bolt` or a
-  Kenney UI Pack icon does the job — no custom art needed.
-- Everything else stays: max 5, one consumed on a failed level, 10-minute real-time regen,
-  regenerates while the app is closed.
-- UI: shown on menu screens only, never during gameplay.
+- Persistent state: max 5, stored the same way the original game's hearts were.
+- **Every damage event decrements this same pool** — enemy contact, era-wall/hazard hit, falling
+  in a gap. Not a level-local counter that resets on retry; the real, global count.
+- **No longer lost to wrong answers** (this part of the original split is kept — Section 6's
+  "wrong answer costs no HP" still applies).
+- Regen: **1 heart per 1 minute** of real wall-clock time, continuing while the app is closed.
+  (Faster than the original game's 10-minute interval — deliberate, since one shared pool
+  running out is a bigger deal than a level-local one did.)
+- One icon (`heart_full` / `heart_empty`), one label, shown both during gameplay and on menu
+  screens. No "Energy", no bolt icon, no second name anywhere.
 
-Two names, two icons, two places they appear. The confusion disappears.
+**Real consequence, worth stating plainly:** because it's one pool, running out of hearts
+*inside* a level both fails that level **and** locks you out of starting or retrying *any*
+level until at least one heart regenerates — about a minute, at 1/minute. Under the old
+two-system design this couldn't happen (a failed level cost one *persistent* heart, but you
+always had a fresh 5 in-level HP for the next attempt). This is a real difficulty and pacing
+change, not just a rename. If it plays too punishing once combat (Phase 2) adds more ways to
+take damage, the number to revisit is the regen rate, not the pool split.
 
 ---
 
@@ -469,7 +498,7 @@ you most of the way there in an afternoon.
 ## 11. Level authoring — use Tiled, don't build a level format
 
 Right now, level "content" is generated at runtime by a spawner: enemies roughly every 800
-world units, coins and crates on timers. The only authored per-level data is the question
+world units, coins on timers. The only authored per-level data is the question
 set. This is the deepest reason the game doesn't feel designed — because it isn't. Nothing in
 it was ever placed by a person.
 
@@ -492,7 +521,6 @@ properties defines what it becomes:
 | `artifact` | `art` (`artifact_1`…`artifact_5`) | An answer point |
 | `gate` | — | A gate using the era's wall art |
 | `coin` | — | A coin pickup |
-| `crate` | — | A hazard |
 | `spawn` | — | Player start position |
 | `exit` | — | Level end trigger |
 
@@ -544,7 +572,7 @@ them can be walked back to. For levels this short, cull generously or not at all
 | `coin.png` | Currency (now actually spendable) |
 | Bundled sound file names | Unstub the audio service — **files are silent placeholders**, replace with CC0 audio later |
 | Power-up icons ×3 | Time Freeze finally does something |
-| `crate.png`, `ground_tileset.png` | Now driven through Tiled |
+| `ground_tileset.png` | Now driven through Tiled |
 | Parallax forest layers | Reused with a per-era `PaintDecorator.tint()` |
 | `fireworks.json` | Boss defeat / era complete |
 
@@ -553,7 +581,6 @@ them can be walked back to. For levels this short, cull generously or not at all
 | Need | Source |
 |---|---|
 | Joystick, jump/attack buttons | [Kenney Onscreen Controls](https://kenney.nl/assets) |
-| Energy icon, HUD frames | Kenney UI Pack, or a Flutter `Icons.bolt` |
 | Attack slash arc | Kenney particle/effects pack, or OpenGameArt |
 
 ### New art actually needed
@@ -619,12 +646,12 @@ here requires a big-bang rewrite. Estimates assume the off-the-shelf components 
   placeholders**, so drop in one real CC0 effect to prove the plumbing works — otherwise the
   result is indistinguishable from the current no-op.
 - Per-era parallax tint with `PaintDecorator.tint()`.
-- Rename persistent hearts → **Energy**, give it its own icon. **UI surface only** — change
-  the label and icon on the menu screens. Do **not** rename `HeartsState`, the provider fields,
-  or the Hive storage keys: those keys hold users' real regen state and renaming them silently
-  resets it on upgrade. Two names and two icons is a presentation change.
-- Drop in-level HP from 10 to 5 — and update the tutorial copy string that says
-  "May 10 buhay ka bawat antas", which will otherwise contradict the game.
+- **Superseded — see Section 8.** Phase 0 originally split the heart system into in-level HP
+  (10→5) and a renamed, menu-only "Energy" pool. Section 8 now specifies a single shared
+  5-heart pool with 1-minute regen instead; if the Energy rename already shipped, revert it
+  (icon, label, and any UI-only surface changes — `HeartsState`, provider fields and Hive keys
+  were never touched and don't need to change back). Update the tutorial copy string that says
+  "May 10 buhay ka bawat antas" to match the real number regardless of which model lands.
 - **Fix the level-complete screen's fabricated results.** It currently derives the score shown
   to the player from `widget.level % 3` rather than the real result, which the game already
   computes and passes to `onLevelComplete` before discarding it. This is a pre-existing bug,
@@ -798,15 +825,19 @@ Each phase: give it the prompt, let it work, then check the criteria yourself on
 **Phase 0 — Free wins**
 
 > Implement Phase 0 of `GAMEPLAY-V2.md`: audio service, per-era parallax tint (six eras, see
-> Section 1), Energy rename, HP 5. Use `flame_audio`. Note that the bundled sound files are
+> Section 1), and the unified 5-heart pool from Section 8 (revert the Energy rename if it
+> already shipped; one heart icon everywhere, 1-minute regen, one shared pool instead of
+> in-level HP + persistent Energy). Use `flame_audio`. Note that the bundled sound files are
 > currently silent placeholders, so wire the service and verify it against one real test file
 > rather than assuming silence means success. Do not touch gameplay logic, physics values, or
 > the tile constants.
 
 *Done when:* the audio service calls `flame_audio` instead of no-ops, proven by one real test
 file actually playing (the rest stay silent until real files land); all six
-eras look visibly different in colour; the menu Energy meter uses a non-heart icon and the
-in-game HP row still uses hearts; a level starts with 5 HP and the tutorial copy agrees; the
+eras look visibly different in colour; menu screens and in-game HUD show the **same** heart
+icon and the **same** count (no separate Energy meter); losing a heart in a level is reflected
+immediately on the menu screens; a level starts with up to 5 hearts and the tutorial copy
+agrees; the
 level-complete screen shows the score you actually earned; Hive keys are unchanged;
 `flutter analyze` clean.
 
@@ -1052,7 +1083,7 @@ Found while cross-checking this design against the asset list. Worth fixing in t
 
 ---
 
-*Revision 5, 2026-09-25. Written against `GAMEPLAY.md` (current implementation) and the
+*Revision 7, 2026-09-26. Written against `GAMEPLAY.md` (current implementation) and the
 bundled asset list. Revision 1 hand-rolled the controls, level format and effects; this
 revision replaces all three with existing components and adds Sections 1 and 15. Section 1
 supersedes the earlier five-era structure and is derived from the DepEd three-term Budget of
