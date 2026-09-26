@@ -1,11 +1,15 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **design proposal**, not yet implemented. Revision 7 — crates cut entirely (broken,
-redundant with era walls); ground fill/tile render order flagged as a bug. On top of
-revision 6's hearts reversal, revision 5's Era 3 correction, and the revision 4 codebase
-corrections. Six-era curriculum structure
-from the DepEd three-term Budget of Work, built around off-the-shelf components, corrected
-against a full read of the codebase (Task M, 2026-09-24).
+Status: **design proposal**, not yet implemented. Revision 9 — protected platform-height
+range corrected to **90-110** (was 60-105) to match the real fix landed on `v2-phase-1`
+(`16fbc5c`): the old range put platforms at ankle height on the player sprite. On top of
+revision 8's Phase 4 commitment to Claude Code generating a programmatic first-draft `.tmx`
+for all 43 levels (Sections 11, 14, 15), shrinking the authoring job from "build 43 levels"
+to "review 31, hand-build 12"; revision 7's crate removal and render-order fix; revision 6's
+hearts reversal; revision 5's Era 3 correction; and the revision 4 codebase corrections.
+Six-era curriculum structure from the DepEd three-term Budget of Work, built around
+off-the-shelf components, corrected against a full read of the codebase (Task M,
+2026-09-24).
 Companion to `GAMEPLAY.md`, which documents the game as it exists today.
 Target: Flutter/Flame app `CHRONO-GAMEAPP` (`rowdel-ctrl/CHRONOQUEST-GAME`).
 
@@ -219,9 +223,15 @@ project. Don't draw these yourself.
 
 ### Keep the jump physics
 
-Gravity `900`, jump force `-480`, peak ~128 units. Platform spawn heights (60-105) were
-tuned against that number and are verified correct. **Do not disturb either.** If one
-changes, the other must be re-tuned.
+Gravity `900`, jump force `-480`, peak ~128 units.
+
+> **Correction, 2026-09-26 (`v2-phase-1`, `16fbc5c`):** platform spawn heights moved from
+> 60-105 to **90-110** after a real-device screenshot showed 60 putting platforms at ankle
+> height on a 120-tall player. 110 stays under the verified reachability ceiling
+> (`jumpPeak - 15` = 113, exercised by `platform_layering_test.dart` at 60fps, 30fps, and a
+> frame-hitch at jump-off). **90-110 is now the protected range** — gravity and jump force
+> are unchanged and still off-limits. If platforms feel too high, 90 is the number to pull
+> back; 110 is the ceiling the jump arc allows.
 
 Attack: a short forward hitbox in the facing direction, ~0.25s, with a cooldown so it can't
 be spammed. Fails with a small "no charges" shake if Kaalaman is 0.
@@ -541,6 +551,32 @@ object layer, instantiate components. The existing off-screen cleanup must be re
 the camera follows the player now and the player can turn around, so anything culled behind
 them can be walked back to. For levels this short, cull generously or not at all.
 
+### Auto-generating first drafts, not blank levels
+
+Building 43 levels by hand in Tiled is the single largest content cost in this project
+(Section 16). Rather than hand you 43 empty maps, Phase 4 includes a generator script that
+writes a mechanically valid first-draft `.tmx` for every level, once the real loader and
+object-layer schema above exist to generate against:
+
+- Ground with gaps, sized to the level's position in its era's difficulty ramp.
+- Enemies spaced out with `walker`/`heavy` mix shifting later in each era.
+- Artifacts and gates placed at the cadence in Section 6/7 (gates every ~3 answer points).
+- Platforms at valid heights (90-110, Section 2) — never violating the tuned jump arc.
+- The level's `curriculum` block and question-pool link pre-filled from the Section 1 mapping,
+  so every generated level is already reportable, not just playable.
+
+**What this changes, honestly:** it removes the blank-canvas problem, not the judgment
+problem. The script can guarantee a level is *playable* — no impossible gaps, no
+softlocks — it cannot tell you whether it's *fun*. Your job becomes reviewing and adjusting
+43 already-playable levels instead of building 43 from nothing. Still hand-build, on purpose
+rather than by rule: **the first level of each of the 6 eras** (first impression of that era)
+and **the 6 boss levels**. That's 12 levels of deliberate hand-authoring against 31 of
+generate-then-review, not 43 of either extreme.
+
+**Sequencing matters:** the generator is written and run once Phase 4's loader and schema are
+real, against the actual tileset — not guessed at from this document beforehand. See the
+Phase 4 prompt in Section 15.
+
 ### Two honest caveats
 
 1. **Your ground tile constants get superseded.** The `(row, col)` mappings in
@@ -745,8 +781,13 @@ playing exactly as it does today, which is what makes it safe to verify.
   heights, so this needs a tracked anchor updated as the player crosses solid ground.
 - `gap_component.dart`'s `GroundSpawner` lays one 1,000,000-wide ground section with an empty
   `update()`. It is dead code that Tiled replaces entirely — delete it rather than porting it.
-- **Then author levels.** 43 of them, per the Section 1 counts. This is content work, not
-  engineering — see risks.
+- **Generator script for first-draft levels.** Once the loader and schema above are real,
+  write a script that emits a valid first-draft `.tmx` for all 43 levels per Section 11's
+  "Auto-generating first drafts" rules. This is what the phase actually delivers content-wise
+  — not one reference map, 43 playable drafts.
+- **Then review and hand-build.** You review/adjust all 43 generated drafts, and hand-build
+  the 6 era-openers and 6 bosses (12 levels) from scratch. Content work, not engineering —
+  see risks — but smaller than building 43 from a blank canvas.
 
 ### Phase 5 — Boss (2-3 days for the simple version)
 - Countdown bar, 6 questions, minions between questions, Time Freeze wired to the timer.
@@ -767,7 +808,7 @@ playing exactly as it does today, which is what makes it safe to verify.
   requires.
 - Platform tile constants in `tile_platform_component.dart` are pixel-verified. Leave them
   alone until the Tiled path in Phase 4 proves out, then retire the file deliberately.
-- Jump physics (gravity 900, force -480, peak ~128) and platform heights (60-105) are tuned
+- Jump physics (gravity 900, force -480, peak ~128) and platform heights (90-110) are tuned
   against each other.
 - Dev no-login mode (`DEV_SKIP_AUTH`, `DEV_START_ROUTE`) will save hours during Phases 1-3.
 
@@ -790,7 +831,7 @@ better against an **implementation** spec, so this section converts it into one.
 3. **Update `HANDOFF.md` at the end of every phase** — dated entry, newest first, as you
    already do. Include what was built, what was deferred, and what needs playtesting.
 4. **Protected values.** Tell it explicitly, every session: do not change gravity (900), jump
-   force (-480), or platform heights (60-105) unless the task is specifically to re-tune them.
+   force (-480), or platform heights (90-110) unless the task is specifically to re-tune them.
    These are verified-correct and easy for a well-meaning refactor to "clean up".
 5. **Run `flutter analyze` before claiming done.** Clean analyze is a floor, not a finish line.
 
@@ -936,17 +977,29 @@ exists** — judge whether the core loop is fun, not just whether it works.
 > Tiled tileset, and write the level loader that reads the `entities` object layer per the
 > convention in Section 11. Retire the runtime spawner. Re-implement one-way platform
 > pass-through under the new system, fix off-screen culling so objects behind a backtracking
-> player are not destroyed, and add gap respawn anchors. Build one complete example `.tmx`
-> level for Era 2 (Pananakop ng Espanya) as a reference, and document the authoring workflow
-> in `HANDOFF.md`. Level config must include the `curriculum` block defined in Section 1.
+> player are not destroyed, and add gap respawn anchors. Level config must include the
+> `curriculum` block defined in Section 1.
+>
+> Then, against that real loader and schema (not a guess at them beforehand), write a
+> generator script that produces a first-draft `.tmx` for **all 43 levels** per Section 11's
+> "Auto-generating first drafts" rules: ground with era/level-appropriate gaps, enemies
+> spaced and mixed by difficulty ramp, artifacts and gates at the Section 6/7 cadence,
+> platforms only at valid heights (90-110 — do not violate the tuned jump arc), and each
+> level's `curriculum` block and question-pool link pre-filled from Section 1. Every generated
+> level must load and be completable start to finish with no softlocks. Document the
+> generator and the authoring workflow in `HANDOFF.md`.
 
-*Done when:* the example level loads from `.tmx` and plays correctly; platforms are still
-one-way; walking backwards doesn't delete the level; falling in a gap costs 1 HP and respawns
-on the last solid ground; the spawner is gone.
+*Done when:* the loader plays a hand-built reference level correctly (platforms still
+one-way, walking backwards doesn't delete the level, falling in a gap costs 1 HP and respawns
+on the last solid ground, the spawner is gone); the generator script runs and emits all 43
+`.tmx` files; every generated level loads without error and can be finished without a
+softlock or an unfair jump; each carries its correct `curriculum` block.
 
-*Then you:* **author the levels.** Claude Code can build the loader and a reference map, but
-level design is judgment work done by eye in the editor. This is your job and it is the
-largest remaining task in the project.
+*Then you:* **review and hand-build, not build from scratch.** Review and adjust the 31
+generated levels for feel and pacing, and hand-build **the first level of each of the 6 eras
+and all 6 boss levels** (12 total) yourself, on purpose rather than by rule — those are the
+levels that set the tone and are worth getting right by hand. This is still real work and
+still yours, but it's review-and-adjust for most of it instead of a blank canvas 43 times.
 
 ---
 
@@ -980,8 +1033,10 @@ Plan your own time around these — nobody else is doing them.
 - **Playtesting and game feel.** It cannot tell whether the jump clears the gap fairly or
   whether the controls are comfortable with your thumbs. Roughly half this design is numbers
   that only reveal themselves in play.
-- **Level design.** It can generate `.tmx` XML; it cannot look at a level and judge whether
-  an enemy placement creates an interesting decision.
+- **Level design judgment.** It can generate mechanically-valid first-draft `.tmx` files for
+  all 43 levels (Section 11, Phase 4) — playable, fair, no softlocks — but it cannot look at
+  a level and judge whether an enemy placement creates an interesting decision, or whether a
+  draft is actually fun. That review, and the 12 hand-built levels, stay yours.
 - **Art.** The 5 idle sprites, and sourcing the Kenney packs.
 - **Seeing the screen.** A clean `flutter analyze` does not mean the artifact isn't spawning
   inside a wall.
@@ -991,11 +1046,13 @@ Plan your own time around these — nobody else is doing them.
 
 ## 16. Risks and honest caveats
 
-**Level authoring is still the real cost.** Tiled makes it dramatically faster than
-hand-writing JSON, but designing 43 levels is content work that no tool removes. If the
-deadline tightens, **cut eras rather than quality** — three well-built eras beat six
-procedurally-mush ones. Cut from the end (Eras 5 and 6) so each grade keeps a coherent
-opening sequence, and say in the paper that the remaining eras are authored but unpopulated.
+**Level authoring is still a real cost, just a smaller one.** Phase 4's generator (Section 11)
+removes the blank-canvas problem — every level starts as a playable draft — but reviewing and
+tuning 31 drafts plus hand-building 12 levels (6 era-openers, 6 bosses) is still real content
+work that no tool removes entirely. If the deadline tightens, **cut eras rather than
+quality** — three well-built eras beat six procedurally-mush ones. Cut from the end (Eras 5
+and 6) so each grade keeps a coherent opening sequence, and say in the paper that the
+remaining eras are authored but unpopulated.
 
 **Question bank depth is the hard bottleneck.** Levels currently have only 5 questions each.
 V2 makes this worse, not better: gates and artifacts re-roll on a wrong answer, so a level
