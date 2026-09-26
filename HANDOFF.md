@@ -3,6 +3,353 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-26 (GAMEPLAY-V2 revision 7 landed + Phase 1 playtest triage)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Land `GAMEPLAY-V2.md` revision 7's two code mandates (hearts reversal, crates cut) and
+investigate four real-device playtest findings from the Phase 1 entry below — ground
+render order, broken collision, inconsistent sprite scale, audio dropouts — before Phase 2,
+which the user flagged as building directly on collision, movement, and the hearts model.
+**Follow-up in the same session, before the user playtests this batch on-device:** also fix
+the two remaining playtest findings (#7 character-select cropping, #8 tutorial contrast/
+trigger), and get a real, tested (not just re-read) confirmation that platform landing
+specifically — separate from the crate issue — actually works.
+
+**Second follow-up, after the user actually playtested a built APK on-device:** three more
+issues came back, all fixed in this same still-uncommitted pass before committing —
+
+1. **#5, sprite scale**, previously confirmed-but-deferred above, now fixed for real: enemies,
+   coins, and platform tiles brought up to the same visual register as the player/boss.
+2. **Pause menu's "UMALIS" (quit) button was a dead end** — tapping it (and confirming) left
+   the student stuck in gameplay with no way out. Not one of the original nine playtest
+   findings; reported fresh once the user was actually testing the built APK.
+3. **Platform spawn height (60-105 above ground) read as ankle-height steps, not jumpable
+   ledges** — visible in a device screenshot once platforms were finally at a legible scale;
+   raised to 90-110. This is a deliberate, user-requested exception to this file's own "do not
+   change platform spawn heights" rule from the Phase 1 entry below — see Section 7.
+
+## 2. Current state
+
+**Committed to no branch yet, all in CHRONO-GAMEAPP:**
+
+**Hearts unified** (Section 8 reversal — one shared 5-heart pool, no separate Energy):
+- `lib/core/constants.dart` — `livesPerLevel` removed (the pool has one cap now,
+  `maxHearts`); `heartRegenInterval` 10min → 1min.
+- `lib/game/chrono_game.dart` — `lives` (level-local, reset every attempt) replaced with
+  `hearts` (seeded from the persistent pool's live count) and a new `onHeartLost` callback
+  fired once per `loseLife()`, so every in-level hit is pushed straight back to the same
+  `HeartsState` the menu screens read.
+- `lib/game/quiz_handler.dart` — **real bug fixed, not just reverted**: a wrong quiz answer
+  was still calling `loseLife()`, contradicting both Section 6 ("wrong answers no longer
+  cost HP") and Phase 0's own stated goal. Removed; a wrong answer now just closes the
+  question with no HP consequence, same as the existing shield-absorbed branch already did.
+- `lib/providers/game_provider.dart` — `consumeHeartOnLevelFailed()` renamed `loseHeart()`
+  and now called once per hit (from `ChronoGame.onHeartLost`) instead of once per fully-failed
+  level — the persisted pool and the in-game HUD count now move in lockstep.
+- `lib/screens/game/game_screen.dart` — seeds `ChronoGame.hearts` from
+  `gameState.hearts.count` at construction; wires `onHeartLost`; `onLevelFailed` no longer
+  separately consumes a heart (the pool is already at 0 by the time it fires).
+- `lib/game/overlays/hud_overlay.dart`, `level_select_screen.dart`, `level_failed_screen.dart`
+  — Energy UI (bolt icons, "ENERHIYA" label, Filipino copy) reverted to the original hearts
+  icon/copy everywhere, per Section 8's explicit instruction. `HeartsState`, the provider
+  field name, and the two Hive keys were never touched, per the standing rule.
+- `lib/screens/tutorial/tutorial_screen.dart` — the life-count string now reads
+  `GameConstants.maxHearts` instead of the removed `livesPerLevel`; also corrected two lines
+  that were now factually wrong (claimed a wrong answer costs a life, and that hearts reset
+  per level — neither true anymore).
+- Test fixes for the two behavior changes above (not bugs in the fix):
+  `test/game/player_reactions_test.dart` (`hurtAnim` assertion → `walkAnimation`, since a
+  wrong answer no longer triggers `triggerHurt()`); `test/models/hearts_state_test.dart`
+  (`timeUntilNext` test's fixed 4-minute offset no longer fit a 1-minute interval).
+
+**Crates cut entirely** (Section 5):
+- Deleted `lib/game/components/crate_component.dart`.
+- `lib/game/components/enemy_spawner.dart` — removed both crate timers and `_spawnCrate()`.
+- `lib/game/components/player_component.dart` — removed the `CrateComponent` collision branch.
+- `assets/tiles/crate.png` left on disk (unused now, not deleted — deleting assets wasn't
+  asked for and is a separate, easily-reversible cleanup).
+
+**#7 character-select cropping fixed:**
+- `lib/screens/home/character_selection_screen.dart` — `_CharCard`'s content (avatar + name +
+  era badge + description) has a fixed intrinsic height that could exceed the space left over
+  on a short landscape phone once the header/footer take their share. Wrapped it in
+  `FittedBox(fit: BoxFit.scaleDown)` + `Column(mainAxisSize: MainAxisSize.min)` — the same
+  safety-net pattern `question_card.dart` already uses for the quiz card on short screens —
+  so it shrinks to fit instead of overflowing/clipping.
+
+**#8 tutorial contrast + trigger point fixed:**
+- `lib/screens/tutorial/tutorial_screen.dart` — `_TutorialPage`'s panel was `Colors.black @
+  55%` stacked on top of the backdrop's own 65% dark scrim, with a near-black border: two dark
+  layers with almost no separation between them, unlike every other panel in the app (which
+  uses the light parchment `AppColors.surface` + dark ink text pairing). Switched this panel
+  to that same pairing (`AppColors.surface` fill, `AppColors.textPrimary`/`textSecondary`
+  text) instead of inventing a one-off dark-on-dark style. Also bumped the "LAKTAWAN" skip
+  button from `Colors.white54` to `Colors.white70`.
+- Trigger moved from "on every visit to character selection until seen" (effectively on app
+  open) to "the first time a level is actually started": removed the auto-push from
+  `CharacterSelectionScreen.initState()` (the manual book-icon replay button is untouched);
+  added `LevelSelectScreen._startLevel()`, which pushes `/tutorial` first and only then
+  navigates into `/game/...` if the tutorial hasn't been seen yet. Both tutorial exit paths
+  (skip and the last page's "SIMULAN NA!" / "start now") call the same `_finish()`, so either
+  one now continues straight into the level that was tapped.
+
+**#4 collision — platform landing specifically confirmed, not just re-read.** Added 5 tests
+to `test/game/platform_layering_test.dart` that run `PlayerComponent.jump()` and the real
+`update(dt)` loop (gravity + `resolveGroundContact()`) against an actual
+`TilePlatformComponent`, the way the game really reaches one (a jump arc, not a drop from
+above):
+- Lands correctly at a normal 60fps frame time, at both the shortest and tallest documented
+  spawn heights (`EnemySpawner.platformMinHeight`/`platformMaxHeight`, 60-105).
+- Still lands correctly at a stuttery 30fps frame time.
+- **Genuine (if narrow) finding:** a single ~200ms frame hitch landing at the single worst
+  possible instant — already falling fast, one normal frame from the platform's 20-unit
+  landing window — does tunnel the player through it. A normal 60fps frame covers ~5.5 units
+  of fall there; a 200ms one covers ~66. This is a real property of the hand-rolled AABB
+  check, confirmed by test rather than assumed, and it predates Phase 1 (the check itself is
+  unchanged). Asserted directly in the test (with a comment pointing here) so a future fix
+  updates it deliberately instead of it silently regressing back in unnoticed.
+
+**Verified:** `flutter analyze` clean at the same 5 pre-existing info lints (none in touched
+files). `flutter test test/data test/game test/models`: **111/111**, all passing (106 from
+the first pass + 5 new platform-landing tests).
+
+**Sprite scale fixed** (#5 above — this pass reverses the "not fixed here" call the first pass
+made):
+
+- `enemy_component.dart` — 60×72 → 90×108 (1.5×, matching the player's own upscale ratio).
+- `coin_component.dart` — 28×28 → 42×42; spawn height now measured from the coin's own bottom
+  edge (`size.y`), not a fixed `32` — at the old fixed offset the taller coin would have hung
+  through the ground.
+- `tile_platform_component.dart` — tiles drawn at 24px (`tileSize`) from the same 16px sheet
+  (`sourceTileSize`, unchanged) — SpriteSheet cutting stays correct, only the draw size grew.
+  All three hitboxes are added after `size` is set and derive from it, so they scaled with the
+  sprite rather than silently keeping the old (now-mismatched) dimensions — checked with a
+  real mounted `GameWidget` in `test/game/sprite_scale_test.dart`, not just re-read, since a
+  bare unloaded `ChronoGame` never runs `onLoad()` and reports every size as zero.
+- Ground band (`GroundSection`) and `WallComponent` were deliberately left unscaled — the
+  ground's height defines `groundY`, which every jump/spawn position is measured against, and
+  wall height is off this session's requested scope.
+
+**Platform thickness bug found and fixed** (introduced by the scale change above, same pass):
+a platform hangs entirely below its `surfaceY` (the landing plane), so doubling the tile size
+also doubled thickness (16×2=32 → 24×2=48) — all of it eating into the gap to the ground. At
+the lowest spawn height this left ~12 units of clearance, so platforms read as blocks sitting
+on the floor rather than ledges. Fixed by drawing the underside as an 8px strip
+(`undersideHeight`) instead of a second full tile, holding total thickness at the original 32
+(`thickness = tileSize + undersideHeight`). `sprite_scale_test.dart` asserts clearance at
+`EnemySpawner.platformMinHeight` stays ≥ a fifth of the player's height, so this can't silently
+regress again.
+
+**Platform spawn height raised, 60-105 → 90-110** (`enemy_spawner.dart`): a device screenshot,
+taken once platforms were finally visible at a legible scale, showed the old range landing
+surfaces at knee height on the 120-tall player — steps to walk into, not ledges to jump onto.
+The ceiling (110) stays under the existing `jumpPeak - 15` = 113 limit
+`platform_layering_test.dart` already enforces; that same test file's landing-physics tests
+(60fps/30fps/frame-hitch, at both `platformMinHeight` and `platformMaxHeight`) all still pass
+against the new range unchanged, confirming reachability rather than assuming it. One test's
+own setup (not the physics) needed widening a 1-unit "stop just before landing" band to 12
+units so it stays valid at any spawn height in range.
+
+**Pause-menu quit fixed** (`pause_overlay.dart`, `game_screen.dart`) — two real bugs, not one:
+
+1. `onQuit` was guarded by `if (context.mounted)` on the context Flame's `overlayBuilderMap`
+   hands the builder (GameWidget's own), not the screen's — any moment that context wasn't
+   mounted silently turned quitting into a no-op with no error and no feedback. Moved the
+   navigation into a `GameScreen._quitToLevelSelect()` method that closes over the screen's own
+   context instead.
+2. The confirm dialog's quit handler called `resumeEngine()` before navigating away. Confirmed
+   via a real stack trace that this restarts the game loop's ticker immediately — so frames run
+   between the tap and the route actually changing, and those frames can reach
+   `levelComplete()`/`showLevelFailed()`, whose own callbacks navigate somewhere else on top of
+   the quit. Removed the `resumeEngine()` call (the level is being torn down, not resumed), and
+   `_quitToLevelSelect()` now also nulls `onLevelComplete`/`onLevelFailed` before navigating as a
+   second guard against exactly that race.
+
+- Could not reproduce the stuck-menu symptom itself: `test/game/pause_quit_test.dart` drives the
+  real `PauseOverlayWidget` through a real `GoRouter` in four arrangements (standalone, inside
+  `GameWidget`, with the HUD overlay also active, with an async router redirect like the release
+  build uses) and all four exited correctly even before these fixes. Both fixes above are real,
+  confirmed-by-code-reading bugs in the quit path regardless; whether either one was the actual
+  on-device cause is unconfirmed pending this build's playtest.
+
+## 3. Investigation: the four playtest findings (Section 15 says Phase 2 depends on this)
+
+**#3, ground render order — investigated, does not reproduce.** The suspected file
+(`gap_component.dart`'s `GroundSection.render()`) draws the era body-color rect first
+(`y ∈ [capHeight, bandHeight]` = `[9, 60]`) and the grass cap tile second
+(`y ∈ [0, capHeight]` = `[0, 9]`) — non-overlapping ranges, tile already drawn after (i.e. on
+top of) the body wherever they'd matter. `TilePlatformComponent`'s top/fill tiles are the
+same shape (non-overlapping y-bands, correct order). No code changed. Either this was already
+fixed before the Phase 0.5 audit flagged it, or the flag was a false positive — worth a real
+screenshot to be sure, but nothing in the source supports the bug as described.
+
+**#4, collision "broken" — two separate causes, neither a Phase 1 regression.**
+
+*Obstacles ("walks straight through with no damage or blocking"):* almost certainly the
+just-removed crates. `CrateComponent`'s hit response (still in place at the time of the
+playtest) was `other.removeFromParent()` with **no sound, no visual effect, no HP change** —
+a crate breaking is visually indistinguishable from having no collision at all, and the
+spawner dropped one every ~2.7s (two overlapping timers). Now moot: crates are gone.
+
+**Deliberately left alone, and worth being explicit about so it doesn't get "found" again
+later: `WallComponent`'s collision branch (real -1 HP) has been dead code since Phase 0** —
+nothing in `enemy_spawner.dart` has ever called a `_spawnWall()`; HANDOFF's 2026-09-22 entry
+already flagged this, and it's still true today. **This is pre-existing, not a new regression
+from crate removal or anything in this pass** — walls simply never spawn, on any commit back
+to when the dead branch was first noticed. Not fixed here: `GAMEPLAY-V2.md`'s Phase 3 replaces
+the entire mechanism with Gates (era walls become interactive knowledge-checks, Section 6/
+Section on Gates), so wiring up bare wall-spawning now would be the same throwaway work the
+crate cut and the deferred gap system already avoid. Leave it dead until Phase 3.
+
+*Platforms ("can also pass through platforms rather than landing on them"):* the hand-rolled
+AABB check (`game_collision.dart`) is byte-for-byte unchanged from before Phase 1 (only moved
+into an extension file). This was flagged in the first pass as "unconfirmed, worth verifying"
+rather than cleared outright — see the platform-landing bullet in section 2 above, which now
+confirms it with real physics-loop tests rather than just re-reading the diff.
+
+**#5, sprite scale inconsistency — confirmed, pre-existing, not Phase 1. Fixed in the
+second follow-up, see Section 2 above.** Only the player (96×120, an explicit ~1.85x upscale
+from 52×68 native art, commit `9692c48`) and the boss (120×140, ~1.5x upscale) ever got a
+deliberate "read as bigger" pass. Enemies (60×72), coins (28×28), and — worst —
+`TilePlatformComponent`'s tiles (rendered at literal, unscaled 16×16 `tileSize`) never did.
+Nothing in Phase 1's diff touches any of these sizes; this has been true since the "bigger
+player sprite" commit landed on 2026-09-22 and was simply never seen on a real screen before
+now (prior verification was CDP screenshots checking tint/count/score, not relative sizing).
+Originally left unfixed pending its own pass; that pass happened in the same still-uncommitted
+session once the user actually playtested a build (see Section 2's "Sprite scale fixed" and
+"Platform thickness bug" and "Platform spawn height raised" bullets).
+
+**#6, audio desync/dropout — likely pre-existing, never actually human-verified before this
+playtest.** Phase 0's own entry explicitly lists audio as "**Still NOT verified — needs a
+human**." `AudioService._playSfx` fires a new pooled `FlameAudio.play()` per call with every
+exception silently swallowed (by design, so a missing sound never crashes gameplay) — which
+also means a degrading `audioplayers` pool or a BGM loop-point gap would produce exactly
+"fine for several seconds, then desyncs/drops" with zero error trail. `audio_service.dart`
+was not touched by Phase 1. Not fixed here — needs a human listening on a device to tell
+pool exhaustion from a loop-point gap from something else, which is exactly what Phase 0's
+entry already said this needed and never got.
+
+**#7 and #8 (character-select cropping, tutorial contrast/trigger):** left open at the end of
+the first pass since they were outside the user's original "investigate 3-6" scope; fixed in
+the same-session follow-up — see the new bullets in section 2 above.
+
+## 4. Decisions made (and why)
+- **Fixed the wrong-answer HP bug while touching this code, rather than filing it
+  separately.** It directly contradicts the exact section (8) being reverted, and leaving it
+  would mean the new shared pool drains on quiz mistakes too — silently reintroducing the
+  "wrong answers cost HP" behavior revision 7 explicitly reverses.
+- **Did not wire up `WallComponent` spawning while removing crates**, even though that
+  leaves zero ground hazards except enemies for now. Phase 3 replaces the whole mechanism with
+  Gates (Section 6) — spawning bare walls now (no gate mechanic) would be the identical
+  throwaway-work situation as the crate cut and the deferred gap system, not a fix.
+- **Did not touch audio pooling.** Confirmed, real, pre-existing, but needs a human's ears on
+  a longer session, not more static analysis — sprite scale (originally deferred alongside it
+  for the same "needs its own pass" reason) was fixed later in this same session once the user
+  asked for it directly; see Section 2.
+- **Kept the 1.5x scale factor consistent across enemies, coins, and platform tiles** rather
+  than picking a different ratio per component, so the world reads at one register instead of
+  trading "enemies too small" for "coins too big."
+- **Fixed platform thickness by shrinking the underside to 8px rather than reverting tileSize**
+  — reverting the tile size back to 16 would have undone the scale fix entirely; the actual bug
+  was thickness eating into ground clearance, not the tile size itself, so only the underside
+  needed to shrink.
+- **Raised the platform height floor (60→90) more than the ceiling (105→110)** — the floor is
+  where the screenshot showed the problem (knee-height ledges), and the ceiling was already
+  close to its jump-reachability limit.
+- **Did not resume the game engine when confirming quit from the pause menu** — the level is
+  being torn down, not returned to, so restarting its game loop before the route changes only
+  creates a window for a stray frame to navigate somewhere else first.
+- **`assets/tiles/crate.png` left on disk.** Deleting unused assets is safe but separate from
+  "remove the code that uses it," and wasn't asked for.
+- **Moved the tutorial's `_TutorialPage` panel to the app's existing light-parchment/dark-ink
+  pairing instead of tuning alpha values on its dark-on-dark original.** The original combo
+  (55% black panel over a 65% black backdrop scrim) meant the panel barely separated from its
+  own background regardless of how legible any single piece of text was — matching what every
+  other panel in the app already does (and already reads fine) fixes the actual cause instead
+  of guessing at which alpha number was "the" problem.
+- **Tutorial gate lives in `LevelSelectScreen`, not `GameScreen`.** Intercepting at the
+  level-select tap (before `context.go('/game/...')`) means the Flame engine, its audio, and
+  its spawner timers never start until after the tutorial is dismissed. Gating inside
+  `GameScreen.initState()` instead would have meant the level was already loading and ticking
+  underneath the tutorial overlay — audio starting early, enemies potentially spawning while
+  the student is still reading.
+- **Added platform-landing tests that assert the confirmed tunneling risk as a known fact,
+  not just a passing "it works" test.** A test that only ever asserted success would have
+  given no signal if this exact scenario silently broke (or got silently "fixed") later —
+  asserting the actual current behavior, with a comment explaining why, means the next person
+  to touch this collision code sees it fail loudly and has to make a deliberate choice about
+  it either way.
+
+## 5. Things we tried that did NOT work
+- Initial platform-landing test design predicted a 300ms hitch *right at jump-off* would
+  overshoot the platform — it didn't (velocity is still small that early in the arc), so the
+  first version of that test asserted the wrong expected landing position. Corrected once the
+  actual run showed the player landing on the platform, then added a second, properly
+  adversarial test that times the hitch for the worst instant (already falling fast, one
+  frame from the window) — that one does confirm the tunneling risk. Recorded here since the
+  wrong first guess is itself the useful lesson: a hitch's danger depends entirely on *when*
+  in the fall it lands, not just its size.
+- The user's own hypothesis for the low-platform bug was a sprite anchor shifting the render
+  position once tiles were scaled up. Checked and ruled out before touching any code:
+  `TilePlatformComponent`'s anchor is `topLeft` and its render loop draws the top row starting
+  at local y=0, so `position.y` (== `surfaceY`) was already the true top edge before and after
+  scaling — confirmed against `ChronoGame.groundY`/`GameConstants.playerX` math, not just
+  asserted. The real bug was thickness (see Section 2), which grows downward from that same
+  correct top edge and was never about the top edge moving at all.
+- First `sprite_scale_test.dart` draft used a bare, unloaded `ChronoGame` (the pattern several
+  other test files in this repo use for speed) and every assertion failed with sizes of 0 —
+  `onLoad()`, which is where every component's `size` and hitbox actually get set, never runs
+  without a real ticking game. Rewrote to mount a real `GameWidget` and alternate
+  `tester.runAsync()` (real time, for the sprite file I/O) with `tester.pump()` (which is what
+  actually advances the game loop and mounts the hitbox child).
+
+## 6. Next steps (in order)
+
+1. ~~User is playtesting this full batch on-device~~ **Done — the user tested a built APK
+   across several iterations of this pass and reported the three issues in Section 1's "second
+   follow-up" (sprite scale, pause-menu quit, platform height), all fixed and re-tested in
+   turn.** The platform-height fix specifically was confirmed via a device screenshot showing
+   the corrected result. Committed on `v2-phase-1` at the end of this session — see Section 7
+   for what's now protected going forward.
+2. Phase 2 — combat and Kaalaman, per the Phase 1 entry below.
+3. Whenever there's a dedicated pass to spare: get a human's ears on a longer play session for
+   audio (#6, still unfixed), and consider whether the confirmed platform-hitch tunneling risk
+   (severe ~200ms single-frame stall, narrow but real) is worth a fix before Phase 4's Tiled
+   rewrite replaces this collision code anyway. Neither blocks Phase 2 per the user's own
+   framing (only collision/movement/hearts do), and the tunneling risk is arguably not worth
+   fixing given Phase 4 replaces the mechanism regardless.
+4. If the pause-menu quit still doesn't work on-device after this pass's two fixes: the bug is
+   somewhere neither fix reaches. Worth checking first whether **ITULOY** (resume) works at
+   all — if it doesn't either, something is eating taps before either button's handler runs,
+   which points away from the quit-specific logic entirely.
+
+## 7. Constraints & conventions
+- Do not rename `HeartsState`, the `GameState.hearts` field, or the two Hive keys
+  (`hearts_count`, `hearts_regen_start_ms`) — unchanged rule, still applies; this pass renamed
+  only the `GameNotifier`/`ChronoGame`-level method and field names around them.
+- `flutter test` must stay scoped to `test/data test/game test/models` — `test/screens/`
+  (`tutorial_screen_test.dart`) still hangs, unrelated to this pass.
+- Do not change gravity (900) or jump force (-480) — confirmed unchanged again this pass,
+  still the rule for every phase after Phase 1.
+- **Platform spawn height is no longer 60-105 — it is 90-110 as of this pass**, changed at
+  the user's explicit request after a device screenshot showed the old range reading as
+  ankle-height steps rather than jumpable ledges. This supersedes the "do not change platform
+  spawn heights" rule the Phase 1 entry below states; that rule was correct for Phase 1 itself,
+  but this later, deliberate, user-requested and re-tested change is the current source of
+  truth. If raised further, the ceiling must stay at or under `jumpPeak - 15` (currently 113) —
+  `platform_layering_test.dart`'s "spawn no higher than the jump can reach" test enforces this
+  automatically, so a future change that violates it fails loudly rather than silently.
+- Platform tiles now draw at 24px (`TilePlatformComponent.tileSize`) from a 16px source sheet
+  (`sourceTileSize`) — if the sheet itself is ever swapped for real Kenney art, keep both
+  constants in sync with whatever the new sheet's native tile size actually is.
+
+---
+
 **Date:** 2026-09-26 (Phase 1 — player control)
 **From:** Claude Code
 **To:** Claude Code / Chat
