@@ -3,6 +3,183 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-29 (screen-fill viewport, joystick reachability, dynamic virtual width — playtest round 3, committed)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Land four playtest-driven tweaks requested together (screen-fill/no-black-bars, bigger/
+further-out Jump+Attack buttons, faster walk speed, platform ceiling 110→113), then fix two
+regressions the screen-fill change itself introduced once the user actually saw it on a real
+device: HUD circles rendering as ovals, and the joystick sitting under the character / being
+too small and too far into the corner to reach comfortably.
+
+## 2. Current state
+
+**Committed (`c3ca19a`, `v2-phase-1`, CHRONO-GAMEAPP):**
+- `lib/game/stretch_to_fill_viewport.dart` (new) — custom Flame `Viewport` replacing
+  `CameraComponent.withFixedResolution`'s `FixedResolutionViewport`. The stock viewport
+  preserves the virtual 16:9 aspect ratio exactly, uniformly scaled, which pillarboxes (black
+  bars) any device wider than 16:9 — effectively every phone in landscape. This one always
+  sizes to the full canvas and scales the fixed 1280×720 virtual resolution onto it per-axis,
+  filling edge-to-edge. `virtualSize` stays pinned to 1280×720 regardless of device, so
+  `groundY`, jump physics, platform heights, and spawn distances are provably unchanged —
+  only the final blit-to-screen step is. Extends `Viewport` directly (not
+  `FixedAspectRatioViewport`, which has a private un-overridable `_handleResize`), reusing
+  Flame's own internal `transform` field for the scale. Tradeoff, disclosed and accepted: a
+  mild non-uniform stretch (~8-25% depending on device aspect ratio) on world sprites.
+  Verified with `test/game/stretch_to_fill_viewport_test.dart` (4 tests: virtual resolution
+  unaffected, viewport fills canvas exactly, groundY/jump math unaffected, touch-mapping
+  round-trip through the transform).
+- `lib/game/game_input.dart` — Jump/Attack buttons 20% bigger (diameter 90→108) and moved
+  further to their screen edges; joystick repositioned off the character.
+- `lib/core/constants.dart` — `PlayerComponent.forwardSpeed` 150→210 (parallax auto-adapts via
+  its existing speed-ratio calculation, not a hardcoded number).
+- `lib/game/components/enemy_spawner.dart` — `platformMaxHeight` 110→113, exactly
+  `jumpPeak - 15`, the limit `platform_layering_test.dart` already enforces. Gravity and jump
+  force untouched, as required.
+
+**HUD-ovals fix, superseded within this same pass — see the dynamic-virtual-width entry below.**
+A first attempt (from a device screenshot showing round buttons and the joystick knob
+rendering as ovals, since the stretch above scaled X and Y unevenly) added a
+`hudCounterScale` to `StretchToFillViewport` that cancelled only the *uneven* part of the
+stretch, applied to every HUD child. It fixed the HUD but left world sprites (enemies, coins,
+platforms) still visibly stretched — confirmed once the user actually saw it on-device. Rather
+than layer a second fix on top, `hudCounterScale` was deleted entirely in favour of removing
+the stretch at its source (below), which fixes the HUD for free too.
+
+**Joystick reachability fix (from a second device screenshot: "still
+too small" / "in the corner, hard to reach"):**
+- `lib/game/game_input.dart` — joystick background/knob enlarged and margin brought in from
+  the literal corner (background radius 60, knob radius 28, margin left 45/bottom 45).
+- **Real geometric conflict found, not guessed at:** no joystick radius/margin combination
+  comfortable enough to reach could avoid overlapping the player sprite at its old render
+  position (`GameConstants.playerX = 80` — the sprite's own x-span, 80-176, sat almost
+  entirely inside any reachable joystick's footprint). Fixing this by shrinking the joystick
+  further would have re-broken reachability; fixing it by moving the joystick would have put
+  it back in an uncomfortable corner. The actual fix was moving the player instead.
+- `lib/core/constants.dart` — `GameConstants.playerX` 80→220, giving ~55 units of clear space
+  between the joystick's footprint and the player regardless of joystick sizing. Forward view
+  shrinks by the same 140 units (`cameraLeftEdgeX` shifts right to match) — about 12% less
+  world visible ahead of the player, still well clear of `spawnInterval` (800), so nothing
+  spawns already on-screen. Confirmed every reference to `playerX` in the codebase (game code
+  and three test files) reads the constant symbolically, not a hardcoded literal, so this one
+  change propagates everywhere correctly. 131/131 tests pass.
+- Verified beyond just the unit tests: drove a real Chrome session through Chrome DevTools
+  Protocol (press → held drag with `buttons:1` on every intermediate move → release, plus a
+  Jump tap) against a live `flutter run -d web-server` build. Screenshots confirm the joystick
+  knob visibly displaces on drag and snaps back on release, the character visibly walks (world/
+  coin/platform positions shift between frames), Jump registers, and the console shows no new
+  errors. This is a stand-in for the user's own on-device test, not a replacement for it — see
+  Section 6.
+
+**Dynamic virtual width — the actual fix for the remaining stretch, committed `99076c4`.**
+Once the user tested the counter-scaled-HUD build on-device, world sprites (enemies, coins,
+platforms) were still visibly stretched — the counter-scale only ever fixed the HUD, since it
+was deliberately scoped to `viewport.children`, not the world. Recommended and implemented the
+fix this was deferred in favour of at the time (see Decisions below):
+- `lib/game/stretch_to_fill_viewport.dart` — `StretchToFillViewport` now takes a fixed
+  `height` only, not a fixed `resolution`. Virtual width is computed live every resize as
+  `height * (canvas.x / canvas.y)`, so the world-to-screen scale is always uniform
+  (`transform.scale` is one scalar, not a per-axis stretch) — nothing distorts on either axis,
+  on any device. `hudCounterScale` and its per-child application are gone entirely; nothing
+  needs them once the source of the stretch is removed.
+- `lib/game/chrono_game.dart` — constructor passes `height: GameConstants.virtualHeight` only.
+- `lib/game/game_input.dart` — dropped the counter-scale application block from `setup()`.
+- `lib/core/constants.dart` — removed `GameConstants.virtualWidth` (no longer a fixed value);
+  `virtualHeight` (720) is unchanged and is now the only virtual-resolution constant. Confirmed
+  it was referenced nowhere in `lib/` outside the viewport construction site, so removing it
+  was safe.
+- `test/game/fixed_resolution_test.dart`, `test/game/stretch_to_fill_viewport_test.dart` —
+  updated to assert virtual width tracks each canvas's aspect ratio and the resulting scale is
+  uniform (`scaleX == scaleY`), instead of asserting a fixed 1280.
+- `test/game/hud_counter_scale_test.dart` — rewritten (same filename, no `hudCounterScale`
+  references left) to confirm the real mounted joystick/buttons still render round and stay
+  edge-anchored, now for free rather than via counter-scaling.
+- 130/130 tests pass, `flutter analyze` clean. **Confirmed on-device by the user** — this is
+  what unblocked the commit; see Section 6.
+
+**Unrelated, pre-existing uncommitted change noticed but deliberately left alone (not made by
+this pass, not investigated further):** `android/app/build.gradle.kts` / `pubspec.yaml` — a
+`gitCommitCount()` Kotlin function overriding `versionCode` with the git commit count instead
+of `flutter.versionCode`. Appears to be legitimate in-progress work from elsewhere in the repo.
+
+## 3. Decisions made (and why)
+- **Chose stretch-to-fill over letterbox/pillarbox.** Checked how similar games handle this:
+  most 2D platformers/runners (and engines like Unity's Canvas Scaler "match height," Cocos2d's
+  `FIXED_HEIGHT` policy) pick fixed-height/variable-width and accept some horizontal stretch or
+  extra view rather than wasting screen real estate on bars — bars are more common in
+  pixel-perfect or console-port genres, which this isn't.
+- **Went with dynamic virtual width once the counter-scaled-HUD build still showed stretched
+  world sprites on-device**, rather than trying to extend counter-scaling to the world too
+  (which would have meant rendering the world into an intermediate uniformly-scaled surface —
+  a much bigger change than computing one extra number per resize). This does mean the "don't
+  touch the camera/world coordinate system" framing item 1 was originally scoped under no
+  longer fully holds — `virtualSize.x` now varies per device — but height, and everything
+  tuned against height (`groundY`, jump physics, platform heights), is still exactly fixed;
+  only the horizontal view width changes, the same tradeoff Unity's "match height" and
+  Cocos2d's `FIXED_HEIGHT` policy make deliberately.
+- **Counter-scaled the HUD instead of moving it to a Flutter overlay outside Flame's
+  viewport.** Both options were offered to the user; counter-scaling keeps the joystick/buttons
+  as Flame components (so they keep using `DragCallbacks`/`ComponentViewportMargin` as-is)
+  while still cancelling the visual distortion, versus a bigger rewrite to a parallel Flutter
+  widget input layer.
+- **Moved the player (`playerX`) rather than continuing to resize the joystick.** Calculated
+  the actual overlap first and confirmed no joystick sizing could satisfy both "reachable" and
+  "not overlapping the character" at once given the old player position — this was a genuine
+  geometric conflict, not a tuning problem, so tuning the joystick further would not have
+  fixed it.
+- **Verified the joystick/jump fix with a real scripted browser interaction, not just unit
+  tests or a static screenshot**, at the user's explicit request to self-test — building a
+  small one-off CDP driver (`Input.dispatchMouseEvent` press/move/release, with `buttons:1` set
+  on every held-drag move, which Chrome requires to treat it as a drag rather than a hover).
+
+## 4. Things we tried that did NOT work
+- First CDP interactive-drag attempt: the joystick never visibly moved even though the drag
+  sequence ran and a plain Jump-button tap worked fine in the same script. Root cause: the
+  intermediate `mouseMoved` events during the simulated drag omitted `buttons: 1`, so Chrome
+  treated them as hover-moves rather than a continued drag. Fixed by setting `buttons: 1`
+  explicitly on every held-move event.
+- First screenshot attempts came back blank white despite the page reporting
+  `readyState: complete`. Root cause: two separate Chrome instances existed at once (Flutter's
+  own auto-launched one, actually working, and a second manually-launched CDP-debug one that
+  stayed backgrounded and heavily throttled by Chrome's background-tab JS throttling) — the
+  wrong one was being screenshotted. Fixed by using `flutter run -d web-server` (no
+  auto-launched browser) plus exactly one manually-launched, genuinely OS-foregrounded Chrome
+  instance.
+
+## 5. Next steps (in order)
+1. ~~Get the user's own on-device confirmation before committing~~ **Done.** The user tested
+   the dynamic-virtual-width build (the one that actually fixes the stretch, not the
+   counter-scaled-HUD-only intermediate build) and confirmed it looks right. Committed on
+   `v2-phase-1` as `99076c4`.
+2. Phase 2 — combat and Kaalaman, per the Phase 1 entry below.
+
+## 6. Constraints & conventions
+- Do not change gravity (900) or jump force (-480) for any future viewport work — `size.y`
+  (virtual height) is fixed at `GameConstants.virtualHeight` regardless of device;
+  `StretchToFillViewport` only ever changes `size.x` (virtual width) and the final canvas
+  blit, never height or world coordinates.
+- **`GameConstants.virtualWidth` no longer exists.** Virtual width now varies per device
+  (`StretchToFillViewport` computes it from `virtualHeight * aspectRatio` every resize) — if
+  something needs "the current virtual width," read `ChronoGame.size.x` / `camera.viewport
+  .virtualSize.x` at the point of use, don't reintroduce a fixed-width constant.
+- `hudCounterScale` no longer exists either — removed along with the stretch it used to
+  correct for. Don't reintroduce per-axis HUD scaling; if HUD elements ever look distorted
+  again, the bug is almost certainly in `StretchToFillViewport`'s scale computation, not
+  something to patch around at the HUD layer.
+- `GameConstants.playerX` is now 220, not 80 — if anything ever needs the player's render x
+  again, read the constant, don't hardcode either value.
+- Joystick footprint is background radius 60 + margin 45 from the left/bottom (x ∈ [45, 165]
+  in virtual units) — any future player-position or HUD-layout change should re-check it
+  doesn't reopen the overlap this pass fixed.
+- Always send arm64-v8a APKs for this user's device, never armeabi-v7a.
+
+---
+
 **Date:** 2026-09-26 (GAMEPLAY-V2 revision 7 landed + Phase 1 playtest triage)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -497,129 +674,6 @@ per the existing convention below) — **106 tests, all passing.**
 
 ---
 
-**Date:** 2026-09-25 (Phase 0/0.5 end-to-end CDP verification, before Phase 1)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Before starting Phase 1, verify Phase 0/0.5 end-to-end with actual measurements instead of
-eyeballed screenshots: pixel-diff the six era tints, confirm level counts and boss positions
-match Section 1 exactly, and confirm the level-complete score matches a real computed result
-rather than just some plausible-looking display text.
-
-## 2. Current state
-
-**New, committed to `tool/`:**
-- `tool/png_util.js` — dependency-free PNG decoder (Node's built-in `zlib` only) with
-  `meanRGB`/`rgbDistance`/`pixelDiff` helpers. Turns a `cdp_shot.js` screenshot into real pixel
-  values instead of something only a human can eyeball.
-- `tool/cdp_shot.js` — gained `--port` (test a plain-static `flutter build web` bundle instead
-  of the dev server), a `console:`/`clearconsole` step (read back `debugPrint` output — how a
-  script can learn a shuffled quiz question's correct-answer letter without knowing it in
-  advance), and now always calls `Page.bringToFront` before running steps.
-
-**Verified, all against a `flutter build web --profile` bundle on a plain static file server
-(no DWDS) — see Decisions for why:**
-- **Tints**: mean background colour sampled from all six eras' actual game canvas (not
-  level-select) plus a same-era reshoot as a noise-floor control. Every cross-era pair differs
-  by 23.5-79.3 in RGB distance; the same-era control (two shots of pre-colonial ~1.5s apart)
-  differs by 0.38 — every era is 60-200x further from every other era than from itself. Full
-  pixel-diff agrees: ~98-99% of sampled pixels differ beyond threshold cross-era vs 14.7% for
-  the control (background dust-particle animation, not colour). Incidental finding: spanish vs
-  nationalism is the closest pair (23.5), not spanish vs american (33.9) as Phase 0's eyeballed
-  note guessed — expected, since nationalism deliberately reuses spanish's palette, but the two
-  eras' own tints (sepia/amber vs warm ochre) still read as distinct on top of it.
-- **Level counts and boss positions**: counted level-select nodes directly from screenshot
-  pixels (classifying each x-position by exact match against the three *opaque* node-fill
-  colours — `AppColors.primary`/`Colors.grey.shade700`/`AppColors.accent` — which render
-  identically regardless of era, unlike the alpha-blended connector and border colours, which
-  blend with each era's own background gradient and so differ per era; matching only the
-  opaque constants is what makes one classifier work across all six colour schemes with no
-  per-era tuning). Counted exactly 10/5/7/8/8/5 = 43 nodes across the six eras, matching
-  Section 1 exactly, and the last node in every era is 54px wide vs 42px for the rest — the
-  boss node, always last, confirming `isBoss` position for every era, not just eyeballed for one.
-- **Level-complete score**: played pre-colonial level 1 to completion for real — all 10
-  questions answered correctly via temporary `debugPrint`s revealing each shuffled question's
-  correct-answer letter (removed after). Recorded each answer's real elapsed time and the
-  final coin count from the trace, then independently reconstructed the expected score from
-  the documented rules alone (10 base × 10 questions, 0 speed bonuses since real answering
-  latency was never under 10s, +50 perfect bonus, +5 × 31 coins collected along the way) =
-  **305**. That number matches both the engine's own internal `score` at `levelComplete()` and
-  the level-complete screen's displayed "+305 PUNTOS" exactly — three independent sources
-  (manual reconstruction, internal state, UI) agreeing, not just "a number is shown."
-
-**Not re-verified this round:** audio (still needs a human, per the Phase 0 entry) and the
-other five eras' full level-complete flow (only pre-colonial was played to completion; the
-other five share the same code path, so this wasn't repeated five more times).
-
-## 3. Decisions made (and why)
-- **Tested against a static `flutter build web --profile` bundle, not `flutter run
-  -d web-server`.** The dev server's periodic self-reload (documented in `cdp_shot.js`,
-  ~20-30s) would have wiped a 10-question, multi-minute playthrough partway through with no
-  warning. A static build has no DWDS, no reload, and (once the one-time Flutter/CanvasKit
-  bootstrap finishes) loads in ~1-2s instead of the dev server's 45-55s per full reload — worth
-  doing for any verification longer than a couple of screenshots. Built via PowerShell, not Git
-  Bash, to avoid the documented `--dart-define=DEV_START_ROUTE=...` path-mangling gotcha.
-- **A second, worse freeze cause found and fixed in the tooling: OS-level window focus, not
-  just the CDP tab.** `Page.bringToFront` selects the right *tab* but does nothing if the
-  Chrome *window* itself isn't the foreground OS window — this session's Chrome was launched
-  detached and had no window focus at all, so the game sat completely frozen (`elapsedSeconds`
-  climbing, `dt` not) through several minutes of waits until the actual window was raised via
-  PowerShell's `SetForegroundWindow`. `cdp_shot.js`'s existing rAF-throttling note only covered
-  the tab-level case; now documents both.
-- **The question overlay's timer keeps running in real wall-clock time while the Flame engine
-  is paused.** `QuestionOverlayWidget`'s `Timer.periodic` is a plain Flutter timer, independent
-  of `pauseEngine()` — so `elapsedSeconds` (and therefore the speed bonus) reflects genuine
-  real-world seconds since the question appeared, including any gap between separate script
-  invocations while a human or agent is reading a screenshot. This is *why* every one of the 10
-  answers in the score verification missed the <10s speed bonus (real per-question turnaround
-  was 18-59s) — correctly reflected in the final score, not a bug in the timer or the test.
-- **Coin income was not scripted or predicted in advance, only measured after the fact.** Coins
-  auto-collect on contact with no player action, so their count over a run is a function of
-  spawn-timer luck, not something to forecast. Reading the final `playerCoins` from the same
-  debug trace that reported the answers is enough to reconstruct the exact expected score
-  without needing to control or predict coin timing.
-- **`png_util.js`'s node classifier matches exact opaque RGB constants, not a background-
-  relative brightness threshold.** The first version classified by absolute brightness/hue and
-  worked for the spanish/pre-colonial screenshots (dark brown gradient) but collapsed american
-  and modern (blue/indigo gradients) into "1 giant node," because the connector and border
-  colours are `.withValues(alpha:...)` and blend with whatever gradient is behind them — a
-  different RGB per era. The three fill colours are plain opaque `color:` values with no alpha,
-  so they're the one thing genuinely constant across all six screenshots.
-
-## 4. Things we tried that did NOT work
-- **Classifying level-select nodes by absolute background brightness + one hardcoded connector
-  RGB.** Correct for the two eras it was tuned against, silently wrong (a single merged "node")
-  for the other four with different background gradients — see Decisions.
-- **Trying to answer questions quickly enough for the speed bonus, across separate script
-  invocations.** Real wall-clock time passes between "read the screenshot" and "send the next
-  click" regardless of how fast that happens in agent-time; every answer landed past 10s. Not a
-  failure of the verification — the expected-score formula was built to use whatever elapsed
-  time actually happened, not to assume a bonus that testing conditions couldn't reliably hit.
-
-## 5. Next steps (in order)
-1. Phase 1 — player control (see the Phase 0.5 entry below for detail). This entry's
-   verification is the explicit prerequisite check the user asked for before starting it.
-2. Content debt carried over from Phase 0.5 (unchanged): `questions_nationalism.json`, the
-   real BOW-PDF-sourced era 4/5 historicalText split.
-3. Audio still needs a human (Phase 0 entry, unchanged).
-
-## 6. Constraints & conventions
-- For any CDP-scripted verification longer than a couple of screenshots, prefer a static
-  `flutter build web --profile` bundle on a plain static server (`tool/cdp_shot.js --port`)
-  over the dev server — see Decisions.
-- Before a scripted run with waits longer than a few seconds, confirm the Chrome *window* has
-  real OS focus (not just the CDP tab) — see Decisions. `cdp_shot.js` handles the tab; the
-  window is on you.
-- `flutter test` must still be scoped to `test/data test/game test/models`; `test/screens/`
-  still hangs (see the 2026-09-22 Tier 1 entry, folded below).
-- Do not rename `HeartsState`, the provider fields, or the Hive keys (Phase 0 rule, still applies).
-
----
-
 **Date:** 2026-09-25 (Era 3 level-count correction + real BOW weeks)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -981,6 +1035,7 @@ playthrough — only the empty-result fallback was exercised above, since script
 ---
 
 ## Older entries (folded)
+- 2026-09-25 (Phase 0/0.5 end-to-end CDP verification) — Confirmed Phase 0/0.5 with real measurements before Phase 1: pixel-diffed all six era tints (every cross-era pair 60-200x further apart than same-era noise), counted level-select nodes by opaque fill colour to confirm 10/5/7/8/8/5 = 43 nodes and correct boss positions across every era, and played a level to completion to confirm the displayed score matches an independently-reconstructed one (305, agreeing three ways). Added `tool/png_util.js` (dependency-free PNG decoder + pixel-diff helpers). No app code changed.
 - 2026-09-22 (Tier 1: hit/idle animation, housekeeping; test hang root-caused but NOT fixed) —
   Added `PlayerComponent.triggerCheer()` on a correct answer (verified by asserting the real
   animation object in `player_reactions_test.dart`, not a screenshot — cheer reuses the jump

@@ -1,11 +1,21 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **design proposal**, not yet implemented. Revision 9 — protected platform-height
-range corrected to **90-110** (was 60-105) to match the real fix landed on `v2-phase-1`
-(`16fbc5c`): the old range put platforms at ankle height on the player sprite. On top of
-revision 8's Phase 4 commitment to Claude Code generating a programmatic first-draft `.tmx`
-for all 43 levels (Sections 11, 14, 15), shrinking the authoring job from "build 43 levels"
-to "review 31, hand-build 12"; revision 7's crate removal and render-order fix; revision 6's
+Status: **design proposal**, not yet implemented. Revision 10 — Phase 1's "play it on a real
+phone" playtest (Section 15) surfaced three more real-device-only issues, fixed and confirmed
+on-device on `v2-phase-1` (`c3ca19a`, `99076c4`): the fixed-resolution viewport pillarboxed any
+screen wider than 16:9 (now a custom edge-to-edge `StretchToFillViewport`); a first attempt at
+fixing that (a non-uniform stretch, counter-scaled back to circular for the HUD only) still
+left world sprites visibly stretched, so the real fix instead lets virtual **width** track each
+device's own aspect ratio (virtual height stays fixed) — the world-to-screen scale is always
+uniform now, so nothing stretches anywhere, HUD included, with no counter-scaling needed; and
+the joystick, sized to be reachable, unavoidably overlapped the player's old render position
+(fixed by moving `GameConstants.playerX`, not by shrinking the joystick past comfortable). The
+platform-height ceiling also moved 110→**113**, the exact jump-reachability limit. See Section
+3's Controls correction for detail. On top of revision 9's platform-height range correction to
+**90-110** (was 60-105, `16fbc5c`); revision 8's Phase 4 commitment to Claude Code generating a
+programmatic first-draft `.tmx` for all 43 levels (Sections 11, 14, 15), shrinking the
+authoring job from "build 43 levels" to "review 31, hand-build 12"; revision 7's crate removal
+and render-order fix; revision 6's
 hearts reversal; revision 5's Era 3 correction; and the revision 4 codebase corrections.
 Six-era curriculum structure from the DepEd three-term Budget of Work, built around
 off-the-shelf components, corrected against a full read of the codebase (Task M,
@@ -232,6 +242,30 @@ Gravity `900`, jump force `-480`, peak ~128 units.
 > frame-hitch at jump-off). **90-110 is now the protected range** — gravity and jump force
 > are unchanged and still off-limits. If platforms feel too high, 90 is the number to pull
 > back; 110 is the ceiling the jump arc allows.
+
+> **Correction, 2026-09-29 (`v2-phase-1`, `c3ca19a` + `99076c4`, confirmed on-device):** the
+> Phase 1 "play it on a real phone" playtest below surfaced three more issues, all
+> layout/rendering, not physics. (1) `CameraComponent.withFixedResolution` pillarboxes any
+> screen wider than exact 16:9 (black bars on the sides) — replaced with a custom
+> `StretchToFillViewport` (`lib/game/stretch_to_fill_viewport.dart`). A first version of that
+> viewport fixed both virtual width and height (1280×720) and stretched them non-uniformly to
+> fill the canvas — this removed the bars but a device screenshot showed world sprites
+> (enemies, coins, platforms) still visibly stretched even after counter-scaling the HUD back
+> to circular. The real fix instead keeps virtual **height** fixed (`GameConstants
+> .virtualHeight`, still 720 — gravity, jump force, groundY and spawn distances, all measured
+> against height, are unaffected) but lets virtual **width** track each device's own aspect
+> ratio, so the world-to-screen scale is always uniform: nothing stretches, on any axis, on any
+> device. `GameConstants.virtualWidth` no longer exists as a fixed constant as a result. (2) The
+> stretch fix above also resolves the HUD-ovals problem for free — the `hudCounterScale`
+> mechanism that used to cancel it has been removed entirely, since there's no longer any
+> unevenness to cancel. (3) A joystick sized/positioned to be comfortably reachable unavoidably
+> overlapped the player's render position at the old `GameConstants.playerX = 80` — no joystick
+> sizing could satisfy both "reachable" and "clear of the character" at once, so the actual fix
+> was moving the player (`playerX` 80→220) rather than continuing to shrink the joystick.
+> Platform ceiling also raised **110→113** (still `jumpPeak - 15`, unchanged limit, just no
+> longer leaving 3 spare units unused). Jump/Attack buttons 20% bigger; walk speed 150→210
+> (parallax auto-adapts). All of the above is committed on `v2-phase-1` — see `HANDOFF.md`'s
+> 2026-09-29 entry for full detail.
 
 Attack: a short forward hitbox in the facing direction, ~0.25s, with a cooldown so it can't
 be spammed. Fails with a small "no charges" shake if Kaalaman is 0.
