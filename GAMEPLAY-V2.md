@@ -1,8 +1,15 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **design proposal**, not yet implemented. Revision 10 — Phase 1's "play it on a real
-phone" playtest (Section 15) surfaced three more real-device-only issues, fixed and confirmed
-on-device on `v2-phase-1` (`c3ca19a`, `99076c4`): the fixed-resolution viewport pillarboxed any
+Status: **Phases 0-2 implemented** (Phase 2 uncommitted, awaiting its on-device playtest);
+Phases 3-4 still design proposal. Revision 11 — **Phase 2, combat and Kaalaman, is built**:
+attack hitbox with charge cost and cooldown, the Kaalaman charge system with HUD orbs,
+Walker/Heavy behaviours with HP, the Flame effect death sequence with coin drops, contact
+damage with knockback and invincibility frames, enemies no longer opening the quiz, and a
+distance-based level-end rule replacing "all enemies dead". Chaser and the boss rework stay
+deferred. Three deliberate, temporary deviations are recorded inline — see Sections 4 and 5's
+corrections and Section 15's Phase 2 status note. On top of revision 10, where Phase 1's "play
+it on a real phone" playtest (Section 15) surfaced three real-device-only issues, fixed and
+confirmed on-device on `v2-phase-1` (`c3ca19a`, `99076c4`): the fixed-resolution viewport pillarboxed any
 screen wider than 16:9 (now a custom edge-to-edge `StretchToFillViewport`); a first attempt at
 fixing that (a non-uniform stretch, counter-scaled back to circular for the HUD only) still
 left world sprites visibly stretched, so the real fix instead lets virtual **width** track each
@@ -293,6 +300,20 @@ valid, both are interesting, and the second one is more dangerous.
 > All five numbers above (start, reward, retry reward, cost, cap) are **guesses that must be
 > tuned by playing**. Treat them as starting values, not requirements.
 
+> **Correction, 2026-09-30 (`v2-phase-1`, Phase 2, uncommitted):** every one of these numbers
+> now lives in `lib/core/combat_constants.dart` (`CombatConstants`), which is where they
+> should be re-tuned — Section 15's Phase 2 prompt asked for exactly one such file. Two
+> deviations from the list above, both deliberate and both temporary:
+> **(1) `kaalamanStart` is 3, not 0.** Artifacts are the only real source of charges and
+> don't exist until Phase 3, while the debug grant key needs a physical keyboard — so on a
+> touch device a level starting at 0 leaves the attack button permanently dead and makes
+> combat impossible to playtest at all. Set it back to 0 as part of Phase 3, once answering an
+> artifact awards charges for real.
+> **(2) The orbs are plain circles stacked under the hearts, not "glowing orbs next to HP".**
+> No orb art exists in the project yet, and the row sits under the hearts rather than beside
+> them so it doesn't crowd the level/score/coin widgets sharing that row — a playtest request,
+> not a design change. Same "plumbing now, real asset later" split Phase 0 used for audio.
+
 ---
 
 ## 5. Combat and enemies
@@ -340,6 +361,26 @@ knockback, per Section 4.
 **Falling in a gap:** -1 HP and respawn at the last ground segment you were standing on. The
 existing `playerFellInGap` logic covers most of this; it needs a respawn anchor instead of a
 straight vertical reset.
+
+> **Correction, 2026-09-30 (`v2-phase-1`, Phase 2, uncommitted):** this section is implemented
+> as written — the behaviour table transcribes directly into `lib/game/enemy_behavior.dart`
+> (7 Walkers, 3 Heavies), the death sequence is the exact ColorEffect → ScaleEffect →
+> OpacityEffect chain over 0.3s, and contact damage is -1 HP with knockback and a ~1s
+> invincibility flash. Four notes on how it actually landed:
+> **(1) The three Chaser-destined sprites run as plain Walkers, without the "floating Y
+> offset"** this section suggests — an offset with no pursuit behaviour reads as a bug rather
+> than a hint at a future one, so it's better added alongside the real Chaser.
+> **(2) Heavies move zero, not "barely".** Simplest reading that satisfies the description,
+> and trivially loosened later once level authoring can place them to block a corridor as
+> intended (they currently spawn in open ground, procedurally).
+> **(3) Enemies now mirror their sprite when patrolling back** — the art faces left natively,
+> so without a flip they visibly slid backwards on the return leg. Done with a render-local
+> canvas transform, never `flipHorizontally()`, which mutates `position.x` — world state the
+> despawn check and patrol anchor both read every frame.
+> **(4) The attack's slash-arc overlay is a plain rectangle for now**, since no such art
+> exists in the project; referencing a missing sprite would throw at runtime.
+> All tuning values (patrol range and speed, knockback, i-frame duration, death timings, coin
+> drop range) live in `lib/core/combat_constants.dart` — see Section 4's correction.
 
 ---
 
@@ -982,6 +1023,19 @@ finished without killing a single enemy**; all tuning values live in one file;
 
 *Then you:* play and **write down which numbers feel wrong.** Expect to adjust most of them.
 That constants file is why the prompt asks for it.
+
+> **Status, 2026-09-30:** implemented on `v2-phase-1`, **uncommitted**, awaiting the
+> on-device playtest this prompt's "then you" step describes. Every acceptance criterion above
+> is met and 172 tests pass; the combat loop was additionally driven end-to-end in a real
+> browser (charge spend, visible hitbox, an enemy killed and dropping 2 coins, contact damage
+> costing a heart). See Sections 4 and 5's corrections for the deviations, and `HANDOFF.md`'s
+> 2026-09-30 entry for the full file-by-file record — including the Flame effect-lifecycle
+> traps the death-sequence test hit, which are worth reading before touching that test.
+>
+> **Scaffolding to delete in Phase 3, all together:** the `K` debug charge key,
+> `CombatConstants.debugGrantAmount`, the temporary `kaalamanStart = 3`, and the
+> `KeyboardEvents` mixin on `ChronoGame`. They exist only because artifacts — the real charge
+> source — arrive in Phase 3.
 
 ---
 

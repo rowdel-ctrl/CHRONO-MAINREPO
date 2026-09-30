@@ -3,6 +3,156 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-09-30 (Phase 2 — combat and Kaalaman; uncommitted, awaiting on-device playtest)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Implement Phase 2 of `GAMEPLAY-V2.md` per Section 15's prompt: attack hitbox with charge cost
+and cooldown, the Kaalaman charge system with HUD orbs, Walker/Heavy enemy behaviours, enemy
+HP, the Flame effect-sequence death animation with coin drops, contact damage with knockback
+and invincibility frames, enemies no longer opening the quiz, and a distance-based level-end
+rule to replace "all enemies dead". Chaser behaviour and the boss rework are explicitly out of
+scope (Phase 3+).
+
+## 2. Current state
+
+**All uncommitted on `v2-phase-1`**, held for the user's on-device playtest per this repo's
+standing workflow. 172/172 tests pass (40 new), `flutter analyze` clean at the same 5
+pre-existing info lints.
+
+**New files:**
+- `lib/core/combat_constants.dart` — every Phase 2 tuning number in one place, as the phase
+  prompt requires ("so they can be adjusted without hunting"). Charge cost/cap/start, attack
+  hitbox size/duration/cooldown, patrol range/speed, Walker/Heavy HP, knockback force and
+  duration, i-frame duration and flash interval, death-sequence sub-timings, coin-drop range,
+  level `lengthUnits` default, and the debug key binding. Each carries a comment saying
+  whether the value came from the design doc or is a guess to be playtested.
+- `lib/game/enemy_behavior.dart` — `EnemyBehavior` enum + `enemyTypeTable`, a direct
+  transcription of Section 5's table (7 Walkers, 3 Heavies across the 10 sprites), looked up
+  by the same sprite-name string `_getEnemyTypeForEra()` already picks.
+- `lib/game/components/attack_hitbox_component.dart` — the transient swing hitbox. Added to
+  `world` rather than the player so it isn't subject to the player's render-flip transform;
+  tracks a `Set` of already-hit enemies so one swing lands at most one hit per enemy even
+  across several collision frames (which would otherwise two-shot a Heavy in a single swing).
+- `lib/game/kaalaman_handler.dart` — `trySpendCharge()`/`debugGrantCharges()` as an extension
+  on `ChronoGame`, matching the existing quiz_handler/game_spawning split.
+
+**Modified:**
+- `lib/game/components/enemy_component.dart` — dropped the `Question` constructor param and
+  the `?` quiz indicator; added behaviour/HP resolution in `onLoad()`, Walker patrol movement,
+  `takeHit()`/`_die()`/`_dropCoins()`, and a `render()` override that mirrors the sprite by
+  patrol direction. Also `enemyTypeOverride` (`@visibleForTesting`) — every era mixes one
+  Walker and one Heavy sprite and the pick is random, so `eraId` alone can't select a
+  behaviour deterministically in a test.
+- `lib/game/components/player_component.dart` — `attack()` (cooldown + charge gate + hitbox
+  spawn); the enemy branch of `onCollisionStart` now deals contact damage instead of opening
+  the quiz; new i-frame/knockback/flash state machine; `render()` skips drawing mid-flash.
+- `lib/game/chrono_game.dart` — `kaalaman` field, `currentLevelData` getter, `onPlayerAttack()`,
+  `KeyboardEvents` mixin + `onKeyEvent` for the debug grant, and `checkLevelEnd()` rewritten to
+  the distance rule. Removed the now-unreachable `currentEnemy` field.
+- `lib/game/quiz_handler.dart` — deleted `showQuestion()` outright (its only caller was the
+  enemy-collision branch) and the three dead `currentEnemy?.defeat()` calls. Boss flow
+  untouched.
+- `lib/game/components/enemy_spawner.dart` — dropped the questions roster and the
+  `spawnedCount`/`totalEnemies`/`allEnemiesSpawned` bookkeeping; enemies now spawn periodically
+  off distance travelled, uncapped, the same rhythm coins and platforms already used.
+- `lib/models/level.dart` + `lib/core/constants.dart` — `Level.lengthUnits`, defaulted from
+  `CombatConstants.lengthUnitsDefault` at the single `EraData.levels` construction site.
+- `lib/game/game_input.dart` — Attack button wired to `game.onPlayerAttack()`.
+- `lib/game/overlays/hud_overlay.dart` — Kaalaman orb row, stacked under the hearts.
+- `lib/game/game_spawning.dart` — `EnemySpawner` no longer takes questions; boss levels still
+  split off their fight-phase questions, and the warm-up slice is now discarded.
+
+**Verified in a real browser, not just by tests** (CDP-driven, screenshots at each step):
+orbs render empty at level start and fill on the debug key; each attack spends exactly one
+charge and the hitbox is visible in front of the player; an enemy died and left 2 coins in its
+place; walking into an enemy cost exactly one heart; and the enemy sprite genuinely mirrors on
+the return leg of its patrol. No new console errors — only the pre-existing
+`questions_nationalism.json` 404.
+
+## 3. Decisions made (and why)
+- **Enemies spawn uncapped off distance rather than from a fixed roster.** Once contact stops
+  opening a quiz, an enemy carries no per-instance data, so a count would have been new state
+  nothing reads. Dropping the roster deleted dead bookkeeping instead of replacing it.
+- **`lengthUnits` is a flat 4000 placeholder on `Level`, not a per-level authored value or a
+  difficulty formula.** Levels are still fully procedural, so there is no real content to
+  measure against; Section 14 says this value is explicitly temporary and Phase 4's Tiled
+  `exit` object replaces it. Putting the field on `Level` costs nothing and gives Phase 3/4 an
+  obvious override point.
+- **Contact damage is decided only on the player's side.** `WallComponent`/`CoinComponent`
+  collisions already live in `PlayerComponent.onCollisionStart`; a second handler on the enemy
+  would double-process the same collision pair.
+- **Invincibility and the hurt animation are tracked separately.** They are different
+  durations (1.0s vs 0.6s) on different axes — one gates damage and drives a render-level
+  flash, the other picks which animation plays. Both fire from one `_takeContactDamage()`
+  helper that early-returns while invincible, which is what stops a wall landing a second hit
+  inside an enemy's window (and vice versa).
+- **The slash arc and the Kaalaman orbs are plain shapes, not art.** No such assets exist in
+  the project; referencing a missing sprite would throw at runtime. Same "plumbing now, real
+  asset later" split Phase 0 used for audio and Phase 1 used for the joystick.
+- **The enemy sprite flip uses a render-local canvas transform, not `flipHorizontally()`** —
+  that method nudges `position.x` for a non-center anchor, and here `position.x` is world state
+  read every frame by the despawn check and the patrol anchor.
+- **`kaalamanStart` is temporarily 3 instead of Section 4's 0.** Artifacts (the real source)
+  are Phase 3 and the debug grant needs a physical keyboard, so on a phone a level starting at
+  0 leaves the attack button permanently dead and combat impossible to playtest. Chosen over
+  adding an on-screen debug button, which would have added a fourth control competing for
+  thumb space with the joystick and two buttons already tuned for reach, plus its own removal
+  pass later. Set back to 0 in Phase 3.
+
+## 4. Things we tried that did NOT work
+- **The death-sequence test cost several wrong turns, all confirmed by instrumentation rather
+  than guessed.** In order: `Component.update()` does not cascade to children (`updateTree()`
+  does), so the effect never ticked; a bare `ChronoGame` never reaches `isMounted`, and
+  `Component._addChild` skips the lifecycle queue entirely for an unmounted parent, so the
+  effect was never mounted and `ComponentEffect.target` stayed uninitialised; `tester.pump()`'s
+  ticker did not reliably advance the effect where direct `game.updateTree(dt)` did; and the
+  first `updateTree` call is needed just to flush the effect's own pending add before its
+  controller starts advancing. The file's header documents all of this so the next person
+  doesn't re-derive it.
+- **`enemy.parent == null` could not be asserted after the death sequence.** `onComplete` does
+  fire and `removeFromParent()` does run (both verified by temporary prints), but the detach
+  stays queued in this harness no matter how many extra ticks are driven. The test asserts
+  `isRemoving` instead — the state the production code actually sets — rather than testing the
+  harness.
+- **`eraId: 'ww2'` was assumed to yield a Heavy.** It picks randomly between `japanese_soldier`
+  (Walker) and `tank` (Heavy), so a patrol-free test passed only about half the time. This
+  surfaced as a test that passed alone but failed in the full suite; fixed with the
+  `enemyTypeOverride` seam rather than by retrying until the right sprite appeared.
+- **Contact-damage tests initially lost an extra heart.** With no `GroundSection` in a bare
+  game, gravity pulled the player below the viewport within ~1s and tripped `update()`'s
+  fall-in-gap check. The helper now pins the player to the ground between frames.
+
+## 5. Next steps (in order)
+1. **User playtests this batch on-device.** Everything above is uncommitted until then.
+   Specific things worth a read: whether hearts drain too fast (enemies spawn often and walk
+   into you), whether the attack feels responsive, and whether 3 starting charges is right.
+2. **Tune `combat_constants.dart` from that feedback.** The phase prompt anticipates most of
+   these numbers being wrong first pass — that file exists for exactly this.
+3. **Phase 3 — artifacts, gates, quiz rework.** Makes charges earnable by answering questions,
+   which is what retires the debug key and the temporary `kaalamanStart = 3`.
+
+## 6. Constraints & conventions
+- Gravity (900), jump force (-480) and the 90-113 platform range are unchanged and still
+  off-limits — Phase 2 touched none of them.
+- `CombatConstants` is the only place Phase 2 tuning numbers live. Do not scatter combat
+  values back into `GameConstants` or into components.
+- The debug charge key (`K`), `CombatConstants.debugGrantAmount`, `kaalamanStart = 3` and the
+  `KeyboardEvents` mixin on `ChronoGame` are all Phase 2 scaffolding with one removal point in
+  Phase 3. Delete them together.
+- `EnemyComponent.enemyTypeOverride` and `PlayerComponent.isFlashVisible` are
+  `@visibleForTesting` seams; production code must not read them.
+- `test/game/sprite_scale_test.dart` is mildly flaky in full-suite runs (real sprite file I/O
+  within a fixed number of pump/runAsync cycles). Pre-existing, unrelated to Phase 2 — re-run
+  before treating a failure there as real.
+- Always send arm64-v8a APKs, and **only build one when explicitly asked.**
+
+---
+
 **Date:** 2026-09-29 (screen-fill viewport, joystick reachability, dynamic virtual width — playtest round 3, committed)
 **From:** Claude Code
 **To:** Claude Code / Chat
@@ -852,189 +1002,8 @@ colour, tint) actually resolves rather than just compiling.
 
 ---
 
-**Date:** 2026-09-25 (GAMEPLAY-V2 Phase 0 — free wins)
-**From:** Claude Code
-**To:** Claude Code / Chat
-**Project:** ChronoQuest
-
----
-
-## 1. Goal
-Implement Phase 0 of `GAMEPLAY-V2.md` (revision 4): unstub audio via `flame_audio`, per-era
-parallax tint, Energy rename (UI surface only), in-level HP 10 → 5, the tutorial copy string,
-and the level-complete screen's fabricated results.
-
-## 2. Current state
-
-Correctly on `v2-phase-0` as of this entry (Phase 0 is commit `bb006ef` in CHRONO-GAMEAPP; this
-doc + `GAMEPLAY.md`/`GAMEPLAY-V2.md` are `3568db6` at root) — an earlier draft of this entry's
-Next Steps had this backwards, claiming it landed on `main`.
-
-**Not yet committed, all in CHRONO-GAMEAPP unless noted:**
-- `pubspec.yaml` / `pubspec.lock` — added `flame_audio: ^2.12.2` (pulls `audioplayers`).
-- `lib/services/audio_service.dart` — stub replaced with a real `flame_audio` implementation.
-  Same public API, so no call site changed. Notes: the asset prefix is set to
-  `assets/sounds/` via `FlameAudio.updatePrefix` (flame_audio defaults to `assets/audio/`);
-  plugin init is deferred to the first play call, because touching `FlameAudio.bgm` builds an
-  `AudioPlayer` and `ChronoGame` creates its `audioService` as a *field initializer* — eager
-  init would drag the plugin into every test that merely constructs a game. Every call is
-  wrapped in try/catch, matching the parallax/sprite loaders.
-- **All 18 files in `assets/sounds/` replaced with real audio** (user-supplied placeholder
-  pack): 13 SFX and 5 era BGM loops, each BGM in a scale matching its era — pentatonic
-  (pre-colonial), Phrygian dominant (Spanish), major (American), natural minor (WWII), minor
-  pentatonic (Modern). All 18 are ID3-tagged MP3s, 1.7 KB–307 KB, replacing the 4-byte stubs
-  described in Decisions. **No code change was needed to adopt them** — the filenames match
-  what the service already asked for, which was the point of doing the plumbing first.
-- `lib/screens/game/game_screen.dart` — added `dispose()` → `stopBgm()`, plus passes the real
-  result to the completion screen via GoRouter `extra`.
-- `lib/game/components/parallax_background.dart` — six Section-1 tint constants + per-era
-  application through the decorator chain.
-- `lib/core/constants.dart` — `livesPerLevel` 10 → 5.
-- `lib/screens/tutorial/tutorial_screen.dart` — the "May 10 buhay" string now interpolates
-  `GameConstants.livesPerLevel`, so it can't drift from the constant again.
-- `lib/screens/game/level_select_screen.dart`, `level_failed_screen.dart` — Energy rename:
-  bolt icons + "ENERHIYA" label + Filipino copy. `HeartsState`, the provider fields and the
-  Hive keys are untouched, as instructed.
-- `lib/screens/game/level_complete_screen.dart` — new `LevelCompleteResult`; the fake
-  `widget.level % 3` getters now read the real result.
-- `lib/core/router.dart` — reads `state.extra`, falling back to `LevelCompleteResult.empty`.
-- `android/gradle.properties` — `kotlin.incremental=false`. **This is what makes the Android
-  build work at all with audio**; see Decisions.
-- `windows/flutter/generated_plugin_registrant.cc`, `generated_plugins.cmake` — regenerated by
-  `flutter pub add` to register `audioplayers_windows`. Generated files, not hand-edited.
-
-**Verified:** `flutter analyze` clean at the same 5 known pre-existing info lints (none in
-touched files). `flutter test test/data test/game test/models`: **96/96**, matching the
-established baseline. `flutter build web --debug` and `flutter build apk --debug` both
-succeed — the APK first from a cleared module cache with no CLI flags, and again after the
-real audio landed. All 18 MP3s confirmed shipping at full size in the web bundle.
-
-**Verified visually, over CDP** (`tool/cdp_shot.js`, web build at 1280x720):
-- **All five reachable era tints render and are clearly distinct** — era 1 warm green, era 2
-  sepia/amber, era 4 dusty gold, era 5 desaturated blue-grey, era 6 hazy cyan. Eras 2 and 4
-  are the closest pair (both warm/gold); still distinguishable, but they are the ones to
-  re-check on a phone screen.
-- **In-level HP is 5**, shown as five hearts in the HUD at level start.
-- **Energy reads as its own system** on both level-select and level-failed: "ENERHIYA" label,
-  gold bolts for available and a dim outline bolt for spent, with the regen countdown live.
-  Level-failed's subtitle now says "Naubusan ng buhay" and keeps a heart icon, so the
-  ran-out-of-HP cause and the Energy pool no longer share an icon.
-- **The level-complete screen no longer fabricates results.** Reached without a result payload
-  it shows "0/0 TAMA / +0 PUNTOS"; the old code would have shown "8/10" and "+80" at level 1
-  (`7 + level % 3`), so this is a decisive check that it reads the real value.
-- Incidental: the unattended auto-runner failed a level during a long wait and the Energy pool
-  correctly dropped to 4/5 with a countdown — the consume path works end to end.
-- **Chased down a real-looking bug that turned out not to be one.** An early screenshot showed
-  the level starting at 4/5 in-level HP with the player in its hurt pose, before anything had
-  been touched. Instrumented `loseLife()`/`PlayerComponent.onLoad`/`GroundSection.onLoad` with
-  temporary prints and reproduced it: `loseLife()` fired at `t=0.00s` with `playerY=2894.1` —
-  physically impossible from one frame of gravity (~0.25px), so the player's *starting* position
-  was already wrong, not something that fell. Root cause: **Chrome was serving a stale, cached
-  copy of the compiled `chrono_game.dart` module left over from before a dev-server restart**,
-  mixed with fresh modules for everything else — a Frankenstein bundle where `game.size`/
-  `groundY` no longer matched what the rest of the game expected. Restarting `flutter run`
-  does not change the DDC module URLs, so the browser's normal HTTP cache keeps serving the old
-  bytes indefinitely. Confirmed by disabling the cache (`Network.setCacheDisabled`) and
-  re-running: `game.size=[1280,720]`, `groundY=660`, `position=[0,540]` — all correct — and
-  `loseLife()` never fires on an idle level start. **No code changed as a result; the game was
-  never actually broken.** Fixed for good in the tooling instead: `tool/cdp_shot.js` now always
-  disables the cache before navigating. Debug prints were reverted.
-- **Separate, pre-existing artifact surfaced along the way:** `flutter run -d web-server`
-  without the Dart Debug Chrome extension retries its debug-service handshake forever, and
-  reloads the page on its own roughly every 20-30s while doing so. A `shot` step landing mid-
-  reload comes back black with a bare HUD; a `wait` spanning one looks like the game froze.
-  Neither is a bug in the game. Documented at the top of `tool/cdp_shot.js` so it isn't
-  mistaken for a regression again — retake the screenshot rather than trusting one that looks
-  wrong.
-
-**Still NOT verified — needs a human:** the audio. Nothing here can hear it. Play one level
-per era and listen for jump / coin / correct / wrong / hurt, plus the era BGM starting on
-entry and stopping on exit, and check the five BGM loops sound different from each other.
-The *real-result* path into the level-complete screen also still needs one genuine
-playthrough — only the empty-result fallback was exercised above, since scripting a full
-10-question level is not practical.
-
-## 3. Decisions made (and why)
-- **The bundled sound files were 4-byte placeholders — now resolved, but worth recording.**
-  Every one of the 18 was byte-identical: `FF FB 90 00`, a bare MP3 frame-sync header with no
-  frame data. That is not a silent MP3 — it does not decode at all, so every
-  `FlameAudio.play()` threw, got swallowed by the service's try/catch, and looked exactly like
-  the old no-op stub. This made the wiring unverifiable on its own: silent files, a broken
-  service, and a missing plugin were three indistinguishable outcomes. Bridged mid-session by
-  hand-writing one real WAV (a canonical 44-byte RIFF/WAVE header plus a phase-accumulated
-  320→920 Hz sweep) purely as proof the path worked. **Real audio has since landed for all 18
-  names**, so that WAV was deleted and `playJump()` reverted to `jump.mp3` — the service is
-  back to a uniform `.mp3` list with no special cases. Keep the lesson: if the sounds ever go
-  quiet again, check the file sizes before suspecting the code.
-- **The old stub's comment blamed an "audioplayers Kotlin compatibility issue" — it is real
-  and still present, but it is not a source incompatibility.** `:audioplayers_android:
-  compileDebugKotlin` fails under Kotlin 2.3.20 with "Could not close incremental caches
-  ... *.tab". There are no `e:` source errors; clearing the cache reproduces it in 22s, and
-  the same sources compile the instant incremental compilation is off. It's a Build Tools API
-  toolchain bug. Fixed with `kotlin.incremental=false` in `android/gradle.properties`. The app
-  has no Kotlin source of its own (only plugins), so the lost incrementality costs ~nothing.
-  **Without this line, adding audio breaks `flutter build apk` outright.**
-- **BGM stop had to be added; it did not exist.** Nothing in the app called `stopBgm()`,
-  `dispose()`, `toggleSound` or `toggleMusic` — harmless while every method was a no-op,
-  but once unstubbed the looping era BGM would have played forever over the menus. Hooked to
-  `GameScreen.dispose()`, which covers complete, failed and quit alike.
-- **The BGM filenames drop the hyphen** (`bgm_precolonial.mp3` vs the `pre-colonial` era id),
-  so `playBgm` needs the same mapping `WallComponent` already applies to obstacle art. Naive
-  `'bgm_$eraId.mp3'` would have silently failed on exactly one era.
-- **The tint is chained onto `decorator`, not assigned over it.** GAMEPLAY-V2 section 10 says
-  `component.decorator = PaintDecorator.tint(color)` works directly — that is wrong in a way
-  worth knowing: `PositionComponent` declares `late Decorator decorator` and fills it in its
-  own constructor with the `Transform2DDecorator` that applies the component's position and
-  scale (`position_component.dart:86,122`). Assigning over it throws that transform away. Used
-  `decorator.replaceLast(...)`, which appends on first call and swaps on any later one, so a
-  re-load can't stack tints. **Worth correcting in the doc.**
-- **Only five of the six tints are reachable today, by design.** Era 3
-  (Pag-usbong ng Nasyonalismo) has no era id until the Phase 0.5 registry creates one. All six
-  constants are defined; the map wires up the five ids that exist, using Section 1's own art
-  table for the correspondence (1=pre-colonial, 2=spanish, 4=american, 5=ww2, 6=modern).
-  Inventing era 3's content in Phase 0 would be doing Phase 0.5's job.
-- **`_points` now shows the game's real accumulated score**, not the old
-  `_correct * 10 + bonus` re-derivation, which silently dropped the speed bonus.
-- **Crates no longer cost HP** (`player_component.dart`, post-Phase-0 tuning at the user's
-  request after playtesting). They still break on contact, so nothing clips through. Reason:
-  the spawner runs *two* parallel crate timers (3-7s and 4-8s, `enemy_spawner.dart:55-69`) —
-  a leftover from when obstacles were a mix of walls and crates, both timers kept "to preserve
-  the combined obstacle cadence" — so a crate lands every ~2.7s. Unavoidable for a one-button
-  auto-runner, and dropping HP to 5 turned that from survivable into a drained bar in under a
-  minute. **This deviates from GAMEPLAY-V2 section 5**, which wants hazards to deal -1 HP with
-  knockback; that design assumes the Phase 1 movement controls, where the player can stop and
-  time a jump. Restore the damage when those land, and place crates deliberately in Phase 4
-  rather than on a timer. Net effect today: the only live damage source in a level is a wrong
-  quiz answer — wall collisions and gap falls are both dead paths, since nothing spawns either.
-
-## 4. Things we tried that did NOT work
-- **Clearing `build/audioplayers_android` to fix the Kotlin failure.** Reasonable first guess
-  (the error names cache files), but it reproduced in 22s from a clean cache — which is what
-  proved it was the incremental machinery itself, not staleness.
-- **`flutter pub add` emits a Windows "Developer Mode / symlink support" warning.** It did not
-  block anything here — both web and APK builds succeed — so it was left alone.
-
-## 5. Next steps (in order)
-1. **Listen to it.** The visuals are verified (see Current state); the audio is not, and
-   cannot be from here. One level per era, ears on. Also worth one genuine level completion
-   to exercise the real-result path into the level-complete screen.
-2. Correct the `decorator` claim in `GAMEPLAY-V2.md` section 10 (see Decisions), and the
-   now-stale "sound files are silent placeholders" text in its section 10 / Phase 0.
-3. Phase 0.5 — the era/level registry. It is the stated prerequisite for all gameplay phases,
-   and it is what makes era 3's tint reachable.
-4. Commit the crate-HP fix and the `cdp_shot.js` changes (`player_component.dart`,
-   `tool/cdp_shot.js`) to `v2-phase-0` — verified but not yet committed as of this entry.
-
-## 6. Constraints & conventions
-- `flutter test` must still be scoped to `test/data test/game test/models`; `test/screens/`
-  still hangs (unchanged by this session — see the 2026-09-22 entry for the root cause).
-- Do not rename `HeartsState`, the provider fields or the Hive keys. The Energy rename is
-  presentation only; those keys hold real regen state and renaming them resets it on upgrade.
-- Do not remove `kotlin.incremental=false` without re-testing `flutter build apk`.
-
----
-
 ## Older entries (folded)
+- 2026-09-25 (GAMEPLAY-V2 Phase 0 — free wins) — Unstubbed `AudioService` onto real `flame_audio` (asset prefix `assets/sounds/`, plugin init deferred to first play so merely constructing a game doesn't drag the plugin into every test) and replaced all 18 sound files with real audio; added the six per-era parallax tints via the decorator chain (chained, not assigned — assigning drops the existing decorator); in-level HP 10 → 5; the Energy UI rename (presentation only — `HeartsState`, provider fields and Hive keys untouched); and fixed the level-complete screen's fabricated results by passing a real `LevelCompleteResult` through GoRouter `extra`. Committed `bb006ef` on `v2-phase-0`, root `3568db6`. Two lasting gotchas: the shipped "silent" sound files were 4-byte stubs that threw on every play and were indistinguishable from a broken service, so check file sizes before suspecting the code; and `kotlin.incremental=false` in `android/gradle.properties` is load-bearing — without it `audioplayers_android` fails to compile and `flutter build apk` breaks outright.
 - 2026-09-25 (Phase 0/0.5 end-to-end CDP verification) — Confirmed Phase 0/0.5 with real measurements before Phase 1: pixel-diffed all six era tints (every cross-era pair 60-200x further apart than same-era noise), counted level-select nodes by opaque fill colour to confirm 10/5/7/8/8/5 = 43 nodes and correct boss positions across every era, and played a level to completion to confirm the displayed score matches an independently-reconstructed one (305, agreeing three ways). Added `tool/png_util.js` (dependency-free PNG decoder + pixel-diff helpers). No app code changed.
 - 2026-09-22 (Tier 1: hit/idle animation, housekeeping; test hang root-caused but NOT fixed) —
   Added `PlayerComponent.triggerCheer()` on a correct answer (verified by asserting the real
