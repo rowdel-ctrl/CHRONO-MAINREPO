@@ -1,7 +1,15 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **Phases 0-2 implemented** (Phase 2 uncommitted, awaiting its on-device playtest);
-Phases 3-4 still design proposal. Revision 11 — **Phase 2, combat and Kaalaman, is built**:
+Status: **Phases 0-3 implemented and committed**, awaiting their on-device playtest; Phase 4
+still design proposal. Revision 12 — **Phase 3, artifacts and gates, is built** (`43cc237`),
+which is the point this document calls "the new game": questions are no longer something
+enemies inflict on you but something you seek out. Artifacts grant Kaalaman and fill a Codex;
+three gates per level guarantee the educational floor; the question bank became a pool that
+never repeats within an attempt and always differs on retry; and Phase 2's debug charge
+scaffolding is gone. One agreed deviation — scoring now takes the best attempt per question,
+because Section 6's retries and Section 12's frozen payload otherwise combine to punish
+learning — is recorded in Section 15's Phase 3 status note. Revision 11 — **Phase 2, combat
+and Kaalaman, is built**:
 attack hitbox with charge cost and cooldown, the Kaalaman charge system with HUD orbs,
 Walker/Heavy behaviours with HP, the Flame effect death sequence with coin drops, contact
 damage with knockback and invincibility frames, enemies no longer opening the quiz, and a
@@ -1056,6 +1064,28 @@ shape; `flutter analyze` clean.
 
 *Then you:* play a full level start to finish. **This is the first time the actual V2 game
 exists** — judge whether the core loop is fun, not just whether it works.
+
+> **Status, 2026-09-30:** implemented and committed on `v2-phase-1` (`43cc237`), awaiting the
+> full-level playtest above. Every acceptance criterion is met and 206 tests pass; the loop
+> was driven in a browser far enough to confirm an artifact opens a real question with the
+> timer and power-ups intact, and that level 1 starts with exactly the one tutorial freebie
+> charge. Phase 2's debug scaffolding (the `K` key, `KeyboardEvents` mixin,
+> `debugGrantCharges`, `debugGrantAmount`) is gone and `kaalamanStart` is back to Section 4's
+> 0.
+>
+> **One deliberate deviation, agreed with the user:** the star/percentage calculation now
+> scores the **best attempt per distinct question** rather than every recorded attempt. The
+> prompt above says to keep that calculation as-is, but Section 6's retry loop and Section
+> 12's "log every attempt" requirement combine to make a student who answers everything
+> correctly on the *second* try score 50% and one star — punishing exactly the learning the
+> explanation panel exists to produce. `answers` and the POST payload are untouched; only the
+> two derived numbers changed, and both halves are pinned by tests.
+>
+> **Two follow-ups, neither blocking:** artifacts render small and dim next to the coins (the
+> per-era tint in Section 10 is tuned for washing a full background, not a 56px sprite), and
+> each non-boss level needs **10-15 authored questions to stop recycling** — it has 5, and
+> `nationalism` still has no question file at all. That is a content task, not a code one;
+> `QuestionPool` already handles any pool size and reports when it recycles.
 
 ---
 

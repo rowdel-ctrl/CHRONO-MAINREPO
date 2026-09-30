@@ -3,7 +3,97 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
-**Date:** 2026-09-30 (Phase 2 — combat and Kaalaman; uncommitted, awaiting on-device playtest)
+**Date:** 2026-09-30 (Phase 3 — artifacts, gates, Codex; committed, awaiting playtest)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Implement Phase 3 per Section 15: artifacts as answer points, gates from the era wall art,
+the reworked question flow, `QuestionBank` as a pool, the Codex on the Profile tab, and
+removal of Phase 2's debug charge key. This is the phase the design doc calls "the new game".
+
+## 2. Current state
+
+**Committed `43cc237` on `v2-phase-1`** (root `e247209` + the bump alongside this entry).
+206/206 tests pass (14 new), `flutter analyze` clean at the usual 5 pre-existing lints.
+
+**New:**
+- `lib/data/question_pool.dart` — per-attempt question supply. Serves one unused question at
+  a time, guarantees a retry differs from the question just missed (honoured even when that
+  forces a recycle), and counts recycles so a content-starved level is visible. Instance
+  state, not statics, so two levels in one session can't share a served-set.
+- `lib/game/components/artifact_component.dart` — floats, bobs, era-tinted via
+  `decorator.replaceLast` (never `decorator =`, which discards the transform decorator).
+  `goInert()` / `_relight()` / `claim()`, with the reward dropping permanently after a miss.
+- `lib/game/components/gate_component.dart` — full-height blocker, `open()` crumbles it.
+  Deliberately never culled behind the camera: a gate that respawned closed would re-block a
+  corridor the player already earned passage through.
+- `lib/game/answer_point_handler.dart` — the artifact/gate question flow, kept out of
+  `quiz_handler.dart` so the boss path bound by Section 12's frozen payload stays untouched.
+- `lib/models/codex_entry.dart`, `lib/screens/profile/codex_screen.dart` — the Codex.
+- `lib/game/era_asset_keys.dart` — the era→asset-name mapping extracted from `WallComponent`
+  before deleting it, so gates and any future user can't drift from it.
+
+**Changed:** `chrono_game.dart` (pool, active answer point, best-attempt scoring),
+`player_component.dart` (artifact/gate collision, gate clamp in `update()`),
+`game_spawning.dart` (lays out gates and artifacts up front), `storage_service.dart`
+(`codex_<eraId>`), `game_screen.dart` (routes the overlay by answer-point kind, tutorial
+freebie), `profile_screen.dart` (Codex card). **Deleted:** `wall_component.dart`.
+
+**Verified in a browser, not just by tests:** walking into an artifact opens a real question
+with the timer and power-ups intact, and level 1 starts with exactly one freebie charge —
+confirming the debug key is gone and `kaalamanStart` is back to 0.
+
+## 3. Decisions made (and why)
+- **Scoring takes the best attempt per distinct question.** Agreed with the user in-session.
+  Section 6 adds retries, Section 12 requires logging every attempt; together they made a
+  student who answers everything right on the second try score 50% and one star. `answers`
+  and the POST payload are byte-identical — only two derived numbers changed, both pinned by
+  tests. This is a documented deviation from "keep the star calculation exactly as it is".
+- **Gates replace `WallComponent` rather than coexisting.** A hazard that damages you and a
+  gate that stops you are different objects; two things made of one sprite with opposite
+  rules would have been a trap for the next reader.
+- **Artifacts and gates are laid out at level start, not spawned on a distance timer.**
+  Section 6 asks for exact counts ("3 gates in every level"), which a rolling timer can't
+  guarantee — the level would end mid-interval having placed some other number.
+- **The first answer point is always an artifact.** Charges come only from artifacts, so
+  meeting a gate first would be a dead start. Asserted in a test, not just arranged.
+- **Recycle real questions instead of padding with placeholders.** The old bank appended
+  generated "Dagdag na tanong" filler; showing students obviously-fake questions is worse
+  than repeating real ones, and `recycleCount` makes the shortfall measurable.
+
+## 4. Things we tried that did NOT work
+- **First `QuestionPool.draw()` let the excluded question through.** The exclusion was applied
+  after the recycle branch, so when the only unserved question *was* the one being replaced,
+  the `length > 1` guard passed it. Caught by the "exclusion holds even when it forces a
+  recycle" test, which is exactly why that case was written. Fixed by filtering unserved and
+  excluded together, recycling, then re-filtering.
+
+## 5. Next steps (in order)
+1. **Play a full level start to finish** — Section 15's own "then you" step for this phase.
+   Judge whether the loop is fun, not just whether it works.
+2. **Artifacts render small and dim** next to the coins; the per-era tint is tuned for washing
+   a whole background, not a 56px sprite. Likely wants a size and tint bump.
+3. **Content:** each non-boss level needs 10-15 authored questions to stop recycling; it has
+   5, and `nationalism` has no question file at all. Code-side this is already handled.
+4. **Phase 4 — Tiled levels**, which retires the procedural spawner entirely.
+
+## 6. Constraints & conventions
+- `answers` / `QuestionSnapshot` / the POST payload are Section 12's frozen contract. Scoring
+  may derive different numbers from them; it must not filter or reshape the array.
+- `QuestionPool` is per-attempt instance state. Do not make it static — levels would share a
+  served-set.
+- Tint sprites with `decorator.replaceLast(...)`, never `decorator = ...`, which discards the
+  `Transform2DDecorator` and renders the component at the origin at the wrong size.
+- Gates must never be culled behind the camera.
+- Always send arm64-v8a APKs, and **only build one when explicitly asked.**
+
+---
+
+**Date:** 2026-09-30 (Phase 2 — combat and Kaalaman; committed `7bb909e`)
 **From:** Claude Code
 **To:** Claude Code / Chat
 **Project:** ChronoQuest
