@@ -1172,6 +1172,11 @@ quality** — three well-built eras beat six procedurally-mush ones. Cut from th
 and 6) so each grade keeps a coherent opening sequence, and say in the paper that the
 remaining eras are authored but unpopulated.
 
+> **Decision, 2026-09-30:** after Phase 3, the call was made to build **all 6 eras** (43
+> levels). The cut-from-the-end fallback above stays as the emergency plan only. The practical
+> consequence is that the question bank (below) is now the critical path — ~450-500 questions
+> — so it has to run in parallel with Phases 4-6, not after them.
+
 **Question bank depth is the hard bottleneck.** Levels currently have only 5 questions each.
 V2 makes this worse, not better: gates and artifacts re-roll on a wrong answer, so a level
 consumes more questions per run than before. **You need 10-12 minimum per level**, and at 43
