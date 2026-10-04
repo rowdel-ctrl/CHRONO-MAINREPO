@@ -3,6 +3,356 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-10-04 (gate asks nothing, 10 artifacts, softlock fix; uncommitted on `v2-phase-4`)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Two reports from the latest APK: the end gate still opened a question, and levels had 5
+artifacts, not 10.
+
+## 2. Current state
+**Uncommitted on `v2-phase-4`.** 325/325 tests pass (~1 min), `flutter analyze` clean at the
+usual 5 pre-existing lints. **Not yet on a device.** The APK last sent predates all of this.
+
+- **Gate:** no question. `PlayerComponent.update` calls `game.passEndGate(gate)` when
+  `requirementMet`, which opens it and completes the level after 350ms. `showGateQuestion`,
+  `GateComponent.questionPending/lastQuestion`, `activeGate`, `gatesTotal/gatesCleared` and
+  `AnswerPointKind` are gone. `GateComponent.isLevelExit` stays.
+- **10 artifacts:** `artifactsPerLevel` 5 -> 10, `gatesPerLevel` 3 -> 1. `era1_1.tmx` has 10
+  artifacts (five added at x=440, 800, 1450, 2250, 2700; the one at 1860 moved to 1800 because
+  it floated 4px into gap 2).
+- **Procedural levels (the other 42):** one end gate after ten artifacts, `isLevelExit: true`.
+- **Tutorial text** no longer says a gate asks a question.
+- **Testing switch (temporary):** Profile has "Buksan lahat ng panahon at level", persisted in
+  Hive under `dev_unlock_all` (`unlock_all_provider.dart`). On, era selection shows all six
+  eras and none are locked, and every level (boss included) is open. It only changes what is
+  shown as unlocked; it awards nothing and sends nothing. Logout clears it (`clearAll`).
+  **Remove it, or hide it behind a debug flag, before students get a build.**
+- **Era selection layout** (found by the user after turning the switch on): the shelf was a
+  Wrap of fixed 220x200 cards. A landscape phone has only ~230px between the title and the
+  student bar, so six cards wrapped into two 200px rows and the second row (American, WW2,
+  Modern) sat behind the bar, where children outside their parent are not hit-testable: those
+  three eras could not be tapped. The normal three-era view also wrapped at 640px wide.
+  `_buildShelf` now sizes at most three cards across from the space actually available and
+  switches to a compact card (icon beside text) below 150px tall. `era_selection_layout_test.dart`
+  checks every era is on screen and hit-testable at four phone sizes, with the switch on and off.
+
+## 3. Decisions made (and why)
+- **The softlock was mine.** On 2026-10-03 I made every gate require every artifact answered
+  but only rebuilt `era1_1`'s layout. The 42 procedural levels still had three gates, the first
+  at 1/4 of the level with one artifact behind it: stopped, told to find artifacts they could not
+  reach. One gate after all artifacts makes that impossible by construction, and
+  `answer_point_test.dart` asserts every artifact precedes the only gate.
+- **10 artifacts with ~5 written questions means repeats.** Accepted by the user until the
+  question bank is written; the pool recycles real questions.
+- **`ArtifactComponent.counted`** is its own flag. Counting off `attempted` double-counted an
+  artifact when a Shield absorbed a wrong answer, because a Shield never sets `attempted`.
+- **`ChronoGame.levelEnded`** stops a level completing or failing twice (gate and exit marker
+  can both fire it).
+
+## 4. Things we tried that did NOT work
+- The new "no artifact over a gap" test failed on the first run, on an artifact I had not
+  touched, so it caught a real 4px overhang. Fixed in the level, not by loosening the test.
+
+## 5. Next steps (in order)
+1. **Device test.** Does 10 artifacts per level feel right, and with only 5 written questions
+   do the repeats read as a bug? Is combat too easy with ~20 charges per level?
+2. Wire the buy-a-heart purchase (Phase 6 in GAMEPLAY-V2.md).
+3. The level generator must emit one end gate and ten artifacts.
+4. Question bank: 10-15 per level, and `nationalism` still has no file.
+
+## 6. Constraints & conventions
+- Run the full `flutter test` (about a minute). Hold fixes uncommitted until confirmed on a
+  device; build APKs only on request, arm64-v8a.
+
+---
+
+**Date:** 2026-10-03 (playtest round 2 — menu hearts, contact damage, end gate, transitions; uncommitted on `v2-phase-4`)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Four problems from the second on-device playtest of the day: no hearts on the menus, enemy
+contact damage behaving erratically, gates wanted at the level end, and the screen freezing
+on exit.
+
+## 2. Current state
+**Uncommitted on `v2-phase-4`.** 314/314 tests pass (~1 min), `flutter analyze` clean at the
+usual 5 pre-existing lints. **Not yet on a device** — no APK built since these changes.
+
+- **Menu hearts:** new `lib/widgets/hearts_pill.dart`, placed on character selection (top
+  right, left of the book icon), era selection (bottom bar), and profile (under the stat
+  boxes). One heart icon, a count like 3/5, a countdown when short, and a plus button that
+  opens a buy-a-heart dialog (20 coins, `GameConstants.heartPriceCoins`). Owns a 1s ticker
+  calling `refreshHearts()`. **The BILHIN (buy) button is disabled on purpose**: there is no
+  local coin balance to spend, only the server's `Student.coins`. The dialog says "Hindi pa
+  magagamit". Wiring it is a Phase 6 item in GAMEPLAY-V2.md.
+- **Contact damage:** enemy contact moved from `onCollisionStart` to `onCollision`, and the
+  i-frame window became a wall-clock `DateTime` deadline. `invincibilityDuration` 1.0 -> 1.5.
+  Enemy hitbox is now `RectangleHitbox.relative(Vector2(0.55, 0.85))` instead of the full
+  sprite box.
+- **End gate:** `ChronoGame.artifactsAnswered` / `canPassEndGate` / `artifactsRemaining`;
+  `GateComponent.isLevelExit` + `requirementMet`; new `GateLockedOverlayWidget`. `era1_1.tmx`
+  now has one gate at x=3100 (the exit is 3140) instead of two mid-level gates. The HUD pill
+  dropped the gate counter and now counts artifacts **answered**, with a lock-open icon when
+  the gate is passable.
+- **Transitions:** `_quitToLevelSelect` now calls `resumeEngine()` before navigating, and
+  `dispose()` schedules `stopBgm()` off the frame instead of firing it inline.
+
+## 3. Decisions made (and why)
+- **The end gate opens on artifacts *answered*, not *answered correctly*** — the user's call,
+  and the reasoning is the important part: requiring correct answers would push every student
+  to 100%, leaving the teacher dashboard with no error rates, no weak-topic signal and no
+  learning gain. Wrong answers still show the explanation and still reach the dashboard as
+  wrong. `end_gate_test.dart` pins this so it is not "simplified" later.
+- **Damage is continuous, not start-only.** The playtest reports ("standing inside an enemy is
+  safe", "it only hurts when facing me") were both the same cause: `onCollisionStart` fires
+  once per *new* overlap, so what varied was whether the player had separated first, not
+  anything on screen. The enemy hitbox is the same box in both directions — only the sprite
+  mirrors.
+- **I-frames run on wall-clock time.** `pauseEngine()` stops `update()`, so a `dt` countdown
+  froze for the entire time a question was open: answer for 20s, return still invincible.
+  That was the "sometimes immune after answering" report. Real time cannot be banked.
+- **The HUD pill counts answered, not claimed.** With the gate keyed to answers, a
+  claimed-only counter would have told students they had work left when the gate was already
+  open.
+
+## 4. Things we tried that did NOT work
+- **`_advancePastInvincibility` spinning frames.** Once i-frames became wall-clock, pumping
+  100 frames instantly no longer expires them — the helper had to await real time. The three
+  failures this caused are the proof the fix works, not a regression.
+- **Asserting "no slash in the pill" to test the hidden state.** The health bar renders "4/5",
+  so that matched. The test now looks for the pill's artifact icon instead.
+
+## 5. Next steps (in order)
+1. **Device test.** Nothing here has been played. Especially: does 1.5s i-frame feel right,
+   and is the locked-gate notice clear enough that a student goes back for the artifact?
+2. **Known risk:** with the gate as the exit, a student who cannot find their last artifact
+   has no way out of the level. The HUD counter plus the notice is the agreed mitigation; a
+   directional indicator is the fallback if device testing says it is not enough.
+3. The other 42 levels still have no `.tmx`, so they keep the procedural path with its three
+   mid-level gates and distance-based ending. The generator must emit the new one-gate shape.
+4. `GAMEPLAY-V2.md` Section 6 still describes 3 gates per level as the educational floor.
+
+## 6. Constraints & conventions
+- Run the full `flutter test` (about a minute).
+- Widget tests that read `gameProvider` must override it, or they hang on Hive.
+- Hold playtest fixes uncommitted until confirmed on a device; build APKs only on request,
+  arm64-v8a.
+
+---
+
+**Date:** 2026-10-03 (Phase 4 playtest round — Kaalaman rework, HUD, enemy ledges, test hang; uncommitted on `v2-phase-4`)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Act on on-device feedback after Phase 4's first half: misses burned Kaalaman and the cap of 6
+felt wrong, the HUD showed no question progress, enemies floated over gaps, and a full
+`flutter test` hung.
+
+## 2. Current state
+**Uncommitted on `v2-phase-4`** (`CHRONO-GAMEAPP` submodule, plus this file and `GAMEPLAY-V2.md`).
+304/304 tests pass in about a minute with a plain `flutter test`; `flutter analyze` clean at the
+usual 5 pre-existing lints. An arm64-v8a APK was sent for playtest **before the enemy ledge
+fix**, so the build on the phone does not have it.
+
+- **Kaalaman:** `attack()` needs a charge (`canAttack`) but `AttackHitboxComponent` spends it on
+  the first enemy hit, once per swing. `grantCharges` no longer clamps; `kaalamanCap` became
+  `kaalamanDisplayMax = 10`, for the HUD only. `updateKaalamanRegen` gives one charge back after
+  20 s at 0 and stops at a floor of 1; it is paused during questions and the boss phase.
+- **HUD:** new `lib/game/overlays/hud_widgets.dart` (health bar over a thinner Kaalaman bar,
+  gate/artifact pill, shared score/coin panel). Level badge removed. `ChronoGame` tracks
+  `gatesTotal/gatesCleared/artifactsTotal/artifactsClaimed`, totals set from the Tiled
+  entities or the procedural constants.
+- **Enemies:** `isGroundUnder` and a public `footSpanFraction` in `game_collision.dart`; walkers
+  turn at a ledge in `EnemyComponent.update`. `LoadedLevel.enemyStaysOnGround` plus a builder
+  warning. `era1_1` enemy 6 moved from x=900 (it sat inside gap 1) to x=600.
+- **Tutorial screen:** rebuilt for landscape phones. The old vertical card overflowed below
+  about 400px tall (title and body hidden), so each page is now two columns (illustration beside
+  text) with a scroll fallback and a single bottom row for the dots and button. Steps moved to
+  `tutorial_content.dart` and rewritten for joystick/JUMP/ATK, artifacts and gates with the HUD
+  counters, Kaalaman (with a bar illustration) and the health bar: 8 pages, Filipino copy that
+  still needs the user's review. `GameBackdrop` now paints its scrim behind the content; it used
+  to be a `foregroundDecoration` that dimmed the whole screen by 65%. Only the tutorial passes an
+  `imagePath`, so no other screen changed.
+- **Tutorial wording bug found while writing the SRS:** page 5 first said a correct answer
+  always gives Kaalaman and opens the gate. Only artifacts grant Kaalaman (`answer_point_handler.dart`
+  calls `grantCharges` for artifacts only); a gate just opens. Fixed in the source after the
+  APK built at 18:46 on 2026-10-03, so **that APK still has the wrong sentence**.
+- **Tests:** new `hud_overlay_test`, `enemy_ledge_test`, `tutorial_layout_test` (every page at
+  five sizes, no overflow, scrim behind the card); additions to the Kaalaman, attack, loader and
+  integration tests. `test/screens/tutorial_screen_test.dart` fixed (it now taps to the last page
+  instead of hard-coding the page count) and `test/flutter_test_config.dart` added.
+
+## 3. Decisions made (and why)
+- **Spend on hit, plus a regen floor of 1, not a kill recharge.** A Walker has 1 HP and a hit
+  costs 1 charge, so refunding 1 on a kill makes Walker fights free forever.
+- **No cap.** Content already bounds supply at 10 per level; a cap only clamped the students
+  who answered the most. The bar is a fixed 10 segments, so levels 1-2 (11 charges) show 10.
+- **The pill counts answer points, not the 10-question target.** `questionsPerLevel = 10` is a
+  draw target; retries and the 5-question pool mean a student does not answer exactly 10.
+- **Walkers turn back at a ledge rather than stopping,** and the check is skipped when already
+  unsupported (otherwise bad data makes them flip every frame). No registered ground means
+  unconstrained, so bare-game tests keep their old patrol behaviour.
+- **A guest/skip-login toggle was analysed and dropped.** `DevFlags.skipAuth` already exists but
+  is debug-only, so it does not work in the release APKs sent for testing.
+
+## 4. Things we tried that did NOT work
+- **`dart_test.yaml` `timeout:` and `flutter test --timeout`** do not shorten a widget test:
+  `testWidgets` sets its own 10-minute timeout. Only a custom binding in
+  `test/flutter_test_config.dart` (60 s) makes a hang fail fast.
+- **The `test/screens/` hang was not google_fonts.** `GameNotifier`'s constructor fires a Hive
+  write (`saveHeartsState`); inside a widget test's fake-time zone it never completes and holds
+  Hive's lock, so the next Hive call and `Hive.close()` wait forever. Any widget test that reads
+  `gameProvider` must override it (`_QuietGameNotifier` in the tutorial test).
+- **`game.ready()` can return before an enemy's sprites load** under parallel load, leaving it
+  at x=0 with no size. The ledge test failed about half the time in a full run until it awaited
+  `enemy.loaded`.
+
+## 5. Next steps (in order)
+1. **Build a new APK and play it.** Check the HUD spacing and readability, whether 20 s regen
+   feels right, that misses are free, and that enemies turn at the lip of the first gap. Then
+   commit in `CHRONO-GAMEAPP` and bump it in the parent.
+2. **Review the new tutorial on the device**, including the Filipino wording. The screenshots
+   were taken with Segoe UI standing in for Poppins, which is about 10% wider, so check the
+   longest pages (artifacts and gates, Kaalaman) for tight wrapping. Hearts regenerate 1 per
+   minute (`GameConstants.heartRegenInterval`, GAMEPLAY-V2 §8), so "isang minuto" is correct.
+3. **The generator** (Phase 4 second half). It must keep every enemy's patrol inside one ground
+   span (`LoadedLevel.enemyStaysOnGround`) and append to `LevelLoader.authored`.
+4. The doc comment on `ChronoGame.kaalaman` still says charges come from a debug key.
+5. Content: still 5 questions per level.
+
+## 6. Constraints & conventions
+- **Run the full `flutter test`** (about a minute). This replaces the older entries below that
+  say to keep it scoped because `test/screens/` hangs.
+- Widget tests that read `gameProvider` must override it, or they hang on Hive.
+- Hold playtest fixes uncommitted until confirmed on a device; build APKs only on request,
+  arm64-v8a.
+
+---
+
+**Date:** 2026-10-01 (Phase 4 first half — Tiled loader; uncommitted on `v2-phase-4`)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+The first half of Phase 4 per Section 15: add `flame_tiled`, set `ground_tileset.png` up as a
+Tiled tileset, write the loader for the `entities` object layer (Section 11), end the level on
+the `exit` object, re-point one-way platforms at Tiled platform objects, stop culling content
+behind a backtracking player, add gap respawn anchors, and carry the Section 1 curriculum
+block. Build it against **one hand-made reference level** (`era1_1.tmx`). The 43-level
+generator is the second half and is **not** in this entry.
+
+## 2. Current state
+
+**Uncommitted on `v2-phase-4`** (both repos branched from `v2-phase-1` at `43cc237` /
+`fea4fc2`). 258/258 tests pass (52 new), `flutter analyze` clean at the usual 5 pre-existing
+lints.
+
+**New:**
+- `assets/tiles/ground_tileset.tsx` — the one-time Tiled wrapper around the existing 112×128
+  sheet (7×8 of 16px tiles). Section 11's caveat 1 said this supersedes the hand-coded
+  `(row, col)` constants; those still work and are untouched.
+- `assets/tiles/levels/era1_1.tmx` — the hand-built reference level. 200×45 tiles (720px tall,
+  so map y *is* world y and the loader needs no vertical remapping). Two real gaps, a platform
+  over each, 4 enemies, 5 artifacts, 2 gates, 8 coins, spawn and exit.
+- `lib/game/level_loader.dart` — `LevelLoader` (parse) + `LevelBuilder` (instantiate), split so
+  the schema is testable without a game loop. Also `LoadedLevel.isOverGround()`, which the
+  generator will reuse to prove a level has no unclearable hole.
+- `lib/game/level_culling.dart` — documents why culling is now "almost never", and keeps one
+  deliberately enormous margin for future transient effects.
+- 5 new test files: loader schema, culling, gap respawn, level end, and a real-game integration
+  test.
+
+**Changed:** `game_spawning.dart` (async; Tiled path with procedural fallback),
+`chrono_game.dart` (`tiledLevel`, `levelEndX`, nullable spawners), `player_component.dart`
+(`respawnAnchorX`, `respawn()` now returns to it), `enemy_component.dart` (optional `worldX` +
+`patrolRangeOverride`), `constants.dart` (`eraNumberFor`). Cull checks removed from
+`artifact`/`coin`/`enemy`/`tile_platform`/`gap` components.
+
+**One-way platforms needed no collision change at all.** `TilePlatformComponent` already
+registers into `game.platforms` in `onMount`, and `game_collision.dart` already iterates that
+list with the `velocityY >= 0` gate — so Tiled-built platforms are one-way for free. Section
+11 flagged this as "the single most likely place for platforming to silently break", so there
+is an explicit test that a Tiled platform lands in `game.platforms`.
+
+## 3. Decisions made (and why)
+- **`LevelLoader.authored` is an explicit manifest, not a bundle probe.** Probing meant a
+  `rootBundle.loadString` that throws for each of the 42 unauthored levels, and made "does this
+  level exist" an async round-trip that widget tests cannot settle with `pump()`. The generator
+  appends to this set as it writes files.
+- **The curriculum block lives in Tiled map properties, not a side JSON.** Section 11 allowed
+  either; map properties travel with the level, so a level can't be copied to a new file and
+  silently lose the tag that makes it reportable. `weeks` is a comma-separated string because
+  Tiled has no list property type. The era registry remains the fallback.
+- **`GroundSpawner` is kept, not deleted.** The task said to retire it once the new path was
+  proven, but it is still the *only* thing laying ground for the 42 levels with no `.tmx`;
+  deleting it now ships 42 floorless levels. Its genuinely dead `update()` is gone and its doc
+  comment now says it is being retired and what has to happen first.
+- **A malformed or missing map falls back to the spawner rather than throwing.** A student
+  mid-lesson should not get a black screen because a level file is bad.
+- **Era 1's reference level has no Heavy enemy.** Era 1's two sprites (`tribal_warrior`,
+  `dark_spirit`) are *both* Walkers — Section 1's art mapping gives era 1 no Heavy. Variety
+  comes from a shorter patrol leash instead. A test pins that the level only names sprites era
+  1 has art for.
+
+## 4. Things we tried that did NOT work
+- **Hand-writing the ground layer CSV.** It came out 8834 values against a declared 9000 and
+  every reference-level test died inside `Gid.generate` with a `RangeError`. Regenerated from a
+  small script that asserts `width*height` before writing. **Author the tile layer with a tool
+  or a script, never by hand.**
+- **Making `setupSpawning()` async broke every bare-game test** with
+  `LateInitializationError: Field 'spawner'`. `update()` now runs before setup finishes, which
+  `late` cannot express. Fixed by making both spawners nullable — null genuinely means "not
+  spawning yet", which is the real state.
+- **Mounting a fresh `GameWidget` per assertion is flaky here.** The first two mounts loaded the
+  `.tmx` inside the pump budget and every later one did not, leaving `tiledLevel` null so the
+  assertions silently read the procedural fallback. Each test passed alone and failed in
+  sequence. Fixed by mounting **once** and asserting the whole built level, not by lengthening
+  the timeout.
+- **`GroundSection`'s cull was the dangerous one.** Pre-Phase-4 the only section was a single
+  million-unit slab whose right edge was never behind the camera, so the check could not fire
+  and the bug stayed invisible. Tiled lays one section per span — tens of units wide — so the
+  same check would have deleted the floor behind a backtracking player, dropping them through
+  ground still drawn in the tile layer.
+
+## 5. Next steps (in order)
+1. **Play `era1_1` on a device.** Nothing here has been seen on a screen: the gaps, the jump
+   over them, and whether the two platform heights feel right are exactly what tests can't
+   judge. This is the acceptance step for the first half.
+2. **The generator** — second half of Phase 4: emit first-draft `.tmx` for all 43 levels
+   against this now-real schema, then append each to `LevelLoader.authored`.
+3. **Delete `GroundSpawner`, `EnemySpawner` and the `_setupProceduralLevel` fallback** once
+   every level has a map. They are dead the moment the manifest is complete.
+4. **Content:** still 5 questions per level (10-15 wanted), and `nationalism` has no file.
+
+## 6. Constraints & conventions
+- Gravity 900, jump force -480, platform heights 90-110 above the ground surface. The reference
+  level's platforms sit at exactly +90 and +110 and a test asserts it.
+- A 720px-tall map keeps map y identical to world y. Changing map height means teaching the
+  loader to remap.
+- Nothing in an authored level is culled behind the camera. If a future transient effect needs
+  culling, use `LevelCulling.isFarBehindCamera`, never a bare camera-edge check.
+- `LevelLoader.authored` must list every level that has a `.tmx`, and `assets/tiles/levels/`
+  must stay declared in `pubspec.yaml` — a map on disk but not in the bundle passes tests
+  (filesystem) and fails on device (asset bundle).
+
+---
+
 **Date:** 2026-09-30 (Phase 3 — artifacts, gates, Codex; committed, awaiting playtest)
 **From:** Claude Code
 **To:** Claude Code / Chat

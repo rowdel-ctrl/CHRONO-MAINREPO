@@ -1,7 +1,13 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **Phases 0-3 implemented and committed**, awaiting their on-device playtest; Phase 4
-still design proposal. Revision 12 — **Phase 3, artifacts and gates, is built** (`43cc237`),
+Status: **Phases 0-3 implemented and committed**, awaiting their on-device playtest; Phase 4's
+first half (Tiled loader and one reference level) is built but uncommitted. Revision 13 — three
+playtest-driven changes on `v2-phase-4`, none yet confirmed on a device: **Kaalaman is spent
+only when a swing hits, the cap of 6 is gone, and a student at 0 charges slowly regains one**
+(Section 4); **the HUD was redesigned** with health and Kaalaman bars and a gate/artifact
+progress pill, and the level badge was removed (Section 4); and **Walkers now turn at the edge
+of their ground**, as Section 5 always said they should (Sections 5 and 11). Revision 12 —
+**Phase 3, artifacts and gates, is built** (`43cc237`),
 which is the point this document calls "the new game": questions are no longer something
 enemies inflict on you but something you seek out. Artifacts grant Kaalaman and fill a Codex;
 three gates per level guarantee the educational floor; the question bank became a pool that
@@ -322,6 +328,34 @@ valid, both are interesting, and the second one is more dangerous.
 > them so it doesn't crowd the level/score/coin widgets sharing that row — a playtest request,
 > not a design change. Same "plumbing now, real asset later" split Phase 0 used for audio.
 
+> **Correction, 2026-10-03 (`v2-phase-4`, uncommitted, awaiting on-device confirmation):** a
+> playtest showed that the economy above punishes the wrong things. Four changes, all of them
+> tunable in `lib/core/combat_constants.dart`:
+> **(1) A charge is spent when a swing hits an enemy, not when it is swung.** Misses were
+> costing charges, and with only 1-3 charges early in a level a few misses left the attack
+> dead. Swinging still needs at least one charge and still respects the cooldown, and one swing
+> costs at most one charge however many enemies it catches.
+> **(2) The cap of 6 is removed.** It could only ever clamp the students who answered the most.
+> Supply is already bounded by content (5 artifacts at +2 is 10 per level, 11 on levels 1-2 with
+> the tutorial charge), so nobody can bank without limit. The "A player who answers everything
+> can't bank enough to brute-force the level" argument above lost to "a student who answers
+> correctly should keep what they earned". The HUD bar is scaled to a fixed 10 segments
+> (`kaalamanDisplayMax`) and nothing is clamped to it.
+> **(3) Slow regeneration to a floor of 1.** At 0 charges a student regains one after 20
+> seconds (`kaalamanRegenSeconds`, a guess to tune); regeneration stops at 1
+> (`kaalamanRegenFloor`), so only artifacts take a player higher. Nobody is stranded without an
+> attack, and artifacts stay the only way to build power. It pauses while a question is open
+> and during the boss phase. A recharge on kill was considered and rejected: a Walker has 1 HP
+> and a hit costs 1 charge, so a refund of 1 makes Walker fights free forever.
+> **(4) The HUD changed shape.** Health is a wide, tall bar (5 segments, with the heart count
+> as text) and Kaalaman a thinner, shorter bar attached beneath it, replacing the hearts and
+> orbs. The level badge is gone. A pill at top centre shows gates cleared and artifacts claimed
+> (`1/3`, `3/5`), counted from the level itself — the Tiled entities, or the fixed
+> `gatesPerLevel`/`artifactsPerLevel` on procedural levels — and hidden on boss levels. It
+> counts answer points, not the 10-question draw target in `GameConstants.questionsPerLevel`,
+> because retries and the 5-question pool mean a student does not answer exactly 10. Score and
+> coins share one panel. The code is in `lib/game/overlays/hud_widgets.dart`.
+
 ---
 
 ## 5. Combat and enemies
@@ -390,6 +424,17 @@ straight vertical reset.
 > All tuning values (patrol range and speed, knockback, i-frame duration, death timings, coin
 > drop range) live in `lib/core/combat_constants.dart` — see Section 4's correction.
 
+> **Correction, 2026-10-03 (`v2-phase-4`, uncommitted, awaiting on-device confirmation):** the
+> table above says a Walker "turns at the edge", and until now it did not: patrol was a fixed
+> distance from its spawn with no idea what was underneath, so on a Tiled level with gaps a
+> Walker strolled out over a hole. On device the first enemy in `era1_1` was also *placed*
+> inside the first gap and hovered there from the start. Walkers now test the same centred foot
+> span the player is held to (`footSpanFraction`, `game_collision.dart`) and turn back when the
+> next step would leave solid ground. If the enemy is already unsupported (bad data) the check
+> is skipped, so it does not flip direction every frame; if no ground is registered at all, as in
+> a bare test game, patrol is unconstrained. Heavies do not move, so they only need to be
+> placed on ground. See Section 11 for the authoring rule that goes with this.
+
 ---
 
 ## 6. Artifacts (answer points) — the heart of the redesign
@@ -443,6 +488,55 @@ one right, which is fine — the student reads the explanation and tries again.
 every enemy and skip every artifact, but they cannot skip gates. Put **3 gates in every
 level** and every student answers at least 3 questions correctly, plus however many attempts
 that took. Artifacts (4-6 per level) are the optional, rewarded layer on top.
+
+> **Correction, 2026-10-03 (`v2-phase-4`, uncommitted, awaiting on-device confirmation):**
+> the gate layout above is replaced by **one gate per level, standing at the exit**. It is the
+> level's end: walking into it with the requirement met completes the level, and there is no
+> separate exit trigger any more. The requirement is that **every artifact in the level has
+> been answered — correct or wrong**.
+>
+> This inverts the old split rather than tightening it. Before, gates were the floor and
+> artifacts were optional; now artifacts are mandatory (you cannot leave without visiting
+> them) and there is a single gate to pass. Every student therefore meets *every* question
+> the level places, which is a stronger floor than three gates ever gave.
+>
+> **Why "answered", not "answered correctly".** This is the whole point and must not be
+> "simplified" later. If the gate demanded correct answers, every student would eventually
+> grind to 100% and the CHRONO-DASHBOARD analytics would measure nothing: no error rates, no
+> most-missed questions, no weak-topic signal, and a Learning Gain (Section 7) of roughly
+> zero for everyone. The thesis depends on wrong answers being recorded *and kept*. The
+> explanation panel still teaches on a wrong answer; the student still progresses; the
+> dashboard still sees what they actually got wrong.
+>
+> **Known risk:** a student who cannot find their last artifact cannot finish the level. The
+> mitigations shipped with this are the HUD counter (artifacts answered out of total, with a
+> lock-open icon once the gate is passable) and a notice at the gate naming how many remain.
+> A directional indicator is the fallback if device testing shows that is not enough.
+>
+> **Further correction, 2026-10-04 (same branch, uncommitted):** three follow-ups from the
+> next playtest. **(1) The gate asks no question at all.** It had kept the old behaviour of
+> opening a question once its requirement was met, on top of requiring every artifact. It now
+> simply opens when the student reaches it with every artifact answered, and that opening
+> completes the level. All questions live on artifacts. **(2) Ten artifacts per level, not
+> five** (`CombatConstants.artifactsPerLevel`), matching `GameConstants.questionsPerLevel`. Levels
+> have only about 5 written questions, so the pool recycles and each appears about twice in a
+> level; that stops when the bank reaches its 10-15 per level target. Kaalaman supply doubles
+> to about 20 charges a level against a 10-segment bar, so combat is easier for a student who
+> answers everything; tune on device. **(3) A softlock I introduced on 2026-10-03 is fixed.**
+> Making every gate require every artifact was only paired with a one-gate layout in the
+> hand-built `era1_1`. The other 42 levels still placed three gates, the first a quarter of the
+> way in with one artifact behind it, so a student was stopped and told to find artifacts they
+> could not reach. Procedural levels now place one end gate after all ten artifacts, and
+> `answer_point_test.dart` pins that every artifact precedes the only gate. Also fixed: an
+> artifact answered twice (a Shield absorbs a wrong answer without marking it attempted) was
+> counted twice toward the gate, and a level can no longer complete or fail twice
+> (`ChronoGame.levelEnded`).
+>
+> Implementation: `ChronoGame.artifactsAnswered` / `canPassEndGate`,
+> `GateComponent.isLevelExit`, `gate_locked_overlay.dart`. `era1_1.tmx` carries the new
+> one-gate shape, and **the Phase 4 generator must emit it too** — not the three mid-level
+> gates described above. The 42 levels still on the procedural fallback keep the old shape
+> until they have a `.tmx`.
 
 ---
 
@@ -620,6 +714,15 @@ properties defines what it becomes:
 The ground tile layer defines the geometry directly, so **gaps are just places you didn't
 paint ground** — which turns on the fall-through logic already written and unused in the
 codebase, for free.
+
+**Enemy placement rule (added 2026-10-03):** an enemy's whole patrol corridor must lie over one
+ground span. That is its position plus and minus `patrol`, measured with the enemy's real
+footprint and the same centred foot span used at runtime; a Heavy never moves, so for it the
+corridor is just where it stands. `LoadedLevel.enemyStaysOnGround` implements the check, a test
+asserts it for every enemy in `era1_1`, and `LevelBuilder` logs a warning for a violation.
+Walkers also turn back at a ledge at runtime (Section 5's correction), so a mistake degrades to
+a shorter patrol rather than a floating enemy, but authored data should not rely on that. **The
+Phase 4 generator must satisfy this rule when it places enemies.**
 
 Levels live at `assets/tiles/levels/era<N>_<n>.tmx` (era numbers 1-6 per Section 1). Per-level
 config that isn't geometry — question pool, starting charges, HP, and the `curriculum` block
@@ -878,6 +981,16 @@ playing exactly as it does today, which is what makes it safe to verify.
 
 ### Phase 6 — Economy and polish (3-4 days)
 - Coins spendable; enforce character unlock costs; power-up purchasing.
+- **Buy a heart with coins (added 2026-10-03).** One heart costs **20 coins**
+  (`GameConstants.heartPriceCoins`, a placeholder to tune). The menu hearts pill and its
+  buy dialog are **built** (`lib/widgets/hearts_pill.dart`: one heart icon, a count such as 3/5,
+  a plus button; the dialog shows price, coins and the 3/5 to 4/5 change, and has full,
+  cannot-afford and can-afford states) but the **BILHIN button is deliberately disabled**: coins
+  have no local spend path. They exist only as `Student.coins` from the server, and in-level
+  coins are only sent when a level ends. To finish it: persist a local coin balance (earned in
+  levels, minus spent), add `GameNotifier.buyHeart()` (deduct 20, add one heart, keep the regen
+  timestamp), enable BILHIN, and sync the spend to the server so the dashboard total stays
+  right. Decide first whether a spend can ever be reversed by a server refresh.
 - Call the existing power-up sync endpoint.
 - Make level select read fresh backend progress rather than only the local cache.
 
