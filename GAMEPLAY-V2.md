@@ -264,6 +264,26 @@ Gravity `900`, jump force `-480`, peak ~128 units.
 > are unchanged and still off-limits. If platforms feel too high, 90 is the number to pull
 > back; 110 is the ceiling the jump arc allows.
 
+> **Correction, 2026-10-04 (`v2-phase-4`, after the Spanish-era playtest):** the protected
+> platform range moved from 90-110 to **104-112** and gaps were widened to **176-240**
+> (platformless gaps at most 208). Two reasons. An enemy's hit area reaches 99.9 above the
+> ground (drawn height 108, hit area the middle 85%), so a student on a platform at 90-100 could
+> still be touched; at 104 or more they are above every enemy with no special immunity rule.
+> And the old gaps were too easy to hop. The jump is **unchanged** (gravity 900, force -480,
+> peak 128), which is why 112 is the ceiling: the verified reachability limit is 113 (peak - 15). A gap is crossable up to the flat reach (224) plus the 48-unit foot span that
+> only has to land, so 240 is within the 90% safety margin (249); with a platform in the middle
+> each hop is short. `test/game/jump_clearance_test.dart` replays the game's own physics against
+> every level and fails if any gap or platform lacks a quarter-second launch window.
+
+> **Correction, 2026-10-04 (same playtest), Sections 5 and 6:** a hit now shoves the player
+> **160 units** (it was 44) over 0.3 s with the controls locked, and the shove stops at a ledge
+> so it never throws anyone into a gap. With 1.5 s of invincibility the student has about 252
+> units of walking left but needs about 306 to get back through the enemy, so the old trick of
+> walking through it during the i-frames no longer works (arithmetic pinned in
+> `contact_damage_test.dart`). The end gate is now drawn in code (stone gatehouse, barred door,
+> padlock and lamp that turn green and open when every artifact is answered), and once they are
+> answered the HUD shows the distance to it (100 units = 1 m) with a one-time message.
+
 > **Correction, 2026-09-29 (`v2-phase-1`, `c3ca19a` + `99076c4`, confirmed on-device):** the
 > Phase 1 "play it on a real phone" playtest below surfaced three more issues, all
 > layout/rendering, not physics. (1) `CameraComponent.withFixedResolution` pillarboxes any
@@ -747,7 +767,7 @@ object-layer schema above exist to generate against:
 - Ground with gaps, sized to the level's position in its era's difficulty ramp.
 - Enemies spaced out with `walker`/`heavy` mix shifting later in each era.
 - Artifacts and gates placed at the cadence in Section 6/7 (gates every ~3 answer points).
-- Platforms at valid heights (90-110, Section 2) — never violating the tuned jump arc.
+- Platforms at valid heights (104-112, Section 2) — never violating the tuned jump arc.
 - The level's `curriculum` block and question-pool link pre-filled from the Section 1 mapping,
   so every generated level is already reportable, not just playable.
 
@@ -762,6 +782,73 @@ generate-then-review, not 43 of either extreme.
 **Sequencing matters:** the generator is written and run once Phase 4's loader and schema are
 real, against the actual tileset — not guessed at from this document beforehand. See the
 Phase 4 prompt in Section 15.
+
+> **Generator design, decided 2026-10-04 (not yet built).** Researched against published work
+> rather than guessed: Smith et al., "Rhythm-Based Level Generation for 2D Platformers" (UCSC,
+> 2009), the Dead Cells hybrid approach (hand-made rooms plus a hand-made structure graph), a
+> Tiled/chunk tutorial (kode80), and Nintendo's introduce/develop/twist/conclude structure.
+> **(1) A level takes about 4-5 minutes:** about 2.5 minutes answering 10 questions (assuming
+> ~15 s each) plus about 2 minutes of platforming, which at 210 units/s is the existing
+> 25,000-unit default. `era1_1` (3,140 units, ~15 s of walking) is a prototype, not the target
+> length. **(2) One section per question:** 10 sections of ~2,300 units (~11 s), each a
+> challenge segment followed by a rest platform holding one artifact, close to the paper's
+> 10-second "rhythm groups". **(3) A hybrid:** hand-made chunks, a per-level recipe following
+> the four acts, and validation; not rhythm grammars, machine learning or wave-function-collapse.
+> **(4) An offline Node script** (`tools/levelgen/`, standard library only) writes seeded `.tmx`
+> files that are committed, so the game loads them exactly as it loads `era1_1`; chunks start as
+> code data. **(5) Generate ~50 candidates per level, drop any that break a hard rule, keep the
+> one closest to its difficulty target.**
+>
+> **Scope (corrected the same day):** an earlier line of this block, and the "hand-build the 12"
+> text above, assumed the user would build the era openers and bosses by hand in Tiled. The user
+> has built no level, so nobody does: `era1_1` was authored by Claude with scripts. The generator
+> therefore covers **every non-boss level except `era1_1`: 36** (pre-colonial 8, spanish 4,
+> nationalism 6, american 7, ww2 7, modern 4). The five era openers (level 1 of eras 2-6) get an
+> "opener" recipe, the Mario 1-1 role: gentlest of the era, one new element at a time, no Heavy,
+> no enemy for the first sections. The six bosses are Phase 5 and keep the procedural fallback
+> until then. The user reviews and playtests; Claude adjusts. **Hard rules** the validator enforces, mirrored by a Dart test that runs
+> every `.tmx` through `LevelLoader.parse`: gaps 176-240 wide (at most the 224 flat jump
+> reach plus the 48-unit foot span, with a 10% margin; platformless gaps at most 208); platforms
+> 104-112 above ground and over a gap; every
+> enemy patrol inside one ground span, using only the era's own sprites (Heavy only in spanish,
+> nationalism, ww2 and modern); no enemy patrol within 240 of an artifact, so a student is not
+> hit the moment a question closes; exactly 10 artifacts, all before the one end gate, which sits
+> at the exit; curriculum properties taken from the era registry. The validator proves every jump
+> is inside the physics; it cannot prove a level is fun or fair, so every number here is a first
+> guess to be tuned from a contact sheet of all 31 levels and from phone playtests.
+>
+> **Correction, 2026-10-04 (later, after the second playtest): every section is dense.** Levels
+> read as empty (7-10 gaps, 2-7 enemies per level, so some sections had nothing). Now **every
+> section of every generated level holds a gap with a platform and an enemy**, in either order.
+> The six middle sections (develop and twist) can take a third element (gap-enemy-gap or
+> enemy-gap-enemy), more often as the era's difficulty rises, so a level has 10-14 gaps and 10-13
+> enemies. The ramp is how many and how hard, not leaving a section bare. The "no enemy in the
+> first four sections" opener rule is dropped; openers stay the gentlest by using short patrols,
+> the narrowest gaps, fewer third elements and no Heavy. A platformless gap appears only in a
+> twist section that has two gaps. To fit three elements, the ground between a gap and an enemy
+> lane is 112-192 (the lane has 60 of its own margin), while two gaps still need 240-400. New
+> hard rules, also in the Dart lint: an enemy's patrol stays at least 160 from any gap edge (a
+> student landing from a jump is not hit at once), and each of the ten sections has a gap with a
+> platform and an enemy. Counts in the rest of this block are the earlier first guesses.
+>
+> **Correction, 2026-10-04 (later again): platform fights and a wider gate.** The attack button
+> works in the air, so a new piece uses it: a **platform fight** is a gap of 288, 320 or 352 (a
+> jump alone crosses at most 272, the 224 reach plus the 48 foot span), a 192-wide platform
+> (8 tiles, 104-112 up) centred in it, 48-80 from each ledge, and one walker patrolling 36 each
+> way on it. The platform is the only way across and the enemy must be hit from the air or
+> fought on it. Why you cannot simply dodge it: passing an enemy needs the player's feet above
+> its head (99.9) for 146 units of walking (the 96-wide player box plus the 49.5-wide enemy hit
+> area), and one jump holds that height for only 105. Every level has 1-3 fights (an opener has
+> one, late; never in sections 1-2), as a third element on top of the section's gap and enemy.
+> The enemy object's `y` is where its feet stand: 660 on the ground, the platform's top on a
+> platform. A shove now stops at a platform edge as it already did at a ledge. Platform enemies
+> are exempt from the 160 gap-clearance rule (they are over the gap by design) and need only 400
+> between them and their neighbour (600 elsewhere). Checked by a physics replay: from the
+> launches that land on the platform there is a safe swing (box overlaps the enemy before the
+> player's box does) of at least 0.15 s, and the platform is required (direct jump window 0).
+> **The end gate is 144 wide** (6 tiles, was 48) and still 260 tall; the generator now leaves 120
+> of floor past the exit (was 60) so it fits. Charges are unchanged: start at 0, 2 per right
+> answer, one regenerates after 20 s at 0, so a fight cannot strand anyone.
 
 ### Two honest caveats
 
@@ -1004,7 +1091,7 @@ playing exactly as it does today, which is what makes it safe to verify.
   requires.
 - Platform tile constants in `tile_platform_component.dart` are pixel-verified. Leave them
   alone until the Tiled path in Phase 4 proves out, then retire the file deliberately.
-- Jump physics (gravity 900, force -480, peak ~128) and platform heights (90-110) are tuned
+- Jump physics (gravity 900, force -480, peak ~128) and platform heights (104-112) are tuned
   against each other.
 - Dev no-login mode (`DEV_SKIP_AUTH`, `DEV_START_ROUTE`) will save hours during Phases 1-3.
 
@@ -1027,7 +1114,7 @@ better against an **implementation** spec, so this section converts it into one.
 3. **Update `HANDOFF.md` at the end of every phase** — dated entry, newest first, as you
    already do. Include what was built, what was deferred, and what needs playtesting.
 4. **Protected values.** Tell it explicitly, every session: do not change gravity (900), jump
-   force (-480), or platform heights (90-110) unless the task is specifically to re-tune them.
+   force (-480), or platform heights (104-112) unless the task is specifically to re-tune them.
    These are verified-correct and easy for a well-meaning refactor to "clean up".
 5. **Run `flutter analyze` before claiming done.** Clean analyze is a floor, not a finish line.
 
@@ -1215,7 +1302,7 @@ exists** — judge whether the core loop is fun, not just whether it works.
 > generator script that produces a first-draft `.tmx` for **all 43 levels** per Section 11's
 > "Auto-generating first drafts" rules: ground with era/level-appropriate gaps, enemies
 > spaced and mixed by difficulty ramp, artifacts and gates at the Section 6/7 cadence,
-> platforms only at valid heights (90-110 — do not violate the tuned jump arc), and each
+> platforms only at valid heights (104-112 — do not violate the tuned jump arc), and each
 > level's `curriculum` block and question-pool link pre-filled from Section 1. Every generated
 > level must load and be completable start to finish with no softlocks. Document the
 > generator and the authoring workflow in `HANDOFF.md`.

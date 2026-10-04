@@ -3,6 +3,104 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+**Date:** 2026-10-04 (level generator, playtest fixes, settings and controls; uncommitted on `v2-phase-4`)
+**From:** Claude Code
+**To:** Claude Code / Chat
+**Project:** ChronoQuest
+
+---
+
+## 1. Goal
+Phase 4's generator (all 37 non-boss levels, `era1_1` included since it was replaced) plus the fixes from the first
+phone playtest of spanish 1-4.
+
+## 2. Current state
+**Uncommitted on `v2-phase-4`.** 456/456 Flutter tests, 22/22 node tests, `flutter analyze` at the
+usual 5 pre-existing lints. An arm64 APK with spanish 1-4 and all the fixes was built and sent on 2026-10-04; no device feedback yet.
+**Fourth round, same day (user's playtest notes, built after a mockup they approved):** (1) **Extra wide
+gate**: `CombatConstants.gateWidth` 48 -> 144 (6 tiles, height unchanged); `GateComponent` draws any
+width, records its still parts once as a `Picture` and does nothing while off screen; generator
+`exitMargin` 120 (was 60) so the gate fits, and a lint rule that it does. (2) **Platform fights** (the
+user noticed the attack button works in the air): a 288/320/352 gap, a 192 platform, a walker on it;
+1-3 per level, never in sections 1-2. Game side: `EnemyComponent.surfaceY`, `LoadedLevel.enemyStaysOnSupport`
+/ `platformUnder`, `isPlatformUnder`, and the shove now clamps to a platform. Generator: `planFight`, tmx
+enemy `y`, validator and Dart lint rules (mirrored). Finding worth keeping: an enemy cannot be jumped
+over (146 units needed, a jump gives 105), so every enemy needs a hit or costs a heart. Tests: 456 Flutter,
+22 node, same 5 analyzer lints; the shove-on-platform test was checked to fail without its fix. Not on a
+phone yet: the user has not tried a fight, so the numbers (patrol 36, platform 192, 0.15 s swing window)
+are first guesses. Charges: start 0, 2 per right answer, +1 per 20 s at 0 only; with 10-13 enemies a
+level a student can run dry (offered to shorten the 20 s or raise the floor; not decided).
+**Third round, same day (user's playtest notes), all uncommitted, not in the sent APK:** (1) every
+section of every generated level now has a gap with a platform and an enemy, with a third element in
+the middle sections (10-14 gaps, 10-13 enemies per level, was 7-10 and 2-7); new rules: enemy patrol at
+least 160 from a gap edge, and a section-coverage check (JS validator, Dart lint, 17 node tests). The
+12 generated levels were regenerated. (2) The gate unlock indicator uses a new `GateIcon`
+(`lib/widgets/gate_icon.dart`, a gatehouse with an open padlock, drawn in code) on the artifact pill,
+the gate distance chip and its message. (3) Frame drops in the last sections of a level, on two phones:
+not reproduced. Dart-side cost per frame is flat along the level (about 0.5 ms in a debug test), so
+it is not level content. Found and fixed a real leak: `AudioService` played every effect with
+`FlameAudio.play`, which builds a new `AudioPlayer` per jump or coin and never disposes it; it now
+reuses a pool of 3 players per sound (`AudioPool`, preloaded in `ChronoGame.onLoad`). Unconfirmed on a
+device. If it still drops, ask whether it is gradual or at one spot, and profile on the phone; also
+note Poppins is fetched from the network at runtime (bundling it is still unmade).
+**Later the same day:** pre-colonial 2-9 (`era1_2..era1_9.tmx`) were generated (all 50/50 valid, no
+Heavy since that era has no Heavy art), so 12 levels are generated. They are NOT in the sent APK.
+`era1_1` was checked: it passed the physics rules but was a 3,200-unit prototype (about 15 s of
+walking) with all 10 artifacts in 3,000 units and enemies on top of artifacts. **The user approved
+replacing it, and it is now a generated full-length opener** (`--era pre-colonial --levels 1 --force`),
+so 13 levels are generated (pre-colonial 1-9, spanish 1-4) and no hand-built map remains. The old map
+is kept as `test/fixtures/hand_built_level.tmx`, which the loader, respawn, level-end and lint tests
+read as a "map a person made". The `(1, 1)` hand entry was dropped from `LevelLoader.authored`; the
+level 1 integration test now reads its numbers from the loaded level instead of pinning the old ones.
+
+- **Generator:** `CHRONO-GAMEAPP/tools/levelgen/` (stdlib Node). `node tools/levelgen/generate.js
+  --era spanish --levels 1-4` writes `assets/tiles/levels/era2_N.tmx` and rewrites
+  `lib/game/generated_level_manifest.dart`. Only spanish 1-4 are generated so far; the other 32
+  wait on a playtest of these. Tests: `node --test tools/levelgen/test/levelgen.test.js`,
+  `level_lint_test.dart`, `levelgen_sync_test.dart` (pins `physics.json`/`eras.json` to the game).
+  `jump_clearance_test.dart` replays the game's jump and landing rules against every level.
+- **Platforms 104-112 above ground, gaps 176-240** (platformless 208 at most), `era1_1` updated
+  to match. 112 is the verified ceiling (peak - 15 = 113); 104 clears an enemy's hit area (99.9).
+  The jump is unchanged.
+- **Respawn:** returns 300 units back along the same ground, anchored only when the whole foot
+  span is over ground (never a platform). The old respawn sat on the lip and drained all hearts.
+- **Stalls:** `ChronoGame.updateTree` caps a frame at 0.1s and steps in 1/60s pieces. A stall
+  (internet dropping) used to run as one step and drop the player through the floor.
+- **Settings > Kontrol:** joystick or left/right arrows, saved on the device
+  (`controlSchemeProvider`, `GameInput.setScheme`). Gear on character select, era select and the
+  pause menu. Screens in `lib/screens/settings/`. Pause is laid out compactly (Ituloy, then
+  Settings and Umalis side by side) because a third stacked button would fill a 360-tall screen.
+- **Hearts:** one `HeartsPill`, top right, on character select and level select only; removed from
+  era select and profile. The in-level bar is untouched (user is satisfied with it).
+- **Knockback:** 160 units over 0.3s with controls locked, stopped at a ledge. With 1.5s of
+  invincibility that makes walking back through an enemy impossible (arithmetic pinned in
+  `contact_damage_test.dart`).
+- **Gate:** drawn in code (stone gatehouse, barred door, padlock and lamp that change when
+  unlocked). **Gate HUD** (`gate_hud.dart`): once every artifact is answered, a chip with the
+  distance in metres (100 units = 1 m) and a one-time message.
+
+## 3. Decisions made (and why)
+- The first fall in the playtest was unexplained; the 3-heart loop and the stall bug were found
+  and fixed, but not confirmed on a device. The freeze at 0 hearts is probably the paused engine
+  showing a frozen frame while the app moves to the level-failed screen (not reproduced).
+- Platform immunity was dropped in favour of higher platforms (user's call).
+
+## 4. Things we tried that did NOT work
+- A first jump simulation counted landing back on the near ledge as clearing the gap. Fixed to
+  count only the far side, with two negative controls that must fail.
+
+## 5. Next steps (in order)
+1. **Device test** of spanish 1-4 with that APK: gaps, platforms, knockback, gate, controls. Ask the user: does the first fall on solid ground still happen, and where? Open question: gear on era select as well as character select (built both). The plan file C:UsersPC.claudeplansstateful-shimmying-flask.md predates the platform/gap change (it still says 90-110 and 128-200).
+2. Tune from the notes, then generate the other 24 levels (nationalism 6, american 7, ww2 7, modern 4;
+   spanish 1-4 and pre-colonial 1-9 are done).
+3. Remove the temporary unlock-all switch before students get a build; question bank is ~5 per
+   level; bosses are Phase 5.
+
+## 6. Constraints & conventions
+- Hold fixes uncommitted until confirmed on a device; build APKs only on request, arm64-v8a.
+
+---
+
 **Date:** 2026-10-04 (gate asks nothing, 10 artifacts, softlock fix; uncommitted on `v2-phase-4`)
 **From:** Claude Code
 **To:** Claude Code / Chat
