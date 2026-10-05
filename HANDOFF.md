@@ -19,6 +19,18 @@ phone playtest of spanish 1-4.
 ## 2. Current state
 **Uncommitted on `v2-phase-4`.** 456/456 Flutter tests, 22/22 node tests, `flutter analyze` at the
 usual 5 pre-existing lints. An arm64 APK with spanish 1-4 and all the fixes was built and sent on 2026-10-04; no device feedback yet.
+**2026-10-05, QR scan on the login (built from a mockup the user approved; uncommitted, not on a phone):** the login
+screen's left column now holds a scan card instead of the logo block (small CHRONOQUEST wordmark kept), camera off until tapped.
+`lib/utils/join_link.dart` (`parseJoinCode`: `chronoquest://join?code=X` or a bare code, upper-cased, 2-20 of A-Z 0-9 - _),
+`lib/widgets/qr_scan_panel.dart` (`QrScanPanel`, `QrScanner`, `showQrScanSheet`, `ScannerViewBuilder` so tests use a fake
+camera), `login_screen.dart` (fills Class Code, which stays editable and shows a green mark only while it still holds the scanned
+code; under 700 wide there is no card, so a scan button sits in the Class Code field and opens a full-screen scanner). Added
+`mobile_scanner` and the CAMERA permission (`uses-feature` not required). Denied camera: message and "Subukan ulit", typing still
+works; there is no "open Settings" button (no package for it). The login row is now top-aligned so the card is on the first screen.
+497 Flutter tests, same 5 analyzer lints. NOT verified: the Android build with the new plugin, and a real scan. Next: build an
+arm64 APK when asked and scan the dashboard's section QR from a phone. Test note: layout tests need
+`tester.view.physicalSize` AND `devicePixelRatio = 1`; `setSurfaceSize` alone was ignored here, so earlier size checks that only used it
+(e.g. `gate_hud_test`) ran at 800x600 logical.
 **Fourth round, same day (user's playtest notes, built after a mockup they approved):** (1) **Extra wide
 gate**: `CombatConstants.gateWidth` 48 -> 144 (6 tiles, height unchanged); `GateComponent` draws any
 width, records its still parts once as a `Picture` and does nothing while off screen; generator
