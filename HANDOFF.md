@@ -3,6 +3,8 @@
 > Purpose: pass context between Claude chat and Claude Code.
 > At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
 
+> Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
+
 **Date:** 2026-10-04 (level generator, playtest fixes, settings and controls; uncommitted on `v2-phase-4`)
 **From:** Claude Code
 **To:** Claude Code / Chat
