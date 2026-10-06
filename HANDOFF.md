@@ -19,6 +19,37 @@ phone playtest of spanish 1-4.
 ## 2. Current state
 **Uncommitted on `v2-phase-4`.** 456/456 Flutter tests, 22/22 node tests, `flutter analyze` at the
 usual 5 pre-existing lints. An arm64 APK with spanish 1-4 and all the fixes was built and sent on 2026-10-04; no device feedback yet.
+**2026-10-06, fifth playtest round (the user's 12 notes, Filipino; all uncommitted, not on a phone, no APK built since the QR one):**
+(1) **QR card adapts**: `QrScanPanel` scales 1x-1.8x with the column and screen height (tablet), text and brackets too.
+(2-4) **Login**: the screen they tested was the APK built *before* the 10-05 error fix, so its messages were the old ones. Two real
+gaps remained and are fixed: "Babalik" no longer applies the 6-character rule (a short password there is a wrong one; the length
+rule is "Bago" only, and `loginErrorMessage` maps a 400 password reply to "Mali ang password" when not joining), and the error
+now clears when any field is edited or a QR is scanned, not only on a tab switch. (6) **Tutorial**: the corner control is a round
+X (48 px, key unchanged) in place of the small "LAKTAWAN" text. (11, 13) **Module screen** (`background_history_screen.dart`):
+back arrow plus the phone's back button go to the era list; the guide bubble says "Ako si" plus the chosen hero (it used `era.guide`, so a
+Lapu-Lapu player read "gagabayan ni Rizal"). (12) **Settings > Tunog** (`sound_screen.dart`, route `/settings/sound`): switch and
+volume slider for music and for effects, saved in Hive (`sound_enabled`, `music_enabled`, `sound_volume`, `music_volume`),
+`AudioService.loadSaved()` at launch, music volume applies live. (7) **Speed 210 -> 250** and a **progress bar** at the bottom
+centre (`level_progress_bar.dart`: hero face from start to the gate icon, ticks at the artifacts, polled every 100 ms).
+The jump did not change, so reach is 267 (was 224). Everything derived from it was redone: gaps 192-288 (plain 240), fight gaps
+352/384/416, fight platform 240 wide, ledge max 112 (rules.js, Dart lint mirror, sync test), `knockbackDistance` 160 -> 180 (the
+invincibility arithmetic would otherwise have been 300 vs 306), attack box 64 -> 80 wide (at the new speed the old box left too
+little time to hit an enemy; the physics replay in `jump_clearance_test` failed until this and the wider platform). All 13 levels
+regenerated; levels are now about 100 s of walking, was 119. (8) **Praise**: after a right answer a cheer plays
+(`assets/sounds/praise.wav`, SYNTHESISED by `tools/sfx/make_praise.js`, not a recording and not listened to by me) and a word
+("WOW!", "GALING!"...) pops over the hero (`PraiseComponent`). A real voice clip would replace the wav file as is.
+(9) **Enemy death**: white flash, then thrown away from the player spinning and shrinking, sparks and a shock ring, about 0.5 s
+(`CombatConstants.death*`; the old three durations are gone); coins drop where it stood; a Heavy's first hit now flinches.
+(10) **Attack**: the plain yellow rectangle is now a white slash that sweeps down through the swing with a spark and speed lines, and
+the hitbox now travels with the hero (`follow`) instead of staying where it spawned. 541 Flutter tests, 22 node tests, same 5
+analyzer lints. Not verified on a device: speed feel, fight difficulty at 250, the slash and death look, the praise sound, the
+progress bar's room between the joystick and the buttons on a real phone.
+**2026-10-05, login error messages (uncommitted, not on a phone):** the user saw wrong messages on the student login. Cause: the server
+answers in English and one answer meant two things. "Babalik" with a mistyped username got "Real name is required for first-time join"
+(the server treats an unknown username as a new student); "Bago" with a taken username got "Incorrect password". New
+`lib/utils/login_errors.dart` (`loginErrorMessage(e, joining:)`, tab-aware, all Filipino, no developer text such as "check the backend and
+API URL"); `ApiService.login` uses it, `AuthNotifier` shows only ready messages and has `clearError()`, called when the tab changes.
+Backend NOT changed (it could return distinct codes for "unknown username" and "username taken" later). 511 Flutter tests.
 **2026-10-05, QR scan on the login (built from a mockup the user approved; uncommitted, not on a phone):** the login
 screen's left column now holds a scan card instead of the logo block (small CHRONOQUEST wordmark kept), camera off until tapped.
 `lib/utils/join_link.dart` (`parseJoinCode`: `chronoquest://join?code=X` or a bare code, upper-cased, 2-20 of A-Z 0-9 - _),

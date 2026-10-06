@@ -264,6 +264,17 @@ Gravity `900`, jump force `-480`, peak ~128 units.
 > are unchanged and still off-limits. If platforms feel too high, 90 is the number to pull
 > back; 110 is the ceiling the jump arc allows.
 
+> **Correction, 2026-10-06 (`v2-phase-4`, fifth playtest round):** walking speed is **250**
+> units/s (it was 210; "medyo mabagal"). The jump is unchanged, so a full-speed jump now
+> carries 250 x 1.067 = **267** (was 224) and every number derived from it moved: gaps
+> **192-288** (platformless at most 240), platform-fight gaps **352 / 384 / 416** (longest
+> crossable gap is now 267 + 48 = 315), fight platform **240** wide, `knockbackDistance`
+> **180** (so the invincibility arithmetic above still holds: 300 walking against 326 needed)
+> and the attack box **80** wide (at the new speed 64 left too little time to hit an enemy
+> before touching it). Levels are about 100 s of walking, was 119. Also new: a progress bar
+> along the bottom of the level, a Tunog (volume) setting, a cheer and a word of praise after a
+> right answer, a thrown-and-spinning enemy death, and a slash for the attack.
+
 > **Correction, 2026-10-04 (`v2-phase-4`, after the Spanish-era playtest):** the protected
 > platform range moved from 90-110 to **104-112** and gaps were widened to **176-240**
 > (platformless gaps at most 208). Two reasons. An enemy's hit area reaches 99.9 above the
