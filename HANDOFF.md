@@ -19,6 +19,14 @@ phone playtest of spanish 1-4.
 ## 2. Current state
 **Uncommitted on `v2-phase-4`.** 456/456 Flutter tests, 22/22 node tests, `flutter analyze` at the
 usual 5 pre-existing lints. An arm64 APK with spanish 1-4 and all the fixes was built and sent on 2026-10-04; no device feedback yet.
+**2026-10-06, after the APK of the fifth round (uncommitted, not on a phone):** from the user's first look at it. (1) **Artifacts**
+(approved mockup, https://claude.ai/artifact/PGLNv4rcKdfjwgkUDVL6jx): 56 -> 72 (`artifactSize`, `physics.json`, lint; `artifactHoverHeight`
+150 -> 158 keeps the middle where it was), the era tint is gone from the sprite (a spent one still goes dull), and a gold halo that
+breathes plus seven sparkles is drawn behind it in `ArtifactComponent.render` (shader built once, skipped when inert or over 900 units
+from the player, follows the claim fade-out). 13 levels regenerated for the new size. (2) **Hearts** no longer regenerate during a level:
+`GameNotifier.enterLevel()/exitLevel()` (called from `GameScreen` initState/dispose) stop the clock and resume it where it was
+(`HeartsState.resumedAfterLevel`); a loss in a level does not regenerate first. Not frozen if the app is killed mid-level. (3) **Progress
+bar** is now the "mini pill" (112 x 18 dp, 78% opacity, thin gold line, 12 dp hero face, 13 dp gate, no ticks), bottom 9. 557 Flutter tests.
 **2026-10-06, fifth playtest round (the user's 12 notes, Filipino; all uncommitted, not on a phone, no APK built since the QR one):**
 (1) **QR card adapts**: `QrScanPanel` scales 1x-1.8x with the column and screen height (tablet), text and brackets too.
 (2-4) **Login**: the screen they tested was the APK built *before* the 10-05 error fix, so its messages were the old ones. Two real
