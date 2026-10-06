@@ -19,6 +19,14 @@ phone playtest of spanish 1-4.
 ## 2. Current state
 **Uncommitted on `v2-phase-4`.** 456/456 Flutter tests, 22/22 node tests, `flutter analyze` at the
 usual 5 pre-existing lints. An arm64 APK with spanish 1-4 and all the fixes was built and sent on 2026-10-04; no device feedback yet.
+**2026-10-06, level-complete card (uncommitted, not on a phone, built from a mockup the user approved, https://claude.ai/artifact/5XcfznAVkssrGqnh9Y3W3z):** the user's
+screenshot showed "5/5 TAMA" on a level of ten artifacts, and the card scrolled. Cause of 5/5: `levelComplete()` scored distinct question ids
+and every level has only 5 authored questions (the pool serves each twice for 10 artifacts). Now a level with artifacts is scored per artifact
+(`correct = artifactsClaimed`, `total = artifactsTotal`), which also feeds stars, the perfect-level +50 and `onLevelComplete`; the POST payload is
+unchanged. Cause of the scrolling: the card was 331 dp tall (382 on levels 3 and 7) on 320-360 dp screens. `LevelCompleteScreen` is now two
+columns (about 190 dp) from 556 dp wide up, one column below, with a row of one dot per artifact under the score (green right, outline missed;
+none above 12 artifacts or with no artifacts). Still open: 5 questions per level means every question is asked twice in a level; 5 more per level
+(185 in all) need writing and teacher review. 565 Flutter tests.
 **2026-10-06, after the APK of the fifth round (uncommitted, not on a phone):** from the user's first look at it. (1) **Artifacts**
 (approved mockup, https://claude.ai/artifact/PGLNv4rcKdfjwgkUDVL6jx): 56 -> 72 (`artifactSize`, `physics.json`, lint; `artifactHoverHeight`
 150 -> 158 keeps the middle where it was), the era tint is gone from the sprite (a spent one still goes dull), and a gold halo that
