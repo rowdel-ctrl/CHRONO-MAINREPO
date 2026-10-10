@@ -5,7 +5,7 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
-**Date:** 2026-10-10 (hearts count in server time; teacher question bank reaches the game; uncommitted on `v2-phase-4`/`era-names-six-era-bow`)
+**Date:** 2026-10-10 (hearts count in server time; teacher question bank reaches the game; committed on `era-names-six-era-bow` (game) and `v2-phase-4` (root), not pushed, not on a phone, needs the backend deployed)
 **From:** Claude Code (Sonnet 5.5)
 - **Hearts and the phone clock:** moving the phone's clock forward used to refill every heart. Hearts now count in the server's time: `lib/services/server_clock.dart` reads `GET /health` (`serverTimeMs`) and carries it forward with a `Stopwatch`, so changing the phone's clock does nothing; the phone's clock is only used to notice a jump and re-read. With no server time yet (offline at launch) hearts do not come back, and a heart lost then starts its countdown at the next connection (`HeartsState.anchoredAt`). `GameNotifier({clock})` takes the clock (tests use `ServerClock.fixed`); `heartCountdown` replaces `timeUntilNext(DateTime.now())` in the three screens. **Needs the backend deployed.**
 - **Question bank sync:** `QuestionBank.applySynced` swaps in the questions a teacher published, per level, after re-checking them (unplayable questions are dropped; a level never ends up thinner than what shipped). `QuestionSync` (`lib/services/question_sync.dart`) downloads them after login, on era-select open (via `refreshProfile`) and at startup, keeps a copy in Hive (`question_bank_cache`, per class code) and restores it offline from `main.dart`. Logout clears it. A level's `QuestionPool` is built when it starts, so a download never changes a level mid-play. Regular levels recycle questions when the pool is small; only the boss pads with placeholders.
@@ -14,7 +14,7 @@
 ---
 
 
-**Date:** 2026-10-10 (levels redesigned: real terrain and generator v2, all 37 non-boss levels; uncommitted on `v2-phase-4`, not on a phone)
+**Date:** 2026-10-10 (levels redesigned: real terrain and generator v2, all 37 non-boss levels; committed and pushed, not on a phone)
 **From:** Claude Code (Sonnet 5.5)
 **To:** Claude Code / Chat
 **Project:** ChronoQuest
