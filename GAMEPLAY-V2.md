@@ -1,7 +1,12 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **Phases 0-3 implemented and committed**, awaiting their on-device playtest; Phase 4's
-first half (Tiled loader and one reference level) is built but uncommitted. Revision 13 — three
+Status: **Phases 0-3 implemented and committed**, awaiting their on-device playtest. **Revision 14
+(2026-10-10): Phase 4 is built for all 37 non-boss levels, and the levels are no longer a flat strip.**
+The game now draws and collides with real terrain (ground in blocks of different heights, walls,
+water in pits; Section 11's `ground` tile layer is the picture the game paints), the generator was
+rewritten around eleven set pieces and a per-section landscape, and every level is played by a
+solver before it is kept (`HANDOFF.md`, 2026-10-10). The six boss levels still have no map and the
+procedural spawners stay until Phase 5. Revision 13 — three
 playtest-driven changes on `v2-phase-4`, none yet confirmed on a device: **Kaalaman is spent
 only when a swing hits, the cap of 6 is gone, and a student at 0 charges slowly regains one**
 (Section 4); **the HUD was redesigned** with health and Kaalaman bars and a gate/artifact
