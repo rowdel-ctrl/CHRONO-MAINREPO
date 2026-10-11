@@ -43,9 +43,9 @@ Done on 2026-10-10: all 37 non-boss levels have a map, redrawn with real terrain
 
 ## 4. Phase 5: boss fights
 
-- [ ] Countdown bar and 6 questions
-- [ ] Minions between questions
-- [ ] Time Freeze wired to the timer (currently does nothing)
+- [x] Countdown bar and 6 questions
+- [x] Minions between questions
+- [x] Time Freeze wired to the timer (students need to own some; Phase 6 shop)
 - [ ] Boss maps exist (see section 1)
 
 ## 5. Phase 6: economy and polish

@@ -5,6 +5,13 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
+**Date:** 2026-10-11 (Phase 5, the boss fight, simple version; committed and pushed on `era-names-six-era-bow`)
+**From:** Claude Code (Sonnet 5.5)
+- **Fight:** the boss asks a question with a 15-second bar (`BossCountdown`, `lib/game/boss_countdown.dart`); six right answers beat it (`GameConstants.bossQuestionsToWin`). A wrong answer or a timeout (the overlay sends an empty answer) costs the boss nothing and shows the explanation; the next question is a different one from the level pool. After every answer a wave of minions spawns (2, then 3 from the third wave; `minionsInWave`); the next question waits until they are all beaten, or 40 seconds pass. Each minion beaten gives one Kaalaman charge (`EnemyComponent.onDefeated`). A shield still turns a wrong answer away; the minions come either way.
+- **Time Freeze** shows on the boss question and stops that question bar. It is a count in `PowerUps.timeFreeze`; students start with none, so real use waits for Phase 6 buying.
+- **Code:** `BossComponent` runs the fight (question, then wave, then question); `QuestionCard`/`QuestionOverlayWidget` show `CountdownBar` and the Time Freeze button; `ChronoGame.bossQuestions` is gone, the boss draws from `questionPool`. Tests: `test/game/boss_countdown_test.dart`, `boss_fight_test.dart`; 734 pass.
+- **Not done:** the six hand-built boss maps (boss levels still use the plain generated ground); the three-phase version; a phone playtest (minion spacing, wave size, bar look).
+
 **Date:** 2026-10-11 (teacher-picked questions, game side; committed and pushed on `era-names-six-era-bow`)
 **From:** Claude Code (Sonnet 5.5)
 - **What:** a teacher can mark a level "I choose" and tick the questions to always ask. The game asks the picked ones first (random order), then fills the rest at random; a retry never repeats the question just missed. Unknown ids, repeats and more than the level asks (10, boss 22) are ignored. Picks are cached with the download, so they work offline.
