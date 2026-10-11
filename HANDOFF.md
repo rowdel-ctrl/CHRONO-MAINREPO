@@ -5,6 +5,15 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
+**Date:** 2026-10-11 (Phase 6, the coin shop; committed and pushed on `era-names-six-era-bow`)
+**From:** Claude Code (Sonnet 5.5)
+- **Where it lives:** the wallet is on the phone, one per student id (`StorageService.getWallet/saveWallet`, key `wallet_<id>`): coins, 50/50, Shield, Time Freeze, and bought characters. The server has no coins field and its power-up endpoint (`PATCH /student/power-ups` takes {type, action}) does not match what `ApiService.updatePowerUps` sends, so nothing is synced; a reinstall starts the wallet again. `gameProvider` listens to the logged-in student id and calls `GameNotifier.loadWallet`.
+- **Earning:** `GameScreen` banks `game.playerCoins` once when a level completes or fails (quitting from the pause menu forfeits them) and saves power-up use on exit. The level 3 and 7 milestone rewards are saved too.
+- **Spending:** `buyHeart()` (20 coins, keeps the regen countdown, `HeartsState.withHeart`), `buyPowerUp(PowerUpKind)` (50/50 15, Shield 25, Time Freeze 30; `GameConstants`), `unlockCharacter(id)` (the existing `unlockCost`: Luna 100, Bonifacio 200, Del Pilar 300). `selectCharacter` refuses a locked one; a student whose saved character is locked goes back to a free one. Test Mode (unlock all) opens every character.
+- **UI:** the hearts dialog BILHIN works; Profile has a "Tindahan" panel (`_Shop`) in place of the old powerups panel; character select dims a locked card, shows its price and offers an unlock dialog.
+- **Tests:** `test/providers/wallet_test.dart`, `test/screens/character_unlock_test.dart`, shop cases in `profile_screen_test.dart`, buy cases in `hearts_pill_test.dart`; 774 pass.
+- **Not done:** prices are placeholders (a level pays roughly 30 to 60 coins); no server sync (needs a coins field and a spend endpoint in the dashboard backend, a brief can be written); the level-complete screen does not show coins earned; a phone playtest.
+
 **Date:** 2026-10-11 (boss arenas: the six boss levels now have maps; committed and pushed on `era-names-six-era-bow`)
 **From:** Claude Code (Sonnet 5.5)
 - **What:** each boss level is one fixed room, 76 tiles (1824 units) wide, mirror-symmetric, with a 7-tile wall at each end. Maps: `era1_10`, `era2_5`, `era3_7`, `era4_8`, `era5_8`, `era6_5` (Sinaunang Pilipinas, Pananakop ng Espanya, Pag-usbong ng Nasyonalismo, Himagsikan at Imperyalismong Amerikano, Pamahalaang Kolonyal at Pananakop ng Hapon, Batas Militar at Muling Pagbangon ng Demokrasya). They are written by `node tools/levelgen/arenas.js` (specs in that file: left half, mirrored), which checks each one with the solver before saving (every platform and minion spot reachable, no trap spots, a safe ledge each side).

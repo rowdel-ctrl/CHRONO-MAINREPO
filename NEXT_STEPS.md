@@ -50,10 +50,10 @@ Done on 2026-10-10: all 37 non-boss levels have a map, redrawn with real terrain
 
 ## 5. Phase 6: economy and polish
 
-- [ ] Save a local coin balance (earned in levels, minus spent)
-- [ ] `GameNotifier.buyHeart()` (20 coins) and enable the disabled BILHIN button
-- [ ] Enforce character unlock costs
-- [ ] Power-up purchasing and in-level use of 50/50 and Shield
+- [x] Save a local coin balance (earned in levels, minus spent)
+- [x] `GameNotifier.buyHeart()` (20 coins) and enable the disabled BILHIN button
+- [x] Enforce character unlock costs
+- [x] Power-up purchasing and in-level use of 50/50 and Shield
 - [ ] Call the existing power-up sync endpoint
 - [ ] Level select reads fresh backend progress, not only the local cache
 - [ ] Score and coins sync (deferred by you): game points vs the server's 10 per correct answer. Needs a backend change; recommended design is in the `score-and-coins-sync-deferred` memory
