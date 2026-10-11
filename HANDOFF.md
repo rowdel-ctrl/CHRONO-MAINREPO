@@ -5,6 +5,14 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
+**Date:** 2026-10-11 (boss arenas: the six boss levels now have maps; committed and pushed on `era-names-six-era-bow`)
+**From:** Claude Code (Sonnet 5.5)
+- **What:** each boss level is one fixed room, 76 tiles (1824 units) wide, mirror-symmetric, with a 7-tile wall at each end. Maps: `era1_10`, `era2_5`, `era3_7`, `era4_8`, `era5_8`, `era6_5` (Sinaunang Pilipinas, Pananakop ng Espanya, Pag-usbong ng Nasyonalismo, Himagsikan at Imperyalismong Amerikano, Pamahalaang Kolonyal at Pananakop ng Hapon, Batas Militar at Muling Pagbangon ng Demokrasya). They are written by `node tools/levelgen/arenas.js` (specs in that file: left half, mirrored), which checks each one with the solver before saving (every platform and minion spot reachable, no trap spots, a safe ledge each side).
+- **Map objects:** `boss` (centre x, surface y), `minion_spawn` spots, platforms, `spawn`; no gate, no exit. Map property `boss=true`. `LoadedLevel` has `isArena`, `boss`, `minionSpawns`, `mapWidth`.
+- **Game:** in an arena the fight starts by itself (`ChronoGame.update`), the boss stands where the map says (no walk-in), the first question comes after 1.8 s, waves spawn on the minion spots furthest from the player (alternating sides, on the surface they stand on), and the camera is clamped inside the room (`cameraLeftEdgeX`). The fight opens with 4 Kaalaman charges (`CombatConstants.bossStartCharges`) and charges regenerate during the fight. The player may now start on raised ground (spawn uses the block under it).
+- **Tools:** `solve.js` has an arena mode (goal is getting back to the start); `paths.js` skips arenas; `arena_mock.js` draws them to PNG (see the Level Review artifact). Tests: `test/game/boss_arena_test.dart`, arena cases in `boss_fight_test.dart`, node tests in `levelgen.test.js`; 747 Flutter and 37 node tests pass.
+- **Not done:** a phone playtest (wave pacing, room size, safe ledges); Pag-usbong ng Nasyonalismo has no minion sprites of its own (reuses Pananakop ng Espanya); the arena uses the usual backdrop; the three-phase boss.
+
 **Date:** 2026-10-11 (Phase 5, the boss fight, simple version; committed and pushed on `era-names-six-era-bow`)
 **From:** Claude Code (Sonnet 5.5)
 - **Fight:** the boss asks a question with a 15-second bar (`BossCountdown`, `lib/game/boss_countdown.dart`); six right answers beat it (`GameConstants.bossQuestionsToWin`). A wrong answer or a timeout (the overlay sends an empty answer) costs the boss nothing and shows the explanation; the next question is a different one from the level pool. After every answer a wave of minions spawns (2, then 3 from the third wave; `minionsInWave`); the next question waits until they are all beaten, or 40 seconds pass. Each minion beaten gives one Kaalaman charge (`EnemyComponent.onDefeated`). A shield still turns a wrong answer away; the minions come either way.

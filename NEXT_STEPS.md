@@ -16,7 +16,7 @@ Done on 2026-10-10: all 37 non-boss levels have a map, redrawn with real terrain
 - [ ] **Review every level on a phone**: the feel of the walls and ramps, whether a hop is too hard, enemy placement, frame rate with the terrain draw
 - [ ] Tune from that review: piece sizes and weights live in `pieces.js` / `build.js`, rules in `rules.js`; regenerate, then `paths.js` and `parity.js`
 - [ ] Optional polish: ladders, vines and grass tufts in the tileset are unused (crate piles and bushes are in)
-- [ ] Build the 6 boss-level maps (needed before Phase 5; the boss arena depends on the boss fight)
+- [x] Build the 6 boss-level maps (done 2026-10-11: tools/levelgen/arenas.js)
 - [ ] Delete `GroundSpawner`, `EnemySpawner` and `_setupProceduralLevel` once the boss levels have maps (they are the only users left)
 - [ ] Update the status header in `GAMEPLAY-V2.md` (done for revision 14; recheck at Phase 5)
 
@@ -46,7 +46,7 @@ Done on 2026-10-10: all 37 non-boss levels have a map, redrawn with real terrain
 - [x] Countdown bar and 6 questions
 - [x] Minions between questions
 - [x] Time Freeze wired to the timer (students need to own some; Phase 6 shop)
-- [ ] Boss maps exist (see section 1)
+- [x] Boss maps exist (see section 1)
 
 ## 5. Phase 6: economy and polish
 
