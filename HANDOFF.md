@@ -5,6 +5,14 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
+**Date:** 2026-10-11 (teacher-picked questions, game side; committed and pushed on `era-names-six-era-bow`)
+**From:** Claude Code (Sonnet 5.5)
+- **What:** a teacher can mark a level "I choose" and tick the questions to always ask. The game asks the picked ones first (random order), then fills the rest at random; a retry never repeats the question just missed. Unknown ids, repeats and more than the level asks (10, boss 22) are ignored. Picks are cached with the download, so they work offline.
+- **Contract with the dashboard:** `GET /student/questions` keeps sending the full list per level and adds `picks: { era: { level: [questionId] } }`. Code: `QuestionBank.applySynced(picks:)`, `picksFor`, `QuestionPool(picks:)`, `QuestionSync`; tests in `test/data/question_sync_test.dart`.
+- **Dashboard side (not done by this chat):** the "I choose" switch, tick boxes and the `picks` field are for the dashboard chat (a brief was given). Until it sends `picks`, nothing changes in play. Test against the live field once it exists.
+- Also done: 246 questions written for the three Grade 6 eras (see the entry below; sources in `tools/questions/grade6/`).
+- Tests: 716 pass; `flutter analyze` shows the same 5 old lints.
+
 **Date:** 2026-10-10 (real questions for Sinaunang Pilipinas, Pananakop ng Espanya and Pag-usbong ng Nasyonalismo; committed and pushed on `era-names-six-era-bow`)
 **From:** Claude Code (Sonnet 5.5)
 - **Source:** `capstone/Term 1 Final.docx`, `Term 2 Final.docx`, `Term 3 Final.docx`. Each ends with "PISA-Type na mga Tanong para sa Educational Game": 10 scenario questions per lesson, 4 choices, answer marked. Lesson N is level N of the era, so 220 questions fill all 22 levels of the three Grade 5 eras. The three Grade 6 eras (Himagsikan at Imperyalismong Amerikano, Pamahalaang Kolonyal at Pananakop ng Hapon, Batas Militar at Muling Pagbangon ng Demokrasya) have no Term 4-6 files, so their 246 questions (92, 92, 62; explanations included) were written for them in Filipino from the level skills, key dates checked online. Sources: `tools/questions/grade6/term4.js` to `term6.js`; `node tools/questions/generate_grade6.js` rebuilds the three era files. A teacher should skim them. If real Term 4-6 docs turn up, `import_terms.js` replaces them.
