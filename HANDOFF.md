@@ -5,6 +5,15 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
+**Date:** 2026-10-13 (teacher's question timer, committed as e23cd50 on `era-names-six-era-bow`; asked for in the dashboard chat)
+**From:** Claude Code (Sonnet 5.5)
+- **What:** a teacher can set a time for each question per level (Question Bank in the dashboard). The game reads it from `GET /student/questions` (`timer: { era: { level: seconds } }`, absent when off), keeps it with the question cache, and shows the countdown bar on ordinary artifact questions. When it runs out the overlay answers with '' (a wrong answer, explanation shown), and `handleAnswerPointAnswer` takes one heart (`loseLife()`); a Shield absorbs it; on the last heart the level fails and the engine stays stopped. A plain wrong answer still costs nothing.
+- **Code:** `QuestionBank.applyTimer / timerSecondsFor` (15 to 120 s only, cleared on logout), `QuestionSync` (sync + restore), `question_overlay.dart` (countdown for non-boss when the level has a time), `question_card.dart` (a timed ordinary question keeps 50/50 and Shield; Time Freeze stays boss-only), `answer_point_handler.dart`.
+- **Tests:** `test/data/question_timer_test.dart`, new groups in `answer_point_test.dart` and `boss_countdown_test.dart`. Full suite: 787 pass. The flaky `wallet_test` (storage closed before a background hearts save finished) is fixed in the test file.
+- **Not done:** no APK built, not tried on a phone. Not confirmed on the device yet.
+
+---
+
 **Date:** 2026-10-11 (Phase 6, the coin shop; committed and pushed on `era-names-six-era-bow`)
 **From:** Claude Code (Sonnet 5.5)
 - **Where it lives:** the wallet is on the phone, one per student id (`StorageService.getWallet/saveWallet`, key `wallet_<id>`): coins, 50/50, Shield, Time Freeze, and bought characters. The server has no coins field and its power-up endpoint (`PATCH /student/power-ups` takes {type, action}) does not match what `ApiService.updatePowerUps` sends, so nothing is synced; a reinstall starts the wallet again. `gameProvider` listens to the logged-in student id and calls `GameNotifier.loadWallet`.
