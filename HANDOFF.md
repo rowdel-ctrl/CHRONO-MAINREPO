@@ -5,6 +5,17 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
+**Date:** 2026-10-13 (new Leaderboard, Background History and Tindahan shop screens; committed as 554455c and pushed on `era-names-six-era-bow`)
+**From:** Claude Code (Sonnet 5.5)
+- **Design:** mockup https://claude.ai/artifact/FMX12niTrMHCP5FnfzuXN8 (Poppins, the game's real font; the pixel fonts named in `AppFonts` comments are not used anywhere).
+- **Leaderboard** (`leaderboard_screen.dart`): "Ikaw" card (rank, score, gap to the next student), podium for the top 3, list for the rest, own row gold, pinned under the list below the top 20. Uses `ApiService.getLeaderboardBoard` (new, returns `LeaderboardBoard{leaders, myRank, myScore}`; `getLeaderboard` still works). Three columns from 760 wide, podium moves into the list from 520, one column below. Empty and offline states; never invents names.
+- **Background History** (`background_history_screen.dart`, new `lib/data/era_story.dart`): the era paragraph is cut into events with a label, a timeline, and 3 tap-to-open term cards. HANDA NA AKO stays grey until all terms are opened (it used to open at the bottom of the scroll). Story text is only the era's `historicalText` split up, nothing added. No date-range chip (era titles carry no dates).
+- **Shop** (`lib/screens/shop/shop_screen.dart`, route `/shop`): hearts (buy 1, or fill all, all-or-nothing via new `GameNotifier.buyAllHearts`) and the three power-ups, grey button with "Kulang ng N" when short, toast after a buy. Entry points: cart chip on the era list (`PixelGlyph.cart`), the hearts pill "+" (the old buy dialog is gone; `HeartsPill.onBuy` overrides), TINDAHAN button on the level-failed screen, and a link in Profile (the Profile panel only shows holdings now).
+- **Tests:** new `leaderboard_screen_test`, `shop_screen_test`; updated history, hearts pill, profile, wallet tests. Full suite 800 pass; analyze shows only the 4 old `login_screen` lints. Test fonts are the wide Ahem face, so overflow checks are stricter than a real phone.
+- **Not done:** no APK, not tried on a phone. No weekly tab on the leaderboard (the game endpoint has no week data; the dashboard does). Hero purchase stays in character select. Wallet is still phone-only.
+
+---
+
 **Date:** 2026-10-13 (teacher's question timer, committed as e23cd50 on `era-names-six-era-bow`; asked for in the dashboard chat)
 **From:** Claude Code (Sonnet 5.5)
 - **What:** a teacher can set a time for each question per level (Question Bank in the dashboard). The game reads it from `GET /student/questions` (`timer: { era: { level: seconds } }`, absent when off), keeps it with the question cache, and shows the countdown bar on ordinary artifact questions. When it runs out the overlay answers with '' (a wrong answer, explanation shown), and `handleAnswerPointAnswer` takes one heart (`loseLife()`); a Shield absorbs it; on the last heart the level fails and the engine stays stopped. A plain wrong answer still costs nothing.
