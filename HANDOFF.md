@@ -5,6 +5,17 @@
 
 > Dashboard (web) work has its own handoff: `CHRONO-DASHBOARD/HANDOFF.md`. This file is the game.
 
+**Date:** 2026-10-14 (new sign-in, sign-up and change-password screens; built and tested, not committed yet)
+**From:** Claude Code (Sonnet 5.5)
+- **Design:** mockup https://claude.ai/artifact/64EmjGQVtEq2cgMLkbCztj (5 versions; the user rejected a form with every box visible as "overwhelming", then asked for the QR card kept on the left, the choice screen first and the step bar at the top).
+- **Sign in** (`lib/screens/auth/login_screen.dart`, rewritten): first screen is two big buttons, "Bago ako" and "Balik na ako". Then one question per screen: Bago = class code, real name, username, password, repeat password (5); Balik = class code, username, password (3). A step bar at the top ("Bago ako · Hakbang 2 ng 5") and a back arrow (also the phone's back button) that keeps what was typed. The QR scan card (unchanged `QrScanPanel`) is on the left of the class code question only; on the other questions the guide (a Luna sprite, a stand-in) says one line. Under 700 wide there is no left side: a scan button sits inside the class code box and opens the full-screen scanner as before. Same rules and the same single `login()` call, sent after the last answer. A server complaint sends the student back to the question it is about, with the answers kept (`loginErrorField` in `login_errors.dart` maps each message); no internet stays on the last question.
+- **Change password** (`change_password_screen.dart`, rewritten): same guide and big boxes, two boxes with show/hide eyes, a line that turns green at 6 characters and when both match, the button grey until both are true, no back button. Errors are now Filipino (`changePasswordErrorMessage`, used by `ApiService.changePassword`; the old one showed the raw server text). The screen takes an optional `save` function so tests do not need the server.
+- **Shared pieces:** `lib/screens/auth/auth_widgets.dart` (`AuthField`, `AuthStepBar`, `AuthGuide`, `AuthError`, `AuthBusyButton`, `AuthWordmark`).
+- **Tests:** new `login_steps_test` (26), `change_password_screen_test` (14), more in `login_errors_test`; the old `login_scan_test` and `login_error_test` were replaced by them. Full suite 831 pass; `flutter analyze` is clean (the 4 old login lints are gone).
+- **Not done:** no APK, not tried on a phone (the on-screen keyboard on a landscape phone is the thing to check: it covers part of the screen, the form scrolls). Opening "Balik na ako" does not remember the last class code or username. No "forgot password" flow (needs a dashboard change). Still to do before the student build: remove Test Mode, bundle Poppins.
+
+---
+
 **Date:** 2026-10-13 (new Leaderboard, Background History and Tindahan shop screens; committed as 554455c and pushed on `era-names-six-era-bow`)
 **From:** Claude Code (Sonnet 5.5)
 - **Design:** mockup https://claude.ai/artifact/FMX12niTrMHCP5FnfzuXN8 (Poppins, the game's real font; the pixel fonts named in `AppFonts` comments are not used anywhere).
