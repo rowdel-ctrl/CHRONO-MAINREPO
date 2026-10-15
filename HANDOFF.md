@@ -1,15 +1,15 @@
 # HANDOFF (board for all chats)
 
 > One page. It shows the three chats side by side. Each chat keeps its own full notes in its own folder; this board only says where things stand and what one chat needs from another.
-> Last updated: 2026-10-15 by LANDING PAGE.
+> Last updated: 2026-10-15 by DASHBOARD.
 
 ## The three chats
 
 | Nickname | Works on | Its own handoff | Where it stands |
 |---|---|---|---|
 | **GAME** | `CHRONO-GAMEAPP` (Flutter game) | `CHRONO-GAMEAPP/HANDOFF.md` | 2026-10-14: new sign-in, sign-up and change-password screens built, tested, committed and pushed. Old Claude co-author lines removed from all game and root commits (commit ids changed; re-clone elsewhere). Last APK was 1.1.0 on 2026-10-11. The Oct 13-14 screens (leaderboard, history, shop, sign-in) have not been tried on a phone. |
-| **DASHBOARD** | `CHRONO-DASHBOARD` (teacher and admin website, backend) | `CHRONO-DASHBOARD/HANDOFF.md` | 2026-10-14: all of today's work is merged to `main` and pushed (new filter bar and phone layouts, Sections cards, Question Bank switch, Top students 10, Points and phone student cards, generated password on reset, per-level question timer, duplicate section names blocked, Users export). Tests and build pass. Not looked at on a real phone or the live site. |
-| **LANDING PAGE** | `CHRONO-LANDING` (public page: APK download, screens, dashboard links) | `CHRONO-LANDING/HANDOFF.md` | 2026-10-15: built and checked in screenshots, committed locally as dcff197 (not pushed), not deployed. Teacher and Admin buttons now point to `https://chronoquest-dashboard.vercel.app/login`. Placeholders still to fill. |
+| **DASHBOARD** | `CHRONO-DASHBOARD` (teacher and admin website, backend) | `CHRONO-DASHBOARD/HANDOFF.md` | 2026-10-16: all work merged to `main` (Excel exports with the new look, admin phone layouts, one filter-window rule, era names in the audit log). Not yet checked on a real phone or in real Excel. Also merged: one button system for every teacher and admin page (every control at least 44px tall on a phone), an admin Leaderboard page (students and sections, read only, export) and a podium card on the Admin Dashboard. Tests pass; not yet seen on a real phone or the live site. |
+| **LANDING PAGE** | `CHRONO-LANDING` (public page: APK download, screens, dashboard links) | `CHRONO-LANDING/HANDOFF.md` | 2026-10-15: LIVE at https://chronoquest-five.vercel.app (Vercel project `chronoquest`, deployed with the CLI from this PC, APK 1.2.0 inside). Team, adviser, school and email are still placeholders. Teacher and Admin buttons now point to `https://chronoquest-dashboard.vercel.app/login`. Placeholders still to fill. |
 
 ## Waiting on the user
 
@@ -23,7 +23,7 @@ A chat adds a line here when it needs something from another chat, and deletes t
 
 | From | To | Request |
 |---|---|---|
-| LANDING PAGE | GAME | A fresh arm64 APK when the download should be the newest build (raise the pubspec version first). A phone screenshot of a quiz question and of the leaderboard for the screens row. |
+| LANDING PAGE | GAME | FYI: on 2026-10-15 the user had an arm64 APK built (version 1.2.0+3, from `5d7e8bf`); the pubspec bump is uncommitted in the game repo. It still has Test Mode. Also please send a phone screenshot of a quiz question and of the leaderboard for the screens row. |
 | LANDING PAGE | DASHBOARD | Three screenshots: item analysis, question bank, sections (need a login and a browser: the user has to take them). The live dashboard address is settled: `https://chronoquest-dashboard.vercel.app`. |
 | GAME | DASHBOARD | Score and coins sync was postponed by the user. It needs a backend change when they pick it up. |
 
