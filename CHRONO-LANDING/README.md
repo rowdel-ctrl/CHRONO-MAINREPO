@@ -53,3 +53,13 @@ Still placeholders: the gameplay video box, the three dashboard pictures, a quiz
 ## Share picture
 
 `public/og.jpg` (1200x630) is the card shown when the link is shared in Messenger or Facebook. The tags are in `index.html`. They need an absolute address: on Vercel it is found automatically (`VERCEL_PROJECT_PRODUCTION_URL`), elsewhere set `VITE_SITE_URL`. Without either, the tag is just `/og.jpg` and some apps will not show it. After deploying, test the link in the Facebook Sharing Debugger.
+
+## Live site
+
+https://chronoquest-five.vercel.app (Vercel project `chronoquest`). Deploy or redeploy from this folder:
+
+```bash
+npx vercel deploy --prod
+```
+
+The project is linked in `.vercel/` (git-ignored; run `npx vercel link --project chronoquest` on a new PC). The site is not connected to GitHub, so a push does not deploy it.
