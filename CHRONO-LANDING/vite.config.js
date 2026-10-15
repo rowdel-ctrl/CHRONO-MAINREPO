@@ -13,7 +13,22 @@ function apkSize() {
   }
 }
 
+// Share links need an absolute address for the picture. Set VITE_SITE_URL, or Vercel's own
+// production address is used when it is available at build time.
+function siteUrl() {
+  const set = process.env.VITE_SITE_URL;
+  if (set) return set.replace(/[/]$/, '');
+  const v = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return v ? 'https://' + v : '';
+}
+
+const shareUrl = {
+  name: 'share-url',
+  transformIndexHtml: (html) => html.replaceAll('__SITE_URL__', siteUrl()),
+};
+
 export default defineConfig({
+  plugins: [shareUrl],
   define: {
     __APK_SIZE__: JSON.stringify(apkSize()),
   },

@@ -49,3 +49,7 @@ Still placeholders: the gameplay video box, the three dashboard pictures, a quiz
 ## Art
 
 `public/art/` holds copies of sprites from `CHRONO-GAMEAPP/assets/`. They are drawn with `image-rendering: pixelated`.
+
+## Share picture
+
+`public/og.jpg` (1200x630) is the card shown when the link is shared in Messenger or Facebook. The tags are in `index.html`. They need an absolute address: on Vercel it is found automatically (`VERCEL_PROJECT_PRODUCTION_URL`), elsewhere set `VITE_SITE_URL`. Without either, the tag is just `/og.jpg` and some apps will not show it. After deploying, test the link in the Facebook Sharing Debugger.
