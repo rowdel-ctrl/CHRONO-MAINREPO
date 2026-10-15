@@ -9,7 +9,7 @@
 |---|---|---|---|
 | **GAME** | `CHRONO-GAMEAPP` (Flutter game) | `CHRONO-GAMEAPP/HANDOFF.md` | 2026-10-14: new sign-in, sign-up and change-password screens built, tested, committed and pushed. Old Claude co-author lines removed from all game and root commits (commit ids changed; re-clone elsewhere). Last APK was 1.1.0 on 2026-10-11. The Oct 13-14 screens (leaderboard, history, shop, sign-in) have not been tried on a phone. |
 | **DASHBOARD** | `CHRONO-DASHBOARD` (teacher and admin website, backend) | `CHRONO-DASHBOARD/HANDOFF.md` | 2026-10-14: all of today's work is merged to `main` and pushed (new filter bar and phone layouts, Sections cards, Question Bank switch, Top students 10, Points and phone student cards, generated password on reset, per-level question timer, duplicate section names blocked, Users export). Tests and build pass. Not looked at on a real phone or the live site. |
-| **LANDING PAGE** | `CHRONO-LANDING` (public page: APK download, screens, dashboard links) | `CHRONO-LANDING/HANDOFF.md` | 2026-10-15: built and checked in screenshots, not deployed, not committed. Teacher and Admin buttons now point to `https://chronoquest-dashboard.vercel.app/login`. Placeholders still to fill. |
+| **LANDING PAGE** | `CHRONO-LANDING` (public page: APK download, screens, dashboard links) | `CHRONO-LANDING/HANDOFF.md` | 2026-10-15: built and checked in screenshots, committed locally as dcff197 (not pushed), not deployed. Teacher and Admin buttons now point to `https://chronoquest-dashboard.vercel.app/login`. Placeholders still to fill. |
 
 ## Waiting on the user
 
