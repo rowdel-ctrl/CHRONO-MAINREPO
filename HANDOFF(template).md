@@ -1,90 +1,28 @@
-# HANDOFF
+# HANDOFF (blank entry)
 
-> Purpose: pass context between Claude chat and Claude Code.
-> At the end of a session, add a new dated entry at the top and keep it short (under one page). Once you have 3–4 entries, fold the oldest into a one-line summary at the bottom so the file doesn't grow forever.
-
-**Date:**
-**From:** Chat / Claude Code
-**To:** Claude Code / Chat
-**Project:**
+> Copy the block below to the top of your chat's own handoff (`CHRONO-GAMEAPP/HANDOFF.md`, `CHRONO-DASHBOARD/HANDOFF.md` or `CHRONO-LANDING/HANDOFF.md`). The board for all chats is `HANDOFF.md` at the root: update your row there too.
+> Keep one entry under a page. Keep the whole file under its limit (see the board). When it is over, move the oldest entries in full to `docs/handoff-archive/` in the same folder and leave a one-line pointer.
 
 ---
 
-<!-- Copy the block below for each new session. Newest entry goes on top. -->
-
-
-## 1. Goal
-One or two sentences: what are we trying to achieve right now?
-
-## 2. Current state
-- What works:
-- What's broken or unfinished:
-- Files/folders touched (paths):
-
-## 3. Decisions made (and why)
-- Decision — reason
-- Decision — reason
-
-## 4. Things we tried that did NOT work
-- Attempt — why it failed (so nobody repeats it)
-
-## 5. Next steps (in order)
-1.
-2.
-3.
-
-## 6. Constraints & conventions
-- Stack/versions:
-- Style rules (naming, state management, folder structure):
-- Do not touch:
-
-## 7. Open questions
-- Question — who needs to answer
-
-## 8. Attachments / references
-- Files, links, error messages, screenshots (paste the key ones below)
-
-<!-- Older entries, folded to one line each, go here once the file gets long:
-- 2026-09-10 — Set up auth flow, decided on JWT over sessions
--->
+**Date:** YYYY-MM-DD (what this session did, in a few words; committed or not)
+**From:** Claude Code (model)
+- **What changed:** files and screens, in plain words.
+- **Checked:** what was run or looked at (tests, screenshots, a phone).
+- **Not checked / not done:** say it honestly (for example "not tried on a phone", "no APK built").
+- **Decisions:** the choice and the reason, one line each.
+- **Tried and failed:** so nobody repeats it.
+- **Next:** the first step for the next session.
+- **For another chat:** also add a line to the requests table on the root board.
 
 ---
 
-# Copy-paste prompts
+## Prompts to paste into a new chat
 
-**End of a chat session (ask Claude in chat):**
-> Fill in a new dated HANDOFF.md entry from this conversation, for Claude Code. Be concise. Include exact file paths, decisions with reasons, and what failed. Output it as a single markdown block I can paste in at the top of the file.
+Start of a session:
 
-**Start of a Claude Code session:**
-> Read HANDOFF.md (top entry = most recent) and CLAUDE.md first. Summarize the goal and next steps in 3 lines, then start on step 1.
+> Read HANDOFF.md at the root (the board), then the top entry of your own handoff and CLAUDE.md. Summarize the goal and next steps in 3 lines, then start on step 1.
 
-**End of a Claude Code session:**
-> Add a new dated entry at the top of HANDOFF.md: what changed (files), what's working, what's broken, decisions made, and next steps. Keep it under one page. If there are more than 4 entries, fold the oldest into a one-line summary at the bottom.
+End of a session:
 
-**Start of a chat session (paste the file, then say):**
-> Here's my HANDOFF.md from Claude Code — top entry is the latest. Continue from it. Help me with: ...
-
----
-
-# CLAUDE.md starter (permanent context; changes rarely)
-
-```
-# Project
-Name / one-line description
-
-# Stack
-Languages, frameworks, versions
-
-# Conventions
-Naming, folder structure, state management, testing
-
-# Commands
-How to run, test, build
-
-# Current priorities
-Top 3 goals (update when they change)
-
-# Rules
-- Read HANDOFF.md (top entry) at the start of every session.
-- Add a new dated entry to the top of HANDOFF.md before ending a session.
-```
+> Add a dated entry at the top of your handoff: what changed (files), what was checked, what was not, decisions with reasons, and next steps. Update your row on the board. Keep it under one page.
