@@ -93,3 +93,23 @@ setAll('[data-email]', function (n) { n.textContent = config.contactEmail; });
     c.addEventListener('click', function () { c.classList.add('tap'); setTimeout(function () { c.classList.remove('tap'); }, 2400); });
   });
 })();
+
+/* tap a dashboard picture to see it bigger */
+(function () {
+  var imgs = document.querySelectorAll('.hl .browser img');
+  if (!imgs.length || !window.HTMLDialogElement) return;
+  var dlg = document.createElement('dialog');
+  dlg.className = 'zoom';
+  dlg.innerHTML = '<form method="dialog"><button class="zx" aria-label="Close">Close</button></form><img alt="">';
+  document.body.appendChild(dlg);
+  var big = dlg.querySelector('img');
+  function open(img) { big.src = img.currentSrc || img.src; big.alt = img.alt; dlg.showModal(); }
+  imgs.forEach(function (img) {
+    img.tabIndex = 0;
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', 'Enlarge: ' + img.alt);
+    img.addEventListener('click', function () { open(img); });
+    img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(img); } });
+  });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg || e.target === big) dlg.close(); });
+})();

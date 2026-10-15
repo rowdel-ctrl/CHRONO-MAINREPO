@@ -379,3 +379,14 @@ footer nav a:hover { color: var(--ink); }
 
 /* real screenshots inside the phone frame */
 .bezel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* real dashboard screenshots inside the browser frame */
+.hl .browser img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; object-position: top left; }
+
+/* enlarged dashboard picture */
+.hl .browser img { cursor: zoom-in; }
+dialog.zoom { width: min(1200px, 96vw); max-height: 94vh; padding: 0; background: transparent; border: 0; color: var(--ink); overflow: visible; }
+dialog.zoom::backdrop { background: rgba(10, 7, 16, .86); }
+dialog.zoom img { display: block; width: 100%; height: auto; max-height: 86vh; object-fit: contain; border: var(--bw) solid var(--line); border-radius: var(--radius-card); background: #fff; cursor: zoom-out; }
+dialog.zoom form { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.zx { min-height: 44px; padding: 8px 20px; font: 700 .85rem "Poppins", sans-serif; text-transform: uppercase; letter-spacing: .05em; background: var(--accent); color: var(--accent-ink); border: var(--bw) solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-btn); cursor: pointer; }

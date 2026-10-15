@@ -63,3 +63,7 @@ npx vercel deploy --prod
 ```
 
 The project is linked in `.vercel/` (git-ignored; run `npx vercel link --project chronoquest` on a new PC). The site is not connected to GitHub, so a push does not deploy it.
+
+## Dashboard pictures
+
+`public/screens/dash-*.webp` (item analysis, question bank, sections) show the real dashboard with **demo data**: a fictional school and fictional students from the dashboard's own seed (`CBACK/src/utils/seed.js`). No real student appears. To retake them: run the seed against a throwaway in-memory MongoDB, start CBACK and CDASH locally on spare ports (not the live database), sign in as `teacher1.bangbangalon@chronoquest.dev`, and screenshot at 1200x800 (scale 1.5). Tap a picture on the page to enlarge it.
