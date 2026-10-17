@@ -44,7 +44,7 @@ The APK is in `.gitignore` (36 MB per version would bloat the repo). Two ways to
 
 `public/screens/*.webp` are real screenshots (873x393) from the Flutter web build, taken with `CHRONO-GAMEAPP/tool/cdp_shot.js`. Navigate with a full page load per screen (`nav:about:blank;nav:http://127.0.0.1:PORT/#/shop`), because hash-only navigation does not re-route in the game. Build the web bundle with `flutter build web --profile --dart-define=DEV_SKIP_AUTH=true` (release builds ignore that flag).
 
-Still placeholders: the gameplay video box, the three dashboard pictures, a quiz question screen and the leaderboard (the web build cannot reach the server without an account).
+Still placeholders: the gameplay video box, a quiz question screen and the leaderboard (the web build cannot reach the server without an account).
 
 ## Art
 

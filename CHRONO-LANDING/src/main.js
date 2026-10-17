@@ -113,3 +113,22 @@ setAll('[data-email]', function (n) { n.textContent = config.contactEmail; });
   });
   dlg.addEventListener('click', function (e) { if (e.target === dlg || e.target === big) dlg.close(); });
 })();
+
+/* old iPhones (before iOS 16) do not know cqw: size the hero scene in pixels instead */
+(function () {
+  var st = document.getElementById('stage');
+  if (!st || (window.CSS && CSS.supports && CSS.supports('width', '1cqw'))) return;
+  function fit() { st.style.setProperty('--u', (st.clientWidth / 100) + 'px'); }
+  fit();
+  window.addEventListener('resize', fit);
+})();
+
+/* iPhone and iPad cannot install an APK: say so instead of offering a download that goes nowhere */
+(function () {
+  var ua = navigator.userAgent || '';
+  var ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!ios) return;
+  document.documentElement.classList.add('ios');
+  document.querySelectorAll('[data-apk]').forEach(function (a) { a.removeAttribute('download'); a.setAttribute('href', '#install'); });
+  document.querySelectorAll('[data-apk-meta], [data-apk-size]').forEach(function (n) { if (n.tagName === 'SMALL') n.textContent = 'Android only'; });
+})();

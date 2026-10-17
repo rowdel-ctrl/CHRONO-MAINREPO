@@ -44,6 +44,7 @@
   --step-2: clamp(1.5rem, 1.15rem + 1.7vw, 2.3rem);
   --step-3: clamp(2.05rem, 1.2rem + 4vw, 3.9rem);
   --ease: cubic-bezier(.2, .7, .2, 1);
+  --u: 1cqw; /* one percent of the hero scene width; main.js replaces it with pixels where cqw is not supported */
   color-scheme: dark;
 }
 html, body { margin: 0; }
@@ -139,34 +140,34 @@ h3 { font-size: var(--step-1); }
 /* hero scene: the world scrolls left at one speed, the runner hops the soldier, coins arc over him */
 .stage { position: relative; container-type: inline-size; aspect-ratio: 16 / 11; overflow: hidden; border: var(--bw) solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-card), 0 0 0 5px rgba(245, 227, 190, .06); background: #C98A5C; animation: pop .9s var(--ease) .3s both; }
 @keyframes pop { from { opacity: 0; transform: scale(.94) translateY(16px); } }
-.layer { position: absolute; left: 0; right: 0; top: 0; bottom: 14cqw; background-repeat: repeat-x; background-position: 0 100%; background-size: auto 100%; image-rendering: pixelated; }
+.layer { position: absolute; left: 0; right: 0; top: 0; bottom: calc(14 * var(--u)); background-repeat: repeat-x; background-position: 0 100%; background-size: auto 100%; image-rendering: pixelated; }
 .l1 { background-image: var(--bg-back); animation: pan1 32s linear infinite; }
 .l2 { background-image: var(--bg-mid); animation: pan2 12s linear infinite; }
-@keyframes pan1 { to { background-position-x: -93.08cqw; } }
-@keyframes pan2 { to { background-position-x: -93.08cqw; } }
-.ground { position: absolute; left: 0; right: 0; bottom: 0; height: 14cqw; background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 2.4cqw, transparent 2.4cqw 14.25cqw), var(--ground); border-top: 2cqw solid var(--ground-top); animation: pan3 .5s linear infinite; }
-@keyframes pan3 { to { background-position-x: -14.25cqw; } }
-.runner { position: absolute; left: 14%; bottom: 14cqw; width: 17cqw; aspect-ratio: 52 / 68; animation: hop 4s infinite; }
+@keyframes pan1 { to { background-position-x: calc(-93.08 * var(--u)); } }
+@keyframes pan2 { to { background-position-x: calc(-93.08 * var(--u)); } }
+.ground { position: absolute; left: 0; right: 0; bottom: 0; height: calc(14 * var(--u)); background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 calc(2.4 * var(--u)), transparent calc(2.4 * var(--u)) calc(14.25 * var(--u))), var(--ground); border-top: calc(2 * var(--u)) solid var(--ground-top); animation: pan3 .5s linear infinite; }
+@keyframes pan3 { to { background-position-x: calc(-14.25 * var(--u)); } }
+.runner { position: absolute; left: 14%; bottom: calc(14 * var(--u)); width: calc(17 * var(--u)); aspect-ratio: 52 / 68; animation: hop 4s infinite; }
 .runner .sp { position: absolute; inset: 0; }
 .runner .w { animation: walk .6s linear infinite, showw 4s linear infinite; }
 .runner .j { background-image: var(--rizal-j); animation: showj 4s linear infinite; }
-@keyframes hop { 0%, 50% { transform: translateY(0); animation-timing-function: ease-out; } 72% { transform: translateY(-13cqw); animation-timing-function: ease-in; } 94%, 100% { transform: translateY(0); } }
+@keyframes hop { 0%, 50% { transform: translateY(0); animation-timing-function: ease-out; } 72% { transform: translateY(calc(-13 * var(--u))); animation-timing-function: ease-in; } 94%, 100% { transform: translateY(0); } }
 @keyframes showw { 0%, 52% { visibility: visible; } 52.01%, 94% { visibility: hidden; } 94.01%, 100% { visibility: visible; } }
 @keyframes showj { 0%, 52% { visibility: hidden; } 52.01%, 94% { visibility: visible; } 94.01%, 100% { visibility: hidden; } }
-.foe { position: absolute; left: 0; bottom: 14cqw; width: 14cqw; animation: run 4s linear infinite; }
+.foe { position: absolute; left: 0; bottom: calc(14 * var(--u)); width: calc(14 * var(--u)); animation: run 4s linear infinite; }
 .foe .sp { width: 100%; --f1: var(--spanish-1); --f2: var(--spanish-2); animation: walk2 .5s linear infinite; }
 @keyframes walk2 { 0%, 49.99% { background-image: var(--f1); } 50%, 100% { background-image: var(--f2); } }
-@keyframes run { from { transform: translateX(100cqw); } to { transform: translateX(-14cqw); } }
-.coins { position: absolute; left: 50%; bottom: 25cqw; width: 22cqw; height: 9cqw; transform: translateX(-50%); }
-.coins .sp { position: absolute; width: 5.4cqw; animation: spin 1s ease-in-out infinite; }
+@keyframes run { from { transform: translateX(calc(100 * var(--u))); } to { transform: translateX(calc(-14 * var(--u))); } }
+.coins { position: absolute; left: 50%; bottom: calc(25 * var(--u)); width: calc(22 * var(--u)); height: calc(9 * var(--u)); transform: translateX(-50%); }
+.coins .sp { position: absolute; width: calc(5.4 * var(--u)); animation: spin 1s ease-in-out infinite; }
 .coins .sp:nth-child(1) { left: 0; bottom: 0; }
-.coins .sp:nth-child(2) { left: 8.3cqw; bottom: 3.2cqw; animation-delay: .15s; }
+.coins .sp:nth-child(2) { left: calc(8.3 * var(--u)); bottom: calc(3.2 * var(--u)); animation-delay: .15s; }
 .coins .sp:nth-child(3) { right: 0; bottom: 0; animation-delay: .3s; }
 @keyframes spin { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.18); } }
-.quiz { position: absolute; z-index: 2; left: 4cqw; right: 4cqw; top: 4cqw; background: var(--card); color: var(--card-ink); border: var(--bw) solid var(--line); border-radius: var(--radius); padding: 2.2cqw 3cqw; box-shadow: 0 4px 0 var(--line); font-size: clamp(10.5px, 2.7cqw, 14px); animation: bob 3s ease-in-out infinite; }
+.quiz { position: absolute; z-index: 2; left: calc(4 * var(--u)); right: calc(4 * var(--u)); top: calc(4 * var(--u)); background: var(--card); color: var(--card-ink); border: var(--bw) solid var(--line); border-radius: var(--radius); padding: calc(2.2 * var(--u)) calc(3 * var(--u)); box-shadow: 0 4px 0 var(--line); font-size: clamp(10.5px, calc(2.7 * var(--u)), 14px); animation: bob 3s ease-in-out infinite; }
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 .quiz b { display: block; line-height: 1.35; }
-.quiz span { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.6cqw; }
+.quiz span { display: flex; flex-wrap: wrap; gap: 6px; margin-top: calc(1.6 * var(--u)); }
 .quiz i { font-style: normal; font-weight: 600; padding: .15em .8em; background: var(--card-2); border: 2px solid var(--line); border-radius: var(--radius); }
 .quiz i.pick { animation: pick 4s linear infinite; }
 @keyframes pick { 0%, 60% { background: var(--card-2); transform: none; } 66% { background: var(--accent); transform: scale(1.12); } 76%, 94% { background: #43A83E; color: #fff; transform: none; } 100% { background: var(--card-2); color: inherit; } }
@@ -374,7 +375,7 @@ footer nav a:hover { color: var(--ink); }
   html { scroll-behavior: auto; }
   .js .rv:not(.in) { opacity: 1; transform: none; }
   .track { flex-wrap: wrap; width: auto; }
-  .foe { transform: translateX(62cqw); }
+  .foe { transform: translateX(calc(62 * var(--u))); }
 }
 
 /* real screenshots inside the phone frame */
@@ -390,3 +391,11 @@ dialog.zoom::backdrop { background: rgba(10, 7, 16, .86); }
 dialog.zoom img { display: block; width: 100%; height: auto; max-height: 86vh; object-fit: contain; border: var(--bw) solid var(--line); border-radius: var(--radius-card); background: #fff; cursor: zoom-out; }
 dialog.zoom form { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 .zx { min-height: 44px; padding: 8px 20px; font: 700 .85rem "Poppins", sans-serif; text-transform: uppercase; letter-spacing: .05em; background: var(--accent); color: var(--accent-ink); border: var(--bw) solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-btn); cursor: pointer; }
+
+/* iPhone and iPad: the APK is for Android only */
+.ios-note { display: none; margin-top: 14px; padding: 12px 16px; background: rgba(255, 197, 49, .12); border: 2px solid var(--accent); border-radius: var(--radius); font-size: .92rem; color: var(--ink); }
+.ios-note b { color: var(--accent); }
+.dl .ios-note { color: var(--card-ink); background: var(--card-2); border-color: var(--line); }
+.dl .ios-note b { color: var(--card-ink); }
+.ios .ios-note { display: block; }
+.ios [data-apk] { opacity: .6; }
