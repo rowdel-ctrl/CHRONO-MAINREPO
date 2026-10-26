@@ -1,8 +1,51 @@
 # ChronoQuest — Gameplay V2 Design ("Knowledge is your weapon")
 
-Status: **design proposal**, not yet implemented. Revision 5 — Era 3 level count corrected (6→7, total 43) and BOW week numbers added, on top of the revision 4 codebase corrections. Six-era curriculum structure
-from the DepEd three-term Budget of Work, built around off-the-shelf components, corrected
-against a full read of the codebase (Task M, 2026-09-24).
+Status: **Phases 0-3 implemented and committed**, awaiting their on-device playtest. **Revision 14
+(2026-10-10): Phase 4 is built for all 37 non-boss levels, and the levels are no longer a flat strip.**
+The game now draws and collides with real terrain (ground in blocks of different heights, walls,
+water in pits; Section 11's `ground` tile layer is the picture the game paints), the generator was
+rewritten around eleven set pieces and a per-section landscape, and every level is played by a
+solver before it is kept (`HANDOFF.md`, 2026-10-10). The six boss levels still have no map and the
+procedural spawners stay until Phase 5. Revision 13 — three
+playtest-driven changes on `v2-phase-4`, none yet confirmed on a device: **Kaalaman is spent
+only when a swing hits, the cap of 6 is gone, and a student at 0 charges slowly regains one**
+(Section 4); **the HUD was redesigned** with health and Kaalaman bars and a gate/artifact
+progress pill, and the level badge was removed (Section 4); and **Walkers now turn at the edge
+of their ground**, as Section 5 always said they should (Sections 5 and 11). Revision 12 —
+**Phase 3, artifacts and gates, is built** (`43cc237`),
+which is the point this document calls "the new game": questions are no longer something
+enemies inflict on you but something you seek out. Artifacts grant Kaalaman and fill a Codex;
+three gates per level guarantee the educational floor; the question bank became a pool that
+never repeats within an attempt and always differs on retry; and Phase 2's debug charge
+scaffolding is gone. One agreed deviation — scoring now takes the best attempt per question,
+because Section 6's retries and Section 12's frozen payload otherwise combine to punish
+learning — is recorded in Section 15's Phase 3 status note. Revision 11 — **Phase 2, combat
+and Kaalaman, is built**:
+attack hitbox with charge cost and cooldown, the Kaalaman charge system with HUD orbs,
+Walker/Heavy behaviours with HP, the Flame effect death sequence with coin drops, contact
+damage with knockback and invincibility frames, enemies no longer opening the quiz, and a
+distance-based level-end rule replacing "all enemies dead". Chaser and the boss rework stay
+deferred. Three deliberate, temporary deviations are recorded inline — see Sections 4 and 5's
+corrections and Section 15's Phase 2 status note. On top of revision 10, where Phase 1's "play
+it on a real phone" playtest (Section 15) surfaced three real-device-only issues, fixed and
+confirmed on-device on `v2-phase-1` (`c3ca19a`, `99076c4`): the fixed-resolution viewport pillarboxed any
+screen wider than 16:9 (now a custom edge-to-edge `StretchToFillViewport`); a first attempt at
+fixing that (a non-uniform stretch, counter-scaled back to circular for the HUD only) still
+left world sprites visibly stretched, so the real fix instead lets virtual **width** track each
+device's own aspect ratio (virtual height stays fixed) — the world-to-screen scale is always
+uniform now, so nothing stretches anywhere, HUD included, with no counter-scaling needed; and
+the joystick, sized to be reachable, unavoidably overlapped the player's old render position
+(fixed by moving `GameConstants.playerX`, not by shrinking the joystick past comfortable). The
+platform-height ceiling also moved 110→**113**, the exact jump-reachability limit. See Section
+3's Controls correction for detail. On top of revision 9's platform-height range correction to
+**90-110** (was 60-105, `16fbc5c`); revision 8's Phase 4 commitment to Claude Code generating a
+programmatic first-draft `.tmx` for all 43 levels (Sections 11, 14, 15), shrinking the
+authoring job from "build 43 levels" to "review 31, hand-build 12"; revision 7's crate removal
+and render-order fix; revision 6's
+hearts reversal; revision 5's Era 3 correction; and the revision 4 codebase corrections.
+Six-era curriculum structure from the DepEd three-term Budget of Work, built around
+off-the-shelf components, corrected against a full read of the codebase (Task M,
+2026-09-24).
 Companion to `GAMEPLAY.md`, which documents the game as it exists today.
 Target: Flutter/Flame app `CHRONO-GAMEAPP` (`rowdel-ctrl/CHRONOQUEST-GAME`).
 
@@ -216,9 +259,70 @@ project. Don't draw these yourself.
 
 ### Keep the jump physics
 
-Gravity `900`, jump force `-480`, peak ~128 units. Platform spawn heights (60-105) were
-tuned against that number and are verified correct. **Do not disturb either.** If one
-changes, the other must be re-tuned.
+Gravity `900`, jump force `-480`, peak ~128 units.
+
+> **Correction, 2026-09-26 (`v2-phase-1`, `16fbc5c`):** platform spawn heights moved from
+> 60-105 to **90-110** after a real-device screenshot showed 60 putting platforms at ankle
+> height on a 120-tall player. 110 stays under the verified reachability ceiling
+> (`jumpPeak - 15` = 113, exercised by `platform_layering_test.dart` at 60fps, 30fps, and a
+> frame-hitch at jump-off). **90-110 is now the protected range** — gravity and jump force
+> are unchanged and still off-limits. If platforms feel too high, 90 is the number to pull
+> back; 110 is the ceiling the jump arc allows.
+
+> **Correction, 2026-10-06 (`v2-phase-4`, fifth playtest round):** walking speed is **250**
+> units/s (it was 210; "medyo mabagal"). The jump is unchanged, so a full-speed jump now
+> carries 250 x 1.067 = **267** (was 224) and every number derived from it moved: gaps
+> **192-288** (platformless at most 240), platform-fight gaps **352 / 384 / 416** (longest
+> crossable gap is now 267 + 48 = 315), fight platform **240** wide, `knockbackDistance`
+> **180** (so the invincibility arithmetic above still holds: 300 walking against 326 needed)
+> and the attack box **80** wide (at the new speed 64 left too little time to hit an enemy
+> before touching it). Levels are about 100 s of walking, was 119. Also new: a progress bar
+> along the bottom of the level, a Tunog (volume) setting, a cheer and a word of praise after a
+> right answer, a thrown-and-spinning enemy death, and a slash for the attack.
+
+> **Correction, 2026-10-04 (`v2-phase-4`, after the Spanish-era playtest):** the protected
+> platform range moved from 90-110 to **104-112** and gaps were widened to **176-240**
+> (platformless gaps at most 208). Two reasons. An enemy's hit area reaches 99.9 above the
+> ground (drawn height 108, hit area the middle 85%), so a student on a platform at 90-100 could
+> still be touched; at 104 or more they are above every enemy with no special immunity rule.
+> And the old gaps were too easy to hop. The jump is **unchanged** (gravity 900, force -480,
+> peak 128), which is why 112 is the ceiling: the verified reachability limit is 113 (peak - 15). A gap is crossable up to the flat reach (224) plus the 48-unit foot span that
+> only has to land, so 240 is within the 90% safety margin (249); with a platform in the middle
+> each hop is short. `test/game/jump_clearance_test.dart` replays the game's own physics against
+> every level and fails if any gap or platform lacks a quarter-second launch window.
+
+> **Correction, 2026-10-04 (same playtest), Sections 5 and 6:** a hit now shoves the player
+> **160 units** (it was 44) over 0.3 s with the controls locked, and the shove stops at a ledge
+> so it never throws anyone into a gap. With 1.5 s of invincibility the student has about 252
+> units of walking left but needs about 306 to get back through the enemy, so the old trick of
+> walking through it during the i-frames no longer works (arithmetic pinned in
+> `contact_damage_test.dart`). The end gate is now drawn in code (stone gatehouse, barred door,
+> padlock and lamp that turn green and open when every artifact is answered), and once they are
+> answered the HUD shows the distance to it (100 units = 1 m) with a one-time message.
+
+> **Correction, 2026-09-29 (`v2-phase-1`, `c3ca19a` + `99076c4`, confirmed on-device):** the
+> Phase 1 "play it on a real phone" playtest below surfaced three more issues, all
+> layout/rendering, not physics. (1) `CameraComponent.withFixedResolution` pillarboxes any
+> screen wider than exact 16:9 (black bars on the sides) — replaced with a custom
+> `StretchToFillViewport` (`lib/game/stretch_to_fill_viewport.dart`). A first version of that
+> viewport fixed both virtual width and height (1280×720) and stretched them non-uniformly to
+> fill the canvas — this removed the bars but a device screenshot showed world sprites
+> (enemies, coins, platforms) still visibly stretched even after counter-scaling the HUD back
+> to circular. The real fix instead keeps virtual **height** fixed (`GameConstants
+> .virtualHeight`, still 720 — gravity, jump force, groundY and spawn distances, all measured
+> against height, are unaffected) but lets virtual **width** track each device's own aspect
+> ratio, so the world-to-screen scale is always uniform: nothing stretches, on any axis, on any
+> device. `GameConstants.virtualWidth` no longer exists as a fixed constant as a result. (2) The
+> stretch fix above also resolves the HUD-ovals problem for free — the `hudCounterScale`
+> mechanism that used to cancel it has been removed entirely, since there's no longer any
+> unevenness to cancel. (3) A joystick sized/positioned to be comfortably reachable unavoidably
+> overlapped the player's render position at the old `GameConstants.playerX = 80` — no joystick
+> sizing could satisfy both "reachable" and "clear of the character" at once, so the actual fix
+> was moving the player (`playerX` 80→220) rather than continuing to shrink the joystick.
+> Platform ceiling also raised **110→113** (still `jumpPeak - 15`, unchanged limit, just no
+> longer leaving 3 spare units unused). Jump/Attack buttons 20% bigger; walk speed 150→210
+> (parallax auto-adapts). All of the above is committed on `v2-phase-1` — see `HANDOFF.md`'s
+> 2026-09-29 entry for full detail.
 
 Attack: a short forward hitbox in the facing direction, ~0.25s, with a cooldown so it can't
 be spammed. Fails with a small "no charges" shake if Kaalaman is 0.
@@ -246,6 +350,48 @@ valid, both are interesting, and the second one is more dangerous.
 > All five numbers above (start, reward, retry reward, cost, cap) are **guesses that must be
 > tuned by playing**. Treat them as starting values, not requirements.
 
+> **Correction, 2026-09-30 (`v2-phase-1`, Phase 2, uncommitted):** every one of these numbers
+> now lives in `lib/core/combat_constants.dart` (`CombatConstants`), which is where they
+> should be re-tuned — Section 15's Phase 2 prompt asked for exactly one such file. Two
+> deviations from the list above, both deliberate and both temporary:
+> **(1) `kaalamanStart` is 3, not 0.** Artifacts are the only real source of charges and
+> don't exist until Phase 3, while the debug grant key needs a physical keyboard — so on a
+> touch device a level starting at 0 leaves the attack button permanently dead and makes
+> combat impossible to playtest at all. Set it back to 0 as part of Phase 3, once answering an
+> artifact awards charges for real.
+> **(2) The orbs are plain circles stacked under the hearts, not "glowing orbs next to HP".**
+> No orb art exists in the project yet, and the row sits under the hearts rather than beside
+> them so it doesn't crowd the level/score/coin widgets sharing that row — a playtest request,
+> not a design change. Same "plumbing now, real asset later" split Phase 0 used for audio.
+
+> **Correction, 2026-10-03 (`v2-phase-4`, uncommitted, awaiting on-device confirmation):** a
+> playtest showed that the economy above punishes the wrong things. Four changes, all of them
+> tunable in `lib/core/combat_constants.dart`:
+> **(1) A charge is spent when a swing hits an enemy, not when it is swung.** Misses were
+> costing charges, and with only 1-3 charges early in a level a few misses left the attack
+> dead. Swinging still needs at least one charge and still respects the cooldown, and one swing
+> costs at most one charge however many enemies it catches.
+> **(2) The cap of 6 is removed.** It could only ever clamp the students who answered the most.
+> Supply is already bounded by content (5 artifacts at +2 is 10 per level, 11 on levels 1-2 with
+> the tutorial charge), so nobody can bank without limit. The "A player who answers everything
+> can't bank enough to brute-force the level" argument above lost to "a student who answers
+> correctly should keep what they earned". The HUD bar is scaled to a fixed 10 segments
+> (`kaalamanDisplayMax`) and nothing is clamped to it.
+> **(3) Slow regeneration to a floor of 1.** At 0 charges a student regains one after 20
+> seconds (`kaalamanRegenSeconds`, a guess to tune); regeneration stops at 1
+> (`kaalamanRegenFloor`), so only artifacts take a player higher. Nobody is stranded without an
+> attack, and artifacts stay the only way to build power. It pauses while a question is open
+> and during the boss phase. A recharge on kill was considered and rejected: a Walker has 1 HP
+> and a hit costs 1 charge, so a refund of 1 makes Walker fights free forever.
+> **(4) The HUD changed shape.** Health is a wide, tall bar (5 segments, with the heart count
+> as text) and Kaalaman a thinner, shorter bar attached beneath it, replacing the hearts and
+> orbs. The level badge is gone. A pill at top centre shows gates cleared and artifacts claimed
+> (`1/3`, `3/5`), counted from the level itself — the Tiled entities, or the fixed
+> `gatesPerLevel`/`artifactsPerLevel` on procedural levels — and hidden on boss levels. It
+> counts answer points, not the 10-question draw target in `GameConstants.questionsPerLevel`,
+> because retries and the 5-question pool mean a student does not answer exactly 10. Score and
+> coins share one panel. The code is in `lib/game/overlays/hud_widgets.dart`.
+
 ---
 
 ## 5. Combat and enemies
@@ -271,12 +417,59 @@ Walkers with a floating Y offset.
 `ColorEffect` (white tint) → `ScaleEffect` (slight grow) → `OpacityEffect` (fade) over ~0.3s,
 then drop 2-3 coins. No custom animation code.
 
-**Hazards** stay as they are conceptually (crates, era walls as scenery obstacles, gaps) but
-now do `-1 HP` with knockback instead of the old life loss.
+**Crates are cut.** They were the original game's only non-era-themed hazard — a single generic
+box (`crate.png`) with no thematic identity, unlike the era walls, which are about to become
+Section 6's knowledge-gates. Keeping both meant two flavors of "static thing you jump or take
+a hit from," one of them meaningless. Removing crates also shrinks the object vocabulary for
+the 43 hand-authored Phase 4 levels — one fewer thing to consider placing per level, forty-some
+times over.
+
+> **Correction, 2026-09-26:** cut after a real-device playtest surfaced a broken collision on
+> them; on inspection they added no thematic value era walls didn't already cover. `crate.png`
+> is no longer used by this design. If Phase 1 already shipped crate-collision code, remove it
+> rather than fix it.
+
+**Hazards**, going forward, are era walls (→ gates, Section 6) and gaps. **Gaps stay deferred to
+Phase 4** for the same reason the object-despawn fix does (Section 14): the current procedural
+spawner is dead weight Tiled replaces entirely, so patching real gaps into it now is work
+that gets thrown away in a few weeks. Until Phase 4, levels simply have no ground-fall hazard
+— acceptable mid-development. Contact damage in general (enemies, walls) is `-1 HP` with
+knockback, per Section 4.
 
 **Falling in a gap:** -1 HP and respawn at the last ground segment you were standing on. The
 existing `playerFellInGap` logic covers most of this; it needs a respawn anchor instead of a
 straight vertical reset.
+
+> **Correction, 2026-09-30 (`v2-phase-1`, Phase 2, uncommitted):** this section is implemented
+> as written — the behaviour table transcribes directly into `lib/game/enemy_behavior.dart`
+> (7 Walkers, 3 Heavies), the death sequence is the exact ColorEffect → ScaleEffect →
+> OpacityEffect chain over 0.3s, and contact damage is -1 HP with knockback and a ~1s
+> invincibility flash. Four notes on how it actually landed:
+> **(1) The three Chaser-destined sprites run as plain Walkers, without the "floating Y
+> offset"** this section suggests — an offset with no pursuit behaviour reads as a bug rather
+> than a hint at a future one, so it's better added alongside the real Chaser.
+> **(2) Heavies move zero, not "barely".** Simplest reading that satisfies the description,
+> and trivially loosened later once level authoring can place them to block a corridor as
+> intended (they currently spawn in open ground, procedurally).
+> **(3) Enemies now mirror their sprite when patrolling back** — the art faces left natively,
+> so without a flip they visibly slid backwards on the return leg. Done with a render-local
+> canvas transform, never `flipHorizontally()`, which mutates `position.x` — world state the
+> despawn check and patrol anchor both read every frame.
+> **(4) The attack's slash-arc overlay is a plain rectangle for now**, since no such art
+> exists in the project; referencing a missing sprite would throw at runtime.
+> All tuning values (patrol range and speed, knockback, i-frame duration, death timings, coin
+> drop range) live in `lib/core/combat_constants.dart` — see Section 4's correction.
+
+> **Correction, 2026-10-03 (`v2-phase-4`, uncommitted, awaiting on-device confirmation):** the
+> table above says a Walker "turns at the edge", and until now it did not: patrol was a fixed
+> distance from its spawn with no idea what was underneath, so on a Tiled level with gaps a
+> Walker strolled out over a hole. On device the first enemy in `era1_1` was also *placed*
+> inside the first gap and hovered there from the start. Walkers now test the same centred foot
+> span the player is held to (`footSpanFraction`, `game_collision.dart`) and turn back when the
+> next step would leave solid ground. If the enemy is already unsupported (bad data) the check
+> is skipped, so it does not flip direction every frame; if no ground is registered at all, as in
+> a bare test game, patrol is unconstrained. Heavies do not move, so they only need to be
+> placed on ground. See Section 11 for the authoring rule that goes with this.
 
 ---
 
@@ -332,6 +525,55 @@ every enemy and skip every artifact, but they cannot skip gates. Put **3 gates i
 level** and every student answers at least 3 questions correctly, plus however many attempts
 that took. Artifacts (4-6 per level) are the optional, rewarded layer on top.
 
+> **Correction, 2026-10-03 (`v2-phase-4`, uncommitted, awaiting on-device confirmation):**
+> the gate layout above is replaced by **one gate per level, standing at the exit**. It is the
+> level's end: walking into it with the requirement met completes the level, and there is no
+> separate exit trigger any more. The requirement is that **every artifact in the level has
+> been answered — correct or wrong**.
+>
+> This inverts the old split rather than tightening it. Before, gates were the floor and
+> artifacts were optional; now artifacts are mandatory (you cannot leave without visiting
+> them) and there is a single gate to pass. Every student therefore meets *every* question
+> the level places, which is a stronger floor than three gates ever gave.
+>
+> **Why "answered", not "answered correctly".** This is the whole point and must not be
+> "simplified" later. If the gate demanded correct answers, every student would eventually
+> grind to 100% and the CHRONO-DASHBOARD analytics would measure nothing: no error rates, no
+> most-missed questions, no weak-topic signal, and a Learning Gain (Section 7) of roughly
+> zero for everyone. The thesis depends on wrong answers being recorded *and kept*. The
+> explanation panel still teaches on a wrong answer; the student still progresses; the
+> dashboard still sees what they actually got wrong.
+>
+> **Known risk:** a student who cannot find their last artifact cannot finish the level. The
+> mitigations shipped with this are the HUD counter (artifacts answered out of total, with a
+> lock-open icon once the gate is passable) and a notice at the gate naming how many remain.
+> A directional indicator is the fallback if device testing shows that is not enough.
+>
+> **Further correction, 2026-10-04 (same branch, uncommitted):** three follow-ups from the
+> next playtest. **(1) The gate asks no question at all.** It had kept the old behaviour of
+> opening a question once its requirement was met, on top of requiring every artifact. It now
+> simply opens when the student reaches it with every artifact answered, and that opening
+> completes the level. All questions live on artifacts. **(2) Ten artifacts per level, not
+> five** (`CombatConstants.artifactsPerLevel`), matching `GameConstants.questionsPerLevel`. Levels
+> have only about 5 written questions, so the pool recycles and each appears about twice in a
+> level; that stops when the bank reaches its 10-15 per level target. Kaalaman supply doubles
+> to about 20 charges a level against a 10-segment bar, so combat is easier for a student who
+> answers everything; tune on device. **(3) A softlock I introduced on 2026-10-03 is fixed.**
+> Making every gate require every artifact was only paired with a one-gate layout in the
+> hand-built `era1_1`. The other 42 levels still placed three gates, the first a quarter of the
+> way in with one artifact behind it, so a student was stopped and told to find artifacts they
+> could not reach. Procedural levels now place one end gate after all ten artifacts, and
+> `answer_point_test.dart` pins that every artifact precedes the only gate. Also fixed: an
+> artifact answered twice (a Shield absorbs a wrong answer without marking it attempted) was
+> counted twice toward the gate, and a level can no longer complete or fail twice
+> (`ChronoGame.levelEnded`).
+>
+> Implementation: `ChronoGame.artifactsAnswered` / `canPassEndGate`,
+> `GateComponent.isLevelExit`, `gate_locked_overlay.dart`. `era1_1.tmx` carries the new
+> one-gate shape, and **the Phase 4 generator must emit it too** — not the three mid-level
+> gates described above. The 42 levels still on the procedural fallback keep the old shape
+> until they have a `.tmx`.
+
 ---
 
 ## 7. Boss fights (final level of each era)
@@ -377,26 +619,36 @@ Era 3 has no boss sprite yet; see Section 1.
 
 ---
 
-## 8. Lives, HP, and Energy — untangling the two systems
+## 8. Lives — one heart pool, everywhere
 
-Right now two unrelated systems share the same heart icon, which is confusing for everyone
-including the developers.
+> **Correction, 2026-09-26:** this section originally proposed splitting the game's one heart
+> system into two — in-level HP (resets every attempt) and a renamed "Energy" gate (persistent,
+> menu-only) — reasoning that two unrelated systems sharing one icon was confusing. That
+> reasoning was mine, not the user's, and after playing the Phase 1 build the actual answer
+> came back the opposite way: **one shared heart pool, one icon, no second name.** This
+> revision replaces the split entirely. If Phase 0's Energy rename already landed, it needs to
+> be reverted along with this.
 
-**In-level HP** — the action-layer resource.
-- Starts at **5**, not 10. Ten hits is so much buffer that nothing feels dangerous.
-- Lost to: enemy contact, crates/walls, falling in a gap.
-- **No longer lost to wrong answers.**
-- Hits 0: level failed.
-- UI: keeps the `heart_full` / `heart_empty` icons, shown in-game only.
+**Five hearts, one pool, shared by everything.**
 
-**Persistent Energy** — the "can I start a level" gate, formerly "persistent hearts".
-- Rename it to **Energy** and give it a **different icon**. A Flutter `Icons.bolt` or a
-  Kenney UI Pack icon does the job — no custom art needed.
-- Everything else stays: max 5, one consumed on a failed level, 10-minute real-time regen,
-  regenerates while the app is closed.
-- UI: shown on menu screens only, never during gameplay.
+- Persistent state: max 5, stored the same way the original game's hearts were.
+- **Every damage event decrements this same pool** — enemy contact, era-wall/hazard hit, falling
+  in a gap. Not a level-local counter that resets on retry; the real, global count.
+- **No longer lost to wrong answers** (this part of the original split is kept — Section 6's
+  "wrong answer costs no HP" still applies).
+- Regen: **1 heart per 1 minute** of real wall-clock time, continuing while the app is closed.
+  (Faster than the original game's 10-minute interval — deliberate, since one shared pool
+  running out is a bigger deal than a level-local one did.)
+- One icon (`heart_full` / `heart_empty`), one label, shown both during gameplay and on menu
+  screens. No "Energy", no bolt icon, no second name anywhere.
 
-Two names, two icons, two places they appear. The confusion disappears.
+**Real consequence, worth stating plainly:** because it's one pool, running out of hearts
+*inside* a level both fails that level **and** locks you out of starting or retrying *any*
+level until at least one heart regenerates — about a minute, at 1/minute. Under the old
+two-system design this couldn't happen (a failed level cost one *persistent* heart, but you
+always had a fresh 5 in-level HP for the next attempt). This is a real difficulty and pacing
+change, not just a rename. If it plays too punishing once combat (Phase 2) adds more ways to
+take damage, the number to revisit is the regen rate, not the pool split.
 
 ---
 
@@ -469,7 +721,7 @@ you most of the way there in an afternoon.
 ## 11. Level authoring — use Tiled, don't build a level format
 
 Right now, level "content" is generated at runtime by a spawner: enemies roughly every 800
-world units, coins and crates on timers. The only authored per-level data is the question
+world units, coins on timers. The only authored per-level data is the question
 set. This is the deepest reason the game doesn't feel designed — because it isn't. Nothing in
 it was ever placed by a person.
 
@@ -492,13 +744,21 @@ properties defines what it becomes:
 | `artifact` | `art` (`artifact_1`…`artifact_5`) | An answer point |
 | `gate` | — | A gate using the era's wall art |
 | `coin` | — | A coin pickup |
-| `crate` | — | A hazard |
 | `spawn` | — | Player start position |
 | `exit` | — | Level end trigger |
 
 The ground tile layer defines the geometry directly, so **gaps are just places you didn't
 paint ground** — which turns on the fall-through logic already written and unused in the
 codebase, for free.
+
+**Enemy placement rule (added 2026-10-03):** an enemy's whole patrol corridor must lie over one
+ground span. That is its position plus and minus `patrol`, measured with the enemy's real
+footprint and the same centred foot span used at runtime; a Heavy never moves, so for it the
+corridor is just where it stands. `LoadedLevel.enemyStaysOnGround` implements the check, a test
+asserts it for every enemy in `era1_1`, and `LevelBuilder` logs a warning for a violation.
+Walkers also turn back at a ledge at runtime (Section 5's correction), so a mistake degrades to
+a shorter patrol rather than a floating enemy, but authored data should not rely on that. **The
+Phase 4 generator must satisfy this rule when it places enemies.**
 
 Levels live at `assets/tiles/levels/era<N>_<n>.tmx` (era numbers 1-6 per Section 1). Per-level
 config that isn't geometry — question pool, starting charges, HP, and the `curriculum` block
@@ -512,6 +772,99 @@ The runtime spawner stops spawning. It becomes a thin loader: load the `.tmx`, r
 object layer, instantiate components. The existing off-screen cleanup must be revisited —
 the camera follows the player now and the player can turn around, so anything culled behind
 them can be walked back to. For levels this short, cull generously or not at all.
+
+### Auto-generating first drafts, not blank levels
+
+Building 43 levels by hand in Tiled is the single largest content cost in this project
+(Section 16). Rather than hand you 43 empty maps, Phase 4 includes a generator script that
+writes a mechanically valid first-draft `.tmx` for every level, once the real loader and
+object-layer schema above exist to generate against:
+
+- Ground with gaps, sized to the level's position in its era's difficulty ramp.
+- Enemies spaced out with `walker`/`heavy` mix shifting later in each era.
+- Artifacts and gates placed at the cadence in Section 6/7 (gates every ~3 answer points).
+- Platforms at valid heights (104-112, Section 2) — never violating the tuned jump arc.
+- The level's `curriculum` block and question-pool link pre-filled from the Section 1 mapping,
+  so every generated level is already reportable, not just playable.
+
+**What this changes, honestly:** it removes the blank-canvas problem, not the judgment
+problem. The script can guarantee a level is *playable* — no impossible gaps, no
+softlocks — it cannot tell you whether it's *fun*. Your job becomes reviewing and adjusting
+43 already-playable levels instead of building 43 from nothing. Still hand-build, on purpose
+rather than by rule: **the first level of each of the 6 eras** (first impression of that era)
+and **the 6 boss levels**. That's 12 levels of deliberate hand-authoring against 31 of
+generate-then-review, not 43 of either extreme.
+
+**Sequencing matters:** the generator is written and run once Phase 4's loader and schema are
+real, against the actual tileset — not guessed at from this document beforehand. See the
+Phase 4 prompt in Section 15.
+
+> **Generator design, decided 2026-10-04 (not yet built).** Researched against published work
+> rather than guessed: Smith et al., "Rhythm-Based Level Generation for 2D Platformers" (UCSC,
+> 2009), the Dead Cells hybrid approach (hand-made rooms plus a hand-made structure graph), a
+> Tiled/chunk tutorial (kode80), and Nintendo's introduce/develop/twist/conclude structure.
+> **(1) A level takes about 4-5 minutes:** about 2.5 minutes answering 10 questions (assuming
+> ~15 s each) plus about 2 minutes of platforming, which at 210 units/s is the existing
+> 25,000-unit default. `era1_1` (3,140 units, ~15 s of walking) is a prototype, not the target
+> length. **(2) One section per question:** 10 sections of ~2,300 units (~11 s), each a
+> challenge segment followed by a rest platform holding one artifact, close to the paper's
+> 10-second "rhythm groups". **(3) A hybrid:** hand-made chunks, a per-level recipe following
+> the four acts, and validation; not rhythm grammars, machine learning or wave-function-collapse.
+> **(4) An offline Node script** (`tools/levelgen/`, standard library only) writes seeded `.tmx`
+> files that are committed, so the game loads them exactly as it loads `era1_1`; chunks start as
+> code data. **(5) Generate ~50 candidates per level, drop any that break a hard rule, keep the
+> one closest to its difficulty target.**
+>
+> **Scope (corrected the same day):** an earlier line of this block, and the "hand-build the 12"
+> text above, assumed the user would build the era openers and bosses by hand in Tiled. The user
+> has built no level, so nobody does: `era1_1` was authored by Claude with scripts. The generator
+> therefore covers **every non-boss level except `era1_1`: 36** (pre-colonial 8, spanish 4,
+> nationalism 6, american 7, ww2 7, modern 4). The five era openers (level 1 of eras 2-6) get an
+> "opener" recipe, the Mario 1-1 role: gentlest of the era, one new element at a time, no Heavy,
+> no enemy for the first sections. The six bosses are Phase 5 and keep the procedural fallback
+> until then. The user reviews and playtests; Claude adjusts. **Hard rules** the validator enforces, mirrored by a Dart test that runs
+> every `.tmx` through `LevelLoader.parse`: gaps 176-240 wide (at most the 224 flat jump
+> reach plus the 48-unit foot span, with a 10% margin; platformless gaps at most 208); platforms
+> 104-112 above ground and over a gap; every
+> enemy patrol inside one ground span, using only the era's own sprites (Heavy only in spanish,
+> nationalism, ww2 and modern); no enemy patrol within 240 of an artifact, so a student is not
+> hit the moment a question closes; exactly 10 artifacts, all before the one end gate, which sits
+> at the exit; curriculum properties taken from the era registry. The validator proves every jump
+> is inside the physics; it cannot prove a level is fun or fair, so every number here is a first
+> guess to be tuned from a contact sheet of all 31 levels and from phone playtests.
+>
+> **Correction, 2026-10-04 (later, after the second playtest): every section is dense.** Levels
+> read as empty (7-10 gaps, 2-7 enemies per level, so some sections had nothing). Now **every
+> section of every generated level holds a gap with a platform and an enemy**, in either order.
+> The six middle sections (develop and twist) can take a third element (gap-enemy-gap or
+> enemy-gap-enemy), more often as the era's difficulty rises, so a level has 10-14 gaps and 10-13
+> enemies. The ramp is how many and how hard, not leaving a section bare. The "no enemy in the
+> first four sections" opener rule is dropped; openers stay the gentlest by using short patrols,
+> the narrowest gaps, fewer third elements and no Heavy. A platformless gap appears only in a
+> twist section that has two gaps. To fit three elements, the ground between a gap and an enemy
+> lane is 112-192 (the lane has 60 of its own margin), while two gaps still need 240-400. New
+> hard rules, also in the Dart lint: an enemy's patrol stays at least 160 from any gap edge (a
+> student landing from a jump is not hit at once), and each of the ten sections has a gap with a
+> platform and an enemy. Counts in the rest of this block are the earlier first guesses.
+>
+> **Correction, 2026-10-04 (later again): platform fights and a wider gate.** The attack button
+> works in the air, so a new piece uses it: a **platform fight** is a gap of 288, 320 or 352 (a
+> jump alone crosses at most 272, the 224 reach plus the 48 foot span), a 192-wide platform
+> (8 tiles, 104-112 up) centred in it, 48-80 from each ledge, and one walker patrolling 36 each
+> way on it. The platform is the only way across and the enemy must be hit from the air or
+> fought on it. Why you cannot simply dodge it: passing an enemy needs the player's feet above
+> its head (99.9) for 146 units of walking (the 96-wide player box plus the 49.5-wide enemy hit
+> area), and one jump holds that height for only 105. Every level has 1-3 fights (an opener has
+> one, late; never in sections 1-2), as a third element on top of the section's gap and enemy.
+> The enemy object's `y` is where its feet stand: 660 on the ground, the platform's top on a
+> platform. A shove now stops at a platform edge as it already did at a ledge. Platform enemies
+> are exempt from the 160 gap-clearance rule (they are over the gap by design) and need only 400
+> between them and their neighbour (600 elsewhere). Checked by a physics replay: from the
+> launches that land on the platform there is a safe swing (box overlaps the enemy before the
+> player's box does) of at least 0.15 s, and the platform is required (direct jump window 0).
+> **The end gate is 144 wide** (6 tiles, was 48) and still 260 tall; the generator now leaves 120
+> of floor past the exit (was 60) so it fits. Charges are unchanged: start at 0, 2 per right
+> answer, one regenerates after 20 s at 0, so a fight cannot strand anyone.
 
 ### Two honest caveats
 
@@ -544,7 +897,7 @@ them can be walked back to. For levels this short, cull generously or not at all
 | `coin.png` | Currency (now actually spendable) |
 | Bundled sound file names | Unstub the audio service — **files are silent placeholders**, replace with CC0 audio later |
 | Power-up icons ×3 | Time Freeze finally does something |
-| `crate.png`, `ground_tileset.png` | Now driven through Tiled |
+| `ground_tileset.png` | Now driven through Tiled |
 | Parallax forest layers | Reused with a per-era `PaintDecorator.tint()` |
 | `fireworks.json` | Boss defeat / era complete |
 
@@ -553,7 +906,6 @@ them can be walked back to. For levels this short, cull generously or not at all
 | Need | Source |
 |---|---|
 | Joystick, jump/attack buttons | [Kenney Onscreen Controls](https://kenney.nl/assets) |
-| Energy icon, HUD frames | Kenney UI Pack, or a Flutter `Icons.bolt` |
 | Attack slash arc | Kenney particle/effects pack, or OpenGameArt |
 
 ### New art actually needed
@@ -619,12 +971,12 @@ here requires a big-bang rewrite. Estimates assume the off-the-shelf components 
   placeholders**, so drop in one real CC0 effect to prove the plumbing works — otherwise the
   result is indistinguishable from the current no-op.
 - Per-era parallax tint with `PaintDecorator.tint()`.
-- Rename persistent hearts → **Energy**, give it its own icon. **UI surface only** — change
-  the label and icon on the menu screens. Do **not** rename `HeartsState`, the provider fields,
-  or the Hive storage keys: those keys hold users' real regen state and renaming them silently
-  resets it on upgrade. Two names and two icons is a presentation change.
-- Drop in-level HP from 10 to 5 — and update the tutorial copy string that says
-  "May 10 buhay ka bawat antas", which will otherwise contradict the game.
+- **Superseded — see Section 8.** Phase 0 originally split the heart system into in-level HP
+  (10→5) and a renamed, menu-only "Energy" pool. Section 8 now specifies a single shared
+  5-heart pool with 1-minute regen instead; if the Energy rename already shipped, revert it
+  (icon, label, and any UI-only surface changes — `HeartsState`, provider fields and Hive keys
+  were never touched and don't need to change back). Update the tutorial copy string that says
+  "May 10 buhay ka bawat antas" to match the real number regardless of which model lands.
 - **Fix the level-complete screen's fabricated results.** It currently derives the score shown
   to the player from `widget.level % 3` rather than the real result, which the game already
   computes and passes to `onLevelComplete` before discarding it. This is a pre-existing bug,
@@ -718,8 +1070,13 @@ playing exactly as it does today, which is what makes it safe to verify.
   heights, so this needs a tracked anchor updated as the player crosses solid ground.
 - `gap_component.dart`'s `GroundSpawner` lays one 1,000,000-wide ground section with an empty
   `update()`. It is dead code that Tiled replaces entirely — delete it rather than porting it.
-- **Then author levels.** 43 of them, per the Section 1 counts. This is content work, not
-  engineering — see risks.
+- **Generator script for first-draft levels.** Once the loader and schema above are real,
+  write a script that emits a valid first-draft `.tmx` for all 43 levels per Section 11's
+  "Auto-generating first drafts" rules. This is what the phase actually delivers content-wise
+  — not one reference map, 43 playable drafts.
+- **Then review and hand-build.** You review/adjust all 43 generated drafts, and hand-build
+  the 6 era-openers and 6 bosses (12 levels) from scratch. Content work, not engineering —
+  see risks — but smaller than building 43 from a blank canvas.
 
 ### Phase 5 — Boss (2-3 days for the simple version)
 - Countdown bar, 6 questions, minions between questions, Time Freeze wired to the timer.
@@ -727,6 +1084,16 @@ playing exactly as it does today, which is what makes it safe to verify.
 
 ### Phase 6 — Economy and polish (3-4 days)
 - Coins spendable; enforce character unlock costs; power-up purchasing.
+- **Buy a heart with coins (added 2026-10-03).** One heart costs **20 coins**
+  (`GameConstants.heartPriceCoins`, a placeholder to tune). The menu hearts pill and its
+  buy dialog are **built** (`lib/widgets/hearts_pill.dart`: one heart icon, a count such as 3/5,
+  a plus button; the dialog shows price, coins and the 3/5 to 4/5 change, and has full,
+  cannot-afford and can-afford states) but the **BILHIN button is deliberately disabled**: coins
+  have no local spend path. They exist only as `Student.coins` from the server, and in-level
+  coins are only sent when a level ends. To finish it: persist a local coin balance (earned in
+  levels, minus spent), add `GameNotifier.buyHeart()` (deduct 20, add one heart, keep the regen
+  timestamp), enable BILHIN, and sync the spend to the server so the dashboard total stays
+  right. Decide first whether a spend can ever be reversed by a server refresh.
 - Call the existing power-up sync endpoint.
 - Make level select read fresh backend progress rather than only the local cache.
 
@@ -740,7 +1107,7 @@ playing exactly as it does today, which is what makes it safe to verify.
   requires.
 - Platform tile constants in `tile_platform_component.dart` are pixel-verified. Leave them
   alone until the Tiled path in Phase 4 proves out, then retire the file deliberately.
-- Jump physics (gravity 900, force -480, peak ~128) and platform heights (60-105) are tuned
+- Jump physics (gravity 900, force -480, peak ~128) and platform heights (104-112) are tuned
   against each other.
 - Dev no-login mode (`DEV_SKIP_AUTH`, `DEV_START_ROUTE`) will save hours during Phases 1-3.
 
@@ -763,7 +1130,7 @@ better against an **implementation** spec, so this section converts it into one.
 3. **Update `HANDOFF.md` at the end of every phase** — dated entry, newest first, as you
    already do. Include what was built, what was deferred, and what needs playtesting.
 4. **Protected values.** Tell it explicitly, every session: do not change gravity (900), jump
-   force (-480), or platform heights (60-105) unless the task is specifically to re-tune them.
+   force (-480), or platform heights (104-112) unless the task is specifically to re-tune them.
    These are verified-correct and easy for a well-meaning refactor to "clean up".
 5. **Run `flutter analyze` before claiming done.** Clean analyze is a floor, not a finish line.
 
@@ -798,15 +1165,19 @@ Each phase: give it the prompt, let it work, then check the criteria yourself on
 **Phase 0 — Free wins**
 
 > Implement Phase 0 of `GAMEPLAY-V2.md`: audio service, per-era parallax tint (six eras, see
-> Section 1), Energy rename, HP 5. Use `flame_audio`. Note that the bundled sound files are
+> Section 1), and the unified 5-heart pool from Section 8 (revert the Energy rename if it
+> already shipped; one heart icon everywhere, 1-minute regen, one shared pool instead of
+> in-level HP + persistent Energy). Use `flame_audio`. Note that the bundled sound files are
 > currently silent placeholders, so wire the service and verify it against one real test file
 > rather than assuming silence means success. Do not touch gameplay logic, physics values, or
 > the tile constants.
 
 *Done when:* the audio service calls `flame_audio` instead of no-ops, proven by one real test
 file actually playing (the rest stay silent until real files land); all six
-eras look visibly different in colour; the menu Energy meter uses a non-heart icon and the
-in-game HP row still uses hearts; a level starts with 5 HP and the tutorial copy agrees; the
+eras look visibly different in colour; menu screens and in-game HUD show the **same** heart
+icon and the **same** count (no separate Energy meter); losing a heart in a level is reflected
+immediately on the menu screens; a level starts with up to 5 hearts and the tutorial copy
+agrees; the
 level-complete screen shows the score you actually earned; Hive keys are unchanged;
 `flutter analyze` clean.
 
@@ -877,6 +1248,19 @@ finished without killing a single enemy**; all tuning values live in one file;
 *Then you:* play and **write down which numbers feel wrong.** Expect to adjust most of them.
 That constants file is why the prompt asks for it.
 
+> **Status, 2026-09-30:** implemented on `v2-phase-1`, **uncommitted**, awaiting the
+> on-device playtest this prompt's "then you" step describes. Every acceptance criterion above
+> is met and 172 tests pass; the combat loop was additionally driven end-to-end in a real
+> browser (charge spend, visible hitbox, an enemy killed and dropping 2 coins, contact damage
+> costing a heart). See Sections 4 and 5's corrections for the deviations, and `HANDOFF.md`'s
+> 2026-09-30 entry for the full file-by-file record — including the Flame effect-lifecycle
+> traps the death-sequence test hit, which are worth reading before touching that test.
+>
+> **Scaffolding to delete in Phase 3, all together:** the `K` debug charge key,
+> `CombatConstants.debugGrantAmount`, the temporary `kaalamanStart = 3`, and the
+> `KeyboardEvents` mixin on `ChronoGame`. They exist only because artifacts — the real charge
+> source — arrive in Phase 3.
+
 ---
 
 **Phase 3 — Artifacts, gates, quiz rework**
@@ -897,6 +1281,28 @@ shape; `flutter analyze` clean.
 *Then you:* play a full level start to finish. **This is the first time the actual V2 game
 exists** — judge whether the core loop is fun, not just whether it works.
 
+> **Status, 2026-09-30:** implemented and committed on `v2-phase-1` (`43cc237`), awaiting the
+> full-level playtest above. Every acceptance criterion is met and 206 tests pass; the loop
+> was driven in a browser far enough to confirm an artifact opens a real question with the
+> timer and power-ups intact, and that level 1 starts with exactly the one tutorial freebie
+> charge. Phase 2's debug scaffolding (the `K` key, `KeyboardEvents` mixin,
+> `debugGrantCharges`, `debugGrantAmount`) is gone and `kaalamanStart` is back to Section 4's
+> 0.
+>
+> **One deliberate deviation, agreed with the user:** the star/percentage calculation now
+> scores the **best attempt per distinct question** rather than every recorded attempt. The
+> prompt above says to keep that calculation as-is, but Section 6's retry loop and Section
+> 12's "log every attempt" requirement combine to make a student who answers everything
+> correctly on the *second* try score 50% and one star — punishing exactly the learning the
+> explanation panel exists to produce. `answers` and the POST payload are untouched; only the
+> two derived numbers changed, and both halves are pinned by tests.
+>
+> **Two follow-ups, neither blocking:** artifacts render small and dim next to the coins (the
+> per-era tint in Section 10 is tuned for washing a full background, not a 56px sprite), and
+> each non-boss level needs **10-15 authored questions to stop recycling** — it has 5, and
+> `nationalism` still has no question file at all. That is a content task, not a code one;
+> `QuestionPool` already handles any pool size and reports when it recycles.
+
 ---
 
 **Phase 4 — Tiled levels**
@@ -905,17 +1311,29 @@ exists** — judge whether the core loop is fun, not just whether it works.
 > Tiled tileset, and write the level loader that reads the `entities` object layer per the
 > convention in Section 11. Retire the runtime spawner. Re-implement one-way platform
 > pass-through under the new system, fix off-screen culling so objects behind a backtracking
-> player are not destroyed, and add gap respawn anchors. Build one complete example `.tmx`
-> level for Era 2 (Pananakop ng Espanya) as a reference, and document the authoring workflow
-> in `HANDOFF.md`. Level config must include the `curriculum` block defined in Section 1.
+> player are not destroyed, and add gap respawn anchors. Level config must include the
+> `curriculum` block defined in Section 1.
+>
+> Then, against that real loader and schema (not a guess at them beforehand), write a
+> generator script that produces a first-draft `.tmx` for **all 43 levels** per Section 11's
+> "Auto-generating first drafts" rules: ground with era/level-appropriate gaps, enemies
+> spaced and mixed by difficulty ramp, artifacts and gates at the Section 6/7 cadence,
+> platforms only at valid heights (104-112 — do not violate the tuned jump arc), and each
+> level's `curriculum` block and question-pool link pre-filled from Section 1. Every generated
+> level must load and be completable start to finish with no softlocks. Document the
+> generator and the authoring workflow in `HANDOFF.md`.
 
-*Done when:* the example level loads from `.tmx` and plays correctly; platforms are still
-one-way; walking backwards doesn't delete the level; falling in a gap costs 1 HP and respawns
-on the last solid ground; the spawner is gone.
+*Done when:* the loader plays a hand-built reference level correctly (platforms still
+one-way, walking backwards doesn't delete the level, falling in a gap costs 1 HP and respawns
+on the last solid ground, the spawner is gone); the generator script runs and emits all 43
+`.tmx` files; every generated level loads without error and can be finished without a
+softlock or an unfair jump; each carries its correct `curriculum` block.
 
-*Then you:* **author the levels.** Claude Code can build the loader and a reference map, but
-level design is judgment work done by eye in the editor. This is your job and it is the
-largest remaining task in the project.
+*Then you:* **review and hand-build, not build from scratch.** Review and adjust the 31
+generated levels for feel and pacing, and hand-build **the first level of each of the 6 eras
+and all 6 boss levels** (12 total) yourself, on purpose rather than by rule — those are the
+levels that set the tone and are worth getting right by hand. This is still real work and
+still yours, but it's review-and-adjust for most of it instead of a blank canvas 43 times.
 
 ---
 
@@ -949,8 +1367,10 @@ Plan your own time around these — nobody else is doing them.
 - **Playtesting and game feel.** It cannot tell whether the jump clears the gap fairly or
   whether the controls are comfortable with your thumbs. Roughly half this design is numbers
   that only reveal themselves in play.
-- **Level design.** It can generate `.tmx` XML; it cannot look at a level and judge whether
-  an enemy placement creates an interesting decision.
+- **Level design judgment.** It can generate mechanically-valid first-draft `.tmx` files for
+  all 43 levels (Section 11, Phase 4) — playable, fair, no softlocks — but it cannot look at
+  a level and judge whether an enemy placement creates an interesting decision, or whether a
+  draft is actually fun. That review, and the 12 hand-built levels, stay yours.
 - **Art.** The 5 idle sprites, and sourcing the Kenney packs.
 - **Seeing the screen.** A clean `flutter analyze` does not mean the artifact isn't spawning
   inside a wall.
@@ -960,11 +1380,18 @@ Plan your own time around these — nobody else is doing them.
 
 ## 16. Risks and honest caveats
 
-**Level authoring is still the real cost.** Tiled makes it dramatically faster than
-hand-writing JSON, but designing 43 levels is content work that no tool removes. If the
-deadline tightens, **cut eras rather than quality** — three well-built eras beat six
-procedurally-mush ones. Cut from the end (Eras 5 and 6) so each grade keeps a coherent
-opening sequence, and say in the paper that the remaining eras are authored but unpopulated.
+**Level authoring is still a real cost, just a smaller one.** Phase 4's generator (Section 11)
+removes the blank-canvas problem — every level starts as a playable draft — but reviewing and
+tuning 31 drafts plus hand-building 12 levels (6 era-openers, 6 bosses) is still real content
+work that no tool removes entirely. If the deadline tightens, **cut eras rather than
+quality** — three well-built eras beat six procedurally-mush ones. Cut from the end (Eras 5
+and 6) so each grade keeps a coherent opening sequence, and say in the paper that the
+remaining eras are authored but unpopulated.
+
+> **Decision, 2026-09-30:** after Phase 3, the call was made to build **all 6 eras** (43
+> levels). The cut-from-the-end fallback above stays as the emergency plan only. The practical
+> consequence is that the question bank (below) is now the critical path — ~450-500 questions
+> — so it has to run in parallel with Phases 4-6, not after them.
 
 **Question bank depth is the hard bottleneck.** Levels currently have only 5 questions each.
 V2 makes this worse, not better: gates and artifacts re-roll on a wrong answer, so a level
@@ -1052,7 +1479,7 @@ Found while cross-checking this design against the asset list. Worth fixing in t
 
 ---
 
-*Revision 5, 2026-09-25. Written against `GAMEPLAY.md` (current implementation) and the
+*Revision 7, 2026-09-26. Written against `GAMEPLAY.md` (current implementation) and the
 bundled asset list. Revision 1 hand-rolled the controls, level format and effects; this
 revision replaces all three with existing components and adds Sections 1 and 15. Section 1
 supersedes the earlier five-era structure and is derived from the DepEd three-term Budget of

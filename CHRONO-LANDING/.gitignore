@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+.vercel/
+
+# The APK is 36 MB and changes with every build. Keep it out of git and
+# deploy with the Vercel CLI (see README), or host it elsewhere with VITE_APK_URL.
+public/downloads/*.apk

@@ -8,6 +8,19 @@ ChronoQuest is a full-stack educational platform consisting of:
 
 1. **CHRONO-GAMEAPP**: A Flutter game app featuring a Philippine history-themed auto-runner platformer where students learn through gameplay
 2. **CHRONO-DASHBOARD**: A web-based admin/teacher dashboard for managing students, quizzes, and analytics (monorepo with separate frontend and backend)
+3. **CHRONO-LANDING**: The public landing page (APK download, screens, links to the dashboard)
+
+## Handoffs (three chats)
+
+The work is split across three separate chats, each with its own handoff file inside its own folder. `HANDOFF.md` at the root is the board that shows all three.
+
+| Chat nickname | Folder | Its handoff |
+|---|---|---|
+| GAME | `CHRONO-GAMEAPP` | `CHRONO-GAMEAPP/HANDOFF.md` |
+| DASHBOARD | `CHRONO-DASHBOARD` | `CHRONO-DASHBOARD/HANDOFF.md` |
+| LANDING PAGE | `CHRONO-LANDING` | `CHRONO-LANDING/HANDOFF.md` |
+
+At the start of a session read the root `HANDOFF.md`, then the top entry of your own handoff. Work only in your own folder; if you need something from another chat, add a line to the requests table on the board. At the end of a session add a dated entry at the top of your own handoff and update your row on the board, automatically. Size limits and the blank entry format are on the board and in `HANDOFF(template).md`. Older entries go in full to `docs/handoff-archive/` in the same folder.
 
 ## Repository Structure
 
@@ -18,6 +31,7 @@ CHRONO/
 │   ├── assets/            # Game assets (backgrounds, characters, sounds, etc.)
 │   ├── pubspec.yaml       # Flutter dependencies
 │   └── test/              # Flutter unit tests
+├── CHRONO-LANDING/        # Public landing page (Vite, plain JS): APK download, screens, dashboard links
 └── CHRONO-DASHBOARD/      # Web dashboard (monorepo)
     ├── CDASH/             # React frontend (Vite)
     │   ├── src/           # React components, pages, API clients

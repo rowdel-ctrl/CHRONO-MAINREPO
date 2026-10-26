@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ChronoQuest | Learn Philippine history by running through it</title>
+  <meta name="description" content="ChronoQuest is an Android runner game where students jump, dodge and answer questions across six eras of Philippine history. Teachers see every result on the dashboard.">
+  <meta name="theme-color" content="#140E1F">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ChronoQuest | Learn Philippine history by running through it">
+  <meta property="og:description" content="Run through Philippine history. An Android game for students, a dashboard for teachers.">
+  <meta property="og:image" content="__SITE_URL__/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="ChronoQuest: Run through Philippine history. Two screens from the game.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="__SITE_URL__/og.jpg">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="ChronoQuest home"><span class="tile">CQ</span>ChronoQuest</a>
+    <button class="menu" id="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav class="nav" id="nav" aria-label="Page sections">
+      <a class="l" href="#screens">Screens</a>
+                  <a class="l" href="#teachers">For teachers</a>
+      <a class="l" href="#faq">FAQ</a>
+      <a class="l" href="#contact">Contact</a>
+      <a class="btn sm" href="#install">Download</a>
+    </nav>
+  </div>
+  <div class="prog" id="prog"></div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow up" style="--i:0">Laro ng kasaysayan ng Pilipinas</span>
+        <h1 class="up" style="--i:1">Run through <em>Philippine history.</em></h1>
+        <p class="lead up" style="--i:2">ChronoQuest is an Android runner game. Students jump, dodge and collect artifacts across six eras, then answer the questions their teacher wrote. Teachers see every result on the dashboard.</p>
+        <div class="cta up" style="--i:3">
+          <a class="btn shine" href="/downloads/chronoquest.apk" data-apk><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M12 4v12M6 11l6 6 6-6M5 21h14"/></svg>Download APK <small data-apk-meta>v1.2.0 · 36 MB</small></a>
+          <a class="btn line" href="#teachers">Teacher or admin</a>
+        </div>
+        <p class="ios-note up" style="--i:4"><b>On an iPhone?</b> ChronoQuest is an Android game, so this file will not install on iPhones or iPads. Open this page on an Android phone, or ask your teacher which phones to use.</p>
+        <ul class="facts up" style="--i:4"><li>Android 7.0 or newer</li><li>64-bit phones</li><li>Internet needed to sign in</li></ul>
+      </div>
+      <div class="stage" id="stage" aria-hidden="true">
+        <div class="layer l1"></div>
+        <div class="layer l2"></div>
+        <div class="quiz"><b>Sino ang sumulat ng Noli Me Tangere?</b><span><i>Bonifacio</i><i class="pick">Rizal</i><i>Luna</i></span></div>
+        <div class="foe"><div class="coins"><div class="sp cn"></div><div class="sp cn"></div><div class="sp cn"></div></div><div class="sp en"></div></div>
+        <div class="runner"><div class="sp ch rizal w"></div><div class="sp ch j"></div></div>
+        <div class="ground"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker" aria-label="The six eras"><div class="track" id="track">
+    <span>Sinaunang Pilipinas</span><span>Pananakop ng Espanya</span><span>Pag-usbong ng Nasyonalismo</span><span>Himagsikan at Imperyalismong Amerikano</span><span>Pamahalaang Kolonyal at Pananakop ng Hapon</span><span>Batas Militar at Muling Pagbangon ng Demokrasya</span>
+  </div></div>
+
+  <section class="band" id="features">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">For students</span><h2>Built to keep you playing</h2><p>Every run earns something, and every question teaches something.</p></div>
+      <div class="grid feat">
+        <div class="card fc rv"><div class="ico"><i style="--ic:var(--heart)"></i></div><div><h3>Hearts</h3><p>Miss a question or take a hit and you lose a heart. Hearts come back with time.</p></div></div>
+        <div class="card fc rv" style="--d:.08s"><div class="ico"><i style="--ic:var(--coin)"></i></div><div><h3>Coins and the shop</h3><p>Collect coins, then spend them in the Tindahan on hearts, power-ups and new heroes.</p></div></div>
+        <div class="card fc rv" style="--d:.16s"><div class="ico"><i style="--ic:var(--shield)"></i></div><div><h3>Power-ups</h3><p>50/50, Shield and Time Freeze help when a question or a boss gets tough.</p></div></div>
+        <div class="card fc rv"><div class="ico"><i style="--ic:var(--star)"></i></div><div><h3>Leaderboard</h3><p>See the top three on the podium and find your own place in the class.</p></div></div>
+        <div class="card fc rv" style="--d:.08s"><div class="ico"><i style="--ic:var(--freeze)"></i></div><div><h3>Question timer</h3><p>Teachers can set a time limit. A bar counts down while you think.</p></div></div>
+        <div class="card fc rv" style="--d:.16s"><div class="ico"><i style="--ic:var(--artifact)"></i></div><div><h3>Background history</h3><p>Read a short timeline and tap the term cards before you start an era.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="screens">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">The game</span><h2>See the game</h2><p>Real screens from the current build. Swipe or use the arrows.</p></div>
+      <div class="rv" style="--d:.1s">
+        <div class="rail" id="rail" tabindex="0" aria-label="Game screenshots">
+          <figure class="phone"><div class="bezel"><img src="/screens/welcome.webp" width="873" height="393" alt="ChronoQuest welcome screen with buttons to join a class or sign back in" loading="lazy" decoding="async"></div><figcaption><strong>Join your class</strong>Sign up with your teacher's class code, or sign back in.</figcaption></figure>
+          <figure class="phone"><div class="bezel"><img src="/screens/eras.webp" width="873" height="393" alt="Era selection screen with the first era open" loading="lazy" decoding="async"></div><figcaption><strong>Pick an era</strong>Eras open one after another as you finish levels.</figcaption></figure>
+          <figure class="phone"><div class="bezel"><img src="/screens/levels.webp" width="873" height="393" alt="Level select map for Sinaunang Pilipinas" loading="lazy" decoding="async"></div><figcaption><strong>Choose a level</strong>Each era ends with a boss arena.</figcaption></figure>
+          <figure class="phone"><div class="bezel"><img src="/screens/run.webp" width="873" height="393" alt="Rizal running through a forest level" loading="lazy" decoding="async"></div><figcaption><strong>Run and jump</strong>Dodge enemies, grab coins and artifacts.</figcaption></figure>
+          <figure class="phone"><div class="bezel"><img src="/screens/history.webp" width="873" height="393" alt="Background history screen with a timeline and term cards" loading="lazy" decoding="async"></div><figcaption><strong>Read the story</strong>A timeline and term cards for each era.</figcaption></figure>
+          <figure class="phone"><div class="bezel"><img src="/screens/shop.webp" width="873" height="393" alt="Tindahan shop with power-ups" loading="lazy" decoding="async"></div><figcaption><strong>Spend your coins</strong>Hearts, power-ups and new heroes in the Tindahan.</figcaption></figure>
+          <figure class="phone"><div class="bezel"><img src="/screens/profile.webp" width="873" height="393" alt="Profile screen with points, coins and era progress" loading="lazy" decoding="async"></div><figcaption><strong>Track your progress</strong>See your points, coins and how far you got in each era.</figcaption></figure>
+        </div>
+        <div class="arrows">
+          <button class="arrow" id="prev" type="button" aria-label="Previous screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button class="arrow" id="next" type="button" aria-label="Next screens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="video">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">Gameplay</span><h2>Watch a run</h2></div>
+      <div class="rv">
+        <div class="vid"><div class="shot" style="--tint:#2c4a73"><div><b>Gameplay clip goes here</b><span>10 to 15 second loop, recorded on a phone</span></div></div><button class="play" type="button" aria-label="Play the gameplay clip"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3.5v17l14-8.5z"/></svg></button></div>
+        <p class="vidcap">A short run through a level: jump the enemy, grab the artifact, answer the question.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="how">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">How it works</span><h2>From class code to class results</h2></div>
+      <div class="grid steps">
+        <div class="card step rv"><div class="n">1</div><h3>Join your class</h3><p>Your teacher shows a QR code or a class code. Scan it or type it, then sign in.</p></div>
+        <div class="card step rv" style="--d:.12s"><div class="n">2</div><h3>Play and answer</h3><p>Run through each era, collect artifacts, and answer a question for every one you pick up.</p></div>
+        <div class="card step rv" style="--d:.24s"><div class="n">3</div><h3>Teachers see results</h3><p>Scores and answers appear on the dashboard, with item analysis for every question.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="teachers">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">Dashboard</span><h2>For teachers and admins</h2><p>The dashboard is a separate website where you write questions, manage classes and read results.</p></div>
+      <div class="grid hl">
+        <figure class="rv"><div class="browser"><div class="top"><i></i><i></i><i></i><span>Item analysis</span></div><img src="/screens/dash-item.webp" width="1800" height="1200" alt="Item analysis page: which questions the class missed most, with a bar for each answer choice" loading="lazy" decoding="async"></div><figcaption><strong>Item analysis</strong>See which questions your class misses most.</figcaption></figure>
+        <figure class="rv" style="--d:.1s"><div class="browser"><div class="top"><i></i><i></i><i></i><span>Question bank</span></div><img src="/screens/dash-questions.webp" width="1800" height="1200" alt="Question bank page: the questions for each level, with a question timer switch" loading="lazy" decoding="async"></div><figcaption><strong>Question bank</strong>Write the questions your students answer in the game.</figcaption></figure>
+        <figure class="rv" style="--d:.2s"><div class="browser"><div class="top"><i></i><i></i><i></i><span>Sections</span></div><img src="/screens/dash-sections.webp" width="1800" height="1200" alt="Sections page: class cards with class codes, student counts and how students join" loading="lazy" decoding="async"></div><figcaption><strong>Sections and class codes</strong>Create a class and share its QR code.</figcaption></figure>
+      </div>
+      <div class="grid portal">
+        <div class="card rv"><span class="role">Teacher</span><h3>Teacher portal</h3><ul><li>Write and manage your question bank</li><li>Create sections and share class codes or QR codes</li><li>Follow each student and see item analysis</li></ul><a class="btn" href="#teachers" data-dash>Open teacher portal</a></div>
+        <div class="card rv" style="--d:.12s"><span class="role admin">Admin</span><h3>Admin portal</h3><ul><li>Manage teacher and student accounts</li><li>Change system settings</li><li>Read the activity log</li></ul><a class="btn dark" href="#teachers" data-dash>Open admin portal</a></div>
+      </div>
+      <p class="note">Both buttons go to the same sign-in page. The dashboard sends you to your own pages after you sign in.</p>
+    </div>
+  </section>
+
+  <section class="band alt" id="install">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">Get the game</span><h2>Install on your phone</h2><p>ChronoQuest comes as an APK file from the project team, not from the Play Store.</p></div>
+      <div class="grid install">
+        <ol class="rv">
+          <li><div><b>Download the APK</b><span>Tap the button. The file is about <span data-apk-size>36 MB</span>.</span></div></li>
+          <li><div><b>Open the file</b><span>Find it in your notifications or your Downloads folder.</span></div></li>
+          <li><div><b>Allow the install</b><span>Android may ask to allow installs from this browser. Tap Settings, then switch Allow on.</span></div></li>
+          <li><div><b>Open ChronoQuest and sign in</b><span>Use the class code from your teacher.</span></div></li>
+        </ol>
+        <div class="card dl rv" style="--d:.12s">
+          <span class="role">Latest build</span>
+          <h3>ChronoQuest <span data-apk-version>1.2.0</span></h3>
+          <a class="btn shine" href="/downloads/chronoquest.apk" data-apk><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M12 4v12M6 11l6 6 6-6M5 21h14"/></svg>Download APK <small data-apk-size>36 MB</small></a>
+          <p class="ios-note"><b>On an iPhone?</b> This file is for Android phones only. Open this page on an Android phone to install it.</p>
+          <div class="qr"><div class="code" id="qr" role="img" aria-label="QR code for the APK download"></div><p><b>On a computer?</b>Scan this with your phone camera to download the APK on your phone.</p></div>
+          <ul><li>Android 7.0 or newer</li><li>64-bit (arm64) phones</li><li>The unknown-app warning is normal for an APK outside the Play Store</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+<section class="band" id="news">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">Updates</span><h2>What's new</h2><p>Every build, in plain words.</p></div>
+      <div class="log">
+        <div class="card rel rv"><div class="v"><b>1.3.0</b><span>October 18, 2026</span><br><span class="tag">Latest</span></div><ul><li>Forgot password? on the sign-in screen</li><li>Your last class code and username are remembered</li><li>See the coins you earned on the level-complete screen</li><li>Hearts belong to each student, so logging out does not refill them</li><li>Simpler, everyday wording in the menus</li></ul></div>
+        <div class="card rel rv" style="--d:.1s"><div class="v"><b>1.2.0</b><span>October 15, 2026</span><br><span class="tag">Earlier</span></div><ul><li>Teacher-set time limit for each question</li><li>Leaderboard with a top-three podium</li><li>Background history with a timeline and term cards</li><li>New sign-in and change-password screens</li></ul></div>
+        <div class="card rel rv" style="--d:.2s"><div class="v"><b>1.1.0</b><span>October 11, 2026</span><br><span class="tag">Earlier</span></div><ul><li>Coin shop (Tindahan) for hearts, power-ups and heroes</li><li>Boss arenas at the end of every era</li><li>Real terrain in every level</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="faq">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">Questions</span><h2>Good to know</h2></div>
+      <div class="faq rv">
+        <details><summary>Is ChronoQuest on the Play Store?</summary><div class="ans">Not yet. You install it from an APK file that the project team gives you on this page. It works on Android phones only.</div></details>
+        <details><summary>Why does Android warn about an unknown app?</summary><div class="ans">Android shows that warning for any app that does not come from the Play Store. The file on this page comes from the ChronoQuest team. When Android asks, allow the install from your browser, then you can switch it off again.</div></details>
+        <details><summary>Do I need internet to play?</summary><div class="ans">You need internet to sign in and to send your scores to your teacher.</div></details>
+        <details><summary>Where do I get a class code?</summary><div class="ans">From your teacher. They create a section on the dashboard and show you a QR code or a short class code.</div></details>
+        <details><summary>Will it work on my phone?</summary><div class="ans">It needs Android 7.0 or newer and a 64-bit phone. Most phones from the last several years are 64-bit.</div></details>
+        <details><summary>Who writes the questions?</summary><div class="ans">Your teacher, from the dashboard. Each question you answer in the game comes from their question bank.</div></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="team">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">The team</span><h2>Made by students, for students</h2></div>
+      <div class="grid team">
+        <div class="card mem rv"><div class="av">AB</div><h3>Member name</h3><p>Role</p></div>
+        <div class="card mem rv" style="--d:.07s"><div class="av">CD</div><h3>Member name</h3><p>Role</p></div>
+        <div class="card mem rv" style="--d:.14s"><div class="av">EF</div><h3>Member name</h3><p>Role</p></div>
+        <div class="card mem rv" style="--d:.21s"><div class="av">GH</div><h3>Member name</h3><p>Role</p></div>
+      </div>
+      <div class="card school rv"><div><small>Adviser</small><b>Adviser name</b></div><div><small>School</small><b>School name</b></div><div><small>Project</small><b>Capstone, 2026</b></div></div>
+    </div>
+  </section>
+
+  <section class="band alt" id="privacy">
+    <div class="wrap">
+      <div class="head rv"><span class="eyebrow">Trust</span><h2>Your data, in plain words</h2></div>
+      <div class="grid two">
+        <div class="card rv"><span class="role">What ChronoQuest keeps about a student</span><ul><li>Name and username</li><li>Class code, school and grade level</li><li>Scores, progress and answers to quiz questions</li><li>Password, stored scrambled so nobody can read it</li><li class="no">Not stored: email address, phone number or location</li></ul></div>
+        <div class="card rv" style="--d:.1s" id="contact"><span class="role">Need help?</span><h3>Contact the team</h3><p>Questions, a bug, or a request to remove a student account? Write to us.</p><div class="mail"><code id="email" data-email>contact@your-email.com</code></div><button class="btn" id="copy" type="button">Copy email</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="tile">CQ</span>ChronoQuest</a>
+    <nav aria-label="Footer"><a href="#screens">Screens</a><a href="#teachers">For teachers</a><a href="#faq">FAQ</a><a href="#privacy">Privacy</a><a href="#contact">Contact</a><a href="#install">Download</a></nav>
+    <span>Philippine history, one level at a time.</span>
+  </div>
+</footer>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
