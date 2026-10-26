@@ -581,6 +581,16 @@ that took. Artifacts (4-6 per level) are the optional, rewarded layer on top.
 The current boss is 12 multiple-choice questions in a row with a sprite next to them. It is
 the least game-like part of the build.
 
+> **Changed 2026-10-26 (the user's call: the 22 authored questions are there for a reason).** The
+> boss now asks **every question of the level's pool once** (22: the lesson's own 10, then 12 of
+> review), not six. Three phases: 10 questions at 15 s with waves of 2, then 6 at 12 s with waves
+> of 3, then 6 at 10 s with waves of 4, each announced (PHASE 2, PHASE 3, FINAL QUESTION). A wave of
+> minions comes after every second question, not every one (to keep a fight near 7 minutes). A
+> wrong answer or a timeout costs the boss nothing and the question goes to the back of the line, so
+> the boss falls only when all 22 have been answered right. The bar counts down from 22 and the
+> counter says "Tamang sagot: 7/22". Code: `lib/game/boss_plan.dart`, `boss_component.dart`. The
+> "six questions" below is what was built first and is kept for history.
+
 ### Build this version first
 
 Keep the existing boss structure and add three things:
