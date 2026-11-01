@@ -42,7 +42,9 @@ The APK is in `.gitignore` (36 MB per version would bloat the repo). Two ways to
 
 ## Screens
 
-`public/screens/*.webp` are real screenshots (873x393) from the Flutter web build, taken with `CHRONO-GAMEAPP/tool/cdp_shot.js`. Navigate with a full page load per screen (`nav:about:blank;nav:http://127.0.0.1:PORT/#/shop`), because hash-only navigation does not re-route in the game. Build the web bundle with `flutter build web --profile --dart-define=DEV_SKIP_AUTH=true` (release builds ignore that flag).
+`public/screens/*.webp` are real screenshots (873x393) from the Flutter web build, taken with `CHRONO-GAMEAPP/tool/cdp_shot.js`. Navigate with a full page load per screen (`nav:about:blank;nav:http://127.0.0.1:PORT/#/shop`), because hash-only navigation does not re-route in the game. Build the web bundle with `flutter build web --profile --dart-define=DEV_SKIP_AUTH=true --dart-define=TEST_MODE=true` (release builds ignore that flag).
+
+The game does not move on its own in the web build: to get a run shot, press and hold the joystick (mouse down at the left stick, drag right) over the DevTools protocol and press Jump now and then; the Chrome window must be the foreground window or the game loop freezes. Nine screens (2026-10-30, build 1.4.0): welcome (with Play as a guest), character, eras, levels, history, run, pause, shop, profile.
 
 Still placeholders: the gameplay video box, a quiz question screen and the leaderboard (the web build cannot reach the server without an account).
 
@@ -66,4 +68,6 @@ The project is linked in `.vercel/` (git-ignored; run `npx vercel link --project
 
 ## Dashboard pictures
 
-`public/screens/dash-*.webp` (item analysis, question bank, sections) show the real dashboard with **demo data**: a fictional school and fictional students from the dashboard's own seed (`CBACK/src/utils/seed.js`). No real student appears. To retake them: run the seed against a throwaway in-memory MongoDB, start CBACK and CDASH locally on spare ports (not the live database), sign in as `teacher1.bangbangalon@chronoquest.dev`, and screenshot at 1200x800 (scale 1.5). Tap a picture on the page to enlarge it.
+The "For teachers and admins" section is a four-step story (Write, Share, Follow, For admins). Its pictures are **not screenshots**: they are redrawn in plain HTML and CSS in the dashboard’s look, with made-up names, class codes and numbers, so the real site and real students never show. They live in `index.html` inside `<div class="tk-flow">`. The layout classes start with `tk-`; the drawings use classes that start with `dz-` (their rules are at the end of `src/style.css`) so the page’s own `.card`, `.btn` and `.tag` never touch them. The pieces reflow instead of shrinking, so they stay readable on a phone.
+
+When the dashboard gains a new screen worth showing, copy the nearest drawing in `index.html`, change its words, and keep every class name with the `dz-` prefix. Do not publish a real screenshot of the dashboard here.

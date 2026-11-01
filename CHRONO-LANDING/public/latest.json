@@ -1,0 +1,12 @@
+{
+  "version": "1.5.3",
+  "required": false,
+  "notes": [
+    "Mas buong makikita ang mahahabang sagot sa quiz",
+    "Puno na ang Kaalaman bar sa simula ng bawat level",
+    "May Exit Guest Mode na sa Settings para sa guest",
+    "Mas mahaba ang loading screen para mabasa ang history fact"
+  ],
+  "reason": "",
+  "url": "https://chronoquest-five.vercel.app"
+}

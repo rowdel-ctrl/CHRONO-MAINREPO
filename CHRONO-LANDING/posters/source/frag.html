@@ -1,0 +1,131 @@
+<style>
+/* the poster: everything is sized in cqw (1% of the poster width), so it looks the same at 6 cm or at A3 */
+.pw { container-type: inline-size; width: 100%; }
+.poster {
+  --bg: #140E1F; --glow: #332621; --ink: #F5E3BE; --soft: #C9B48A; --gold: #FFC531;
+  --line: #2E1608; --brand: #6B3A1F; --card: #F5E3BE; --card-ink: #2A1707; --card-soft: #6B4423;
+  --eyebrow: #FFC531; --em: #FFC531; --em-bg: transparent;
+  --sky: #C98A5C; --ground: #6B3A1F; --grass: #43A83E;
+  position: relative; overflow: hidden; width: 100cqw; aspect-ratio: 210 / 297;
+  display: flex; flex-direction: column; justify-content: space-between;
+  background: radial-gradient(70% 38% at 82% 10%, var(--glow), var(--bg) 70%), var(--bg);
+  color: var(--ink); font-family: "Poppins", system-ui, sans-serif; line-height: 1.2;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.poster[data-look="day"] {
+  --bg: #F5E3BE; --glow: #F8D98D; --ink: #2A1707; --soft: #6B4423;
+  --card: #FFF8E7; --eyebrow: #6B3A1F; --em: #2A1707; --em-bg: #FFC531;
+}
+.poster > * { flex: none; }
+.poster *, .poster *::before, .poster *::after { box-sizing: border-box; }
+.poster h1, .poster h2, .poster h3, .poster p, .poster ol { margin: 0; padding: 0; }
+
+/* top: brand and version */
+.p-top { display: flex; align-items: center; justify-content: space-between; gap: 3cqw; padding: 4.4cqw 6cqw 0; }
+.p-brand { display: flex; align-items: center; gap: 2.4cqw; }
+.p-cq { display: grid; place-items: center; width: 7cqw; height: 7cqw; background: var(--brand); color: var(--gold); border: .45cqw solid var(--line); border-radius: .7cqw; box-shadow: 0 .6cqw 0 var(--line); font-weight: 800; font-size: 3cqw; letter-spacing: .02em; }
+.p-word { font-weight: 800; font-size: 3.5cqw; letter-spacing: .07em; text-transform: uppercase; }
+.p-ver { background: var(--gold); color: #2A1707; border: .45cqw solid var(--line); border-radius: .7cqw; padding: .9cqw 2cqw; font-weight: 800; font-size: 2.1cqw; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 .5cqw 0 var(--line); }
+
+/* headline */
+.p-hero { padding: 0 6cqw; }
+.p-eyebrow { display: flex; align-items: center; gap: 1.6cqw; color: var(--eyebrow); font-weight: 700; font-size: 2.15cqw; letter-spacing: .15em; text-transform: uppercase; }
+.p-eyebrow::before { content: ""; width: 5cqw; height: .9cqw; background: var(--gold); border: .25cqw solid var(--line); }
+.poster h1 { margin-top: 1.7cqw; font-weight: 800; font-size: 8.7cqw; line-height: 1.04; letter-spacing: -.015em; }
+.poster h1 em { position: relative; z-index: 0; font-style: normal; color: var(--em); padding: 0 .6cqw; margin-left: -.6cqw; }
+.poster h1 em::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; bottom: .2em; height: .39em; background: var(--em-bg); }
+.p-lead { margin-top: 3cqw; color: var(--soft); font-size: 2.95cqw; line-height: 1.5; max-width: 84cqw; }
+
+/* the pixel scene, drawn with the game's own sprites */
+.p-scene { position: relative; height: 17cqw; overflow: hidden; background: var(--sky); border-block: .5cqw solid var(--line); }
+.p-scene .layer { position: absolute; left: 0; right: 0; top: 0; bottom: 3.2cqw; background-repeat: repeat-x; background-position: 0 100%; background-size: auto 100%; image-rendering: pixelated; }
+.p-scene .l1 { background-image: url("{{IMG:back}}"); }
+.p-scene .l2 { background-image: url("{{IMG:mid}}"); background-position: -9cqw 100%; }
+.p-scene .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 3.2cqw; background: var(--ground); border-top: .5cqw solid var(--grass); overflow: hidden; }
+.p-scene .ground i { position: absolute; top: 0; bottom: 0; width: .55cqw; background: #562E19; }
+.p-scene .sp { position: absolute; image-rendering: pixelated; display: block; }
+.p-scene .rizal { left: 27%; bottom: 6.4cqw; width: 6.4cqw; }
+.p-scene .foe { left: 40%; bottom: 3.2cqw; width: 5.6cqw; }
+.p-scene .coin { width: 3cqw; }
+.p-scene .c1 { left: 37.5%; bottom: 10.4cqw; }
+.p-scene .c2 { left: 43.5%; bottom: 12.2cqw; }
+.p-scene .c3 { left: 49.5%; bottom: 10.4cqw; }
+.p-scene .art { left: 66%; bottom: 4.6cqw; width: 4.2cqw; }
+.p-scene .heart { left: 76%; bottom: 5.4cqw; width: 3.2cqw; }
+.p-scene .star { left: 84%; bottom: 8.4cqw; width: 3.2cqw; }
+
+/* the two codes */
+.p-qr { display: grid; grid-template-columns: 1fr 1fr; gap: 4cqw; padding: 0 12cqw; }
+.p-card { display: flex; flex-direction: column; background: var(--card); color: var(--card-ink); border: .5cqw solid var(--line); border-radius: .9cqw; box-shadow: 0 .7cqw 0 var(--line); overflow: hidden; }
+.p-card h2 { padding: 1.1cqw 2cqw; text-align: center; white-space: nowrap; font-weight: 800; font-size: 2.05cqw; letter-spacing: .07em; text-transform: uppercase; border-bottom: .5cqw solid var(--line); }
+.p-card.game h2 { background: var(--gold); color: #2A1707; }
+.p-card.site h2 { background: var(--brand); color: #F5E3BE; }
+.p-code { padding: 2cqw 2cqw 0; }
+.p-code svg { display: block; width: 100%; height: auto; border: .4cqw solid var(--line); border-radius: .5cqw; }
+.p-cap { padding: 2.2cqw 2cqw 2cqw; text-align: center; }
+.p-cap b { display: block; font-weight: 800; font-size: 2.05cqw; line-height: 1.25; overflow-wrap: anywhere; }
+.p-cap span { display: block; margin-top: .5cqw; color: var(--card-soft); font-size: 1.95cqw; line-height: 1.4; }
+
+/* install steps */
+.p-steps { padding: 1cqw 6cqw 0; }
+.p-steps h3 { color: var(--eyebrow); font-weight: 700; font-size: 2.05cqw; letter-spacing: .15em; text-transform: uppercase; }
+.p-steps ol { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3cqw; }
+.p-steps li { display: flex; align-items: flex-start; gap: 1.6cqw; }
+.p-steps .n { flex: none; display: grid; place-items: center; width: 4.6cqw; height: 4.6cqw; background: var(--gold); color: #2A1707; border: .4cqw solid var(--line); border-radius: .6cqw; font-weight: 800; font-size: 2.5cqw; }
+.p-steps b { display: block; font-weight: 700; font-size: 2.45cqw; line-height: 1.25; }
+.p-steps span { display: block; margin-top: .4cqw; color: var(--soft); font-size: 1.95cqw; line-height: 1.4; }
+
+/* the six eras and credits */
+.p-eras { padding: 1.5cqw 6cqw; background: var(--gold); color: #2A1707; border-block: .5cqw solid var(--line); text-align: center; font-weight: 700; font-size: 1.65cqw; line-height: 1.6; text-wrap: balance; }
+.p-eras span { display: inline-block; white-space: nowrap; margin: 0 1.3cqw; }
+.p-eras span::before { content: ""; display: inline-block; width: .8cqw; height: .8cqw; margin: 0 1cqw .12cqw 0; background: #2A1707; }
+.p-credit { padding: 1.5cqw 6cqw 2.2cqw; text-align: center; color: var(--soft); font-size: 1.85cqw; line-height: 1.55; }
+.p-credit b { color: var(--ink); font-weight: 700; }
+</style>
+<div class="pw"><div class="poster" id="poster" data-look="night">
+  <header class="p-top">
+    <div class="p-brand"><span class="p-cq">CQ</span><span class="p-word">ChronoQuest</span></div>
+    <span class="p-ver">Android · {{VERSION}}</span>
+  </header>
+
+  <div class="p-hero">
+    <span class="p-eyebrow">Laro ng kasaysayan ng Pilipinas</span>
+    <h1>Run through <em>Philippine history.</em></h1>
+    <p class="p-lead">Jump, dodge and collect artifacts across six eras.</p>
+  </div>
+
+  <div class="p-scene" aria-hidden="true">
+    <div class="layer l1"></div><div class="layer l2"></div>
+    <img class="sp c1 coin" src="{{IMG:coin}}" alt=""><img class="sp c2 coin" src="{{IMG:coin}}" alt=""><img class="sp c3 coin" src="{{IMG:coin}}" alt="">
+    <img class="sp foe" src="{{IMG:soldier}}" alt="">
+    <img class="sp rizal" src="{{IMG:rizal}}" alt="">
+    <img class="sp art" src="{{IMG:artifact}}" alt=""><img class="sp heart" src="{{IMG:heart}}" alt=""><img class="sp star" src="{{IMG:star}}" alt="">
+    <div class="ground">{{STRIPES}}</div>
+  </div>
+
+  <section class="p-qr">
+    <article class="p-card game">
+      <h2>Download the game</h2>
+      <div class="p-code" role="img" aria-label="QR code that downloads the ChronoQuest {{VERSION}} APK">{{QR_GAME}}</div>
+      <p class="p-cap"><b>ChronoQuest {{VERSION}}</b><span>Android phones, about {{SIZE}}</span></p>
+    </article>
+    <article class="p-card site">
+      <h2>Visit the website</h2>
+      <div class="p-code" role="img" aria-label="QR code that opens the ChronoQuest website">{{QR_SITE}}</div>
+      <p class="p-cap"><b>chronoquest-five.vercel.app</b><span>Screens, news and teacher login</span></p>
+    </article>
+  </section>
+
+  <section class="p-steps">
+    <ol>
+      <li><span class="n">1</span><div><b>Download</b><span>Scan the game code.</span></div></li>
+      <li><span class="n">2</span><div><b>Install</b><span>Open the file, allow the install.</span></div></li>
+      <li><span class="n">3</span><div><b>Play</b><span>Class code, or tap Play as a guest.</span></div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <div class="p-eras"><span>Sinaunang Pilipinas</span><span>Pananakop ng Espanya</span><span>Pag-usbong ng Nasyonalismo</span><span>Himagsikan at Imperyalismong Amerikano</span><span>Pamahalaang Kolonyal at Pananakop ng Hapon</span><span>Batas Militar at Muling Pagbangon ng Demokrasya</span></div>
+    <div class="p-credit"><b>Capstone project, 2026</b> · Marinduque State University · Adviser: Kierven A. Villaruel, MIT<br>Andrea Pearl Manqueria · Rodel Anoche · Yuan Wilson Fuerte · Jhonn Carlo Rey</div>
+  </footer>
+</div></div>
