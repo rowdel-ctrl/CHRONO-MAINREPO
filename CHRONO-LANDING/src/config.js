@@ -10,8 +10,8 @@ export const config = {
   // The APK file. By default it is served by this site from public/downloads/.
   // Set VITE_APK_URL to host it somewhere else (for example a GitHub Release).
   apkUrl: env.VITE_APK_URL || '/downloads/chronoquest.apk',
-  apkVersion: env.VITE_APK_VERSION || '1.3.0',
+  apkVersion: env.VITE_APK_VERSION || '1.5.3 TEST',
   apkSize: env.VITE_APK_SIZE || __APK_SIZE__ || '36 MB',
 
-  contactEmail: env.VITE_CONTACT_EMAIL || 'contact@your-email.com',
+  contactEmail: env.VITE_CONTACT_EMAIL || 'chronoquest.noreply@gmail.com',
 };
