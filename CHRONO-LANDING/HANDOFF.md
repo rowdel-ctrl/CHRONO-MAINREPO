@@ -3,7 +3,16 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
-**Date:** 2026-10-30 (night: **TEST 1.5.3 for every chip is LIVE**; flier made; nothing committed)
+**Date:** 2026-11-02 (student 1.6.0 + hidden tester 1.6.0 **LIVE**; committed and pushed to `v2-phase-4` and `main`)
+**From:** Claude Code (Sonnet 5.5)
+- User: put both 1.6.0 builds on the page, student as the public one, tester hidden behind the logo tapped 5 times in a row (2 s between taps). Checked with aapt2: student `com.chronoquest.chronoquest` 1.6.0 (2189), TEST `...chronoquest.test` 1.6.0-test (2189), both libflutter/libapp for arm64, armeabi-v7a, x86_64 (83 MB). Used the plain GAME files, not the later `-rules-` TEST.
+- Files: `public/downloads/chronoquest.apk` (student) and `chronoquest-tester.apk` (both git-ignored). `config.js` apkVersion '1.6.0', new testerUrl/testerSize; `index.html` brand id + `<dialog id="tester">`; `main.js` tap counter; `style.css` dialog; `vite.config.js` tester size; `public/robots.txt` (Disallow /downloads/); `latest.json` 1.6.0 (3 Taglish notes); What's new 1.6.0 card (1.5.3 now in the fold, "Show 10 earlier versions").
+- Checked in Chrome at phone width: 4 taps nothing, 5 taps opens, slow taps do not count, Close works, no tester link outside the dialog, student button says 1.6.0 and 83 MB. Not checked: live, the APKs on any phone or the tablet.
+- Deployed at the user's "Deploy" (2026-11-02). Live check: student file sha256 `04d673c0…` (86,866,771 bytes) and tester file `98bb92f7…` (86,866,787 bytes) match the local files; live `latest.json` is 1.6.0; live page has the tester dialog; `robots.txt` live. Still not tried on a phone or the tablet.
+
+---
+
+**Date:** 2026-10-30 (night: **TEST 1.5.3 for every chip is LIVE**; flier made; committed: `14943e9` on `v2-phase-4` and `98c9cfc` on `main`, pushed 2026-11-02)
 **From:** Claude Code (Sonnet 5.5)
 - **1.5.3:** GAME board request (user: "check board", then "Deploy"). aapt2/apksigner: student and TEST 1.5.3 both versionCode 2186, libflutter.so for three chips, same Debug signer. TEST file on the page (apkVersion '1.5.3 TEST', 83 MB), `latest.json` 1.5.3 (four Taglish notes), What's new 1.5.3 card (Latest; 1.5.1 and 1.5.0 in the fold, "Show 9 earlier versions"; no 1.5.2 card, GAME sent none). Deploy was blocked once by the permission check, run again at the user's "Deploy". Live hash `6ec46b80…` equals the local TEST 1.5.3. Student 1.5.3 NOT on the page. Not tried on the tablet.
 - **Flier:** canvas https://claude.ai/artifact/81gv7589NK1P8pqvbLDuP7 with A (night) and B (sunburst, loud) fronts and backs, A5. B as PDF: `posters/ChronoQuest-Flier-B.pdf` (2 pages, QR decoded = the landing page; rendered with local Chrome by `scratchpad/flier/makepdf.cjs`, not kept in the repo). Dashboard address not printed (not confirmed).

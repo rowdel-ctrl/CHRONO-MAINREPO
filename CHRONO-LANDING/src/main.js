@@ -5,6 +5,9 @@ import './style.css';
 /* values that change between releases live in config.js */
 function setAll(sel, fn) { document.querySelectorAll(sel).forEach(fn); }
 setAll('[data-apk]', function (a) { a.href = config.apkUrl; a.setAttribute('download', 'chronoquest.apk'); });
+setAll('[data-tester]', function (a) { a.href = config.testerUrl; a.setAttribute('download', 'chronoquest-tester.apk'); });
+setAll('[data-tester-version]', function (n) { n.textContent = config.apkVersion; });
+setAll('[data-tester-size]', function (n) { n.textContent = config.testerSize; });
 setAll('[data-dash]', function (a) { a.href = config.dashboardUrl.replace(/\/$/, '') + '/login'; });
 setAll('[data-apk-version]', function (n) { n.textContent = config.apkVersion; });
 setAll('[data-apk-size]', function (n) { n.textContent = config.apkSize; });
@@ -28,6 +31,21 @@ setAll('[data-email]', function (n) { n.textContent = config.contactEmail; });
     try { navigator.clipboard.writeText(mail.textContent).then(done, function () { select(); }); } catch (e) { select(); }
     function select() { var r = document.createRange(); r.selectNodeContents(mail); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
   });
+
+  /* tap the logo 5 times in a row to open the hidden tester download */
+  var brand = document.getElementById('brand'), tester = document.getElementById('tester'), taps = 0, tapTimer;
+  if (brand && tester) {
+    brand.addEventListener('click', function (e) {
+      taps += 1; clearTimeout(tapTimer); tapTimer = setTimeout(function () { taps = 0; }, 2000);
+      if (taps < 5) return;
+      taps = 0; e.preventDefault();
+      if (tester.showModal) tester.showModal(); else tester.setAttribute('open', '');
+    });
+    tester.addEventListener('click', function (e) {
+      if (e.target !== tester && !e.target.closest('[data-close]')) return;
+      if (tester.close) tester.close(); else tester.removeAttribute('open');
+    });
+  }
 
   var root = document.documentElement;
 

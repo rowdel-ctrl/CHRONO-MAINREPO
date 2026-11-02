@@ -23,7 +23,7 @@
 <body>
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="ChronoQuest home"><span class="tile">CQ</span>ChronoQuest</a>
+    <a class="brand" id="brand" href="#top" aria-label="ChronoQuest home"><span class="tile">CQ</span>ChronoQuest</a>
     <button class="menu" id="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
@@ -167,8 +167,9 @@
     <div class="wrap">
       <div class="head rv"><span class="eyebrow">Updates</span><h2>What's new</h2><p>Every build, in plain words.</p></div>
       <div class="log">
-        <div class="card rel rv"><div class="v"><b>1.5.3</b><span>October 30, 2026</span><br><span class="tag">Latest</span></div><ul><li>Long quiz answers show in full</li><li>The Kaalaman bar starts full on every level and comes back faster</li><li>Guests can leave guest mode from Settings (it asks first)</li><li>The new-version notice also shows on the first screen</li><li>Longer loading screens, about 3 seconds, so you can read the history fact</li><li>Time Freeze now works on any timed question, not only the boss</li></ul></div>
-        <details class="older"><summary class="btn line sm"><span class="o-show">Show 9 earlier versions</span><span class="o-hide">Hide earlier versions</span></summary><div class="log">
+        <div class="card rel rv"><div class="v"><b>1.6.0</b><span>November 2, 2026</span><br><span class="tag">Latest</span></div><ul><li>A new look for the game world in every era</li><li>Layered scenery with light and mist</li><li>Grass and leaves in front of the hero as you run</li><li>The heroes, enemies and rules are the same as before</li></ul></div>
+        <details class="older"><summary class="btn line sm"><span class="o-show">Show 10 earlier versions</span><span class="o-hide">Hide earlier versions</span></summary><div class="log">
+        <div class="card rel rv"><div class="v"><b>1.5.3</b><span>October 30, 2026</span><br><span class="tag">Earlier</span></div><ul><li>Long quiz answers show in full</li><li>The Kaalaman bar starts full on every level and comes back faster</li><li>Guests can leave guest mode from Settings (it asks first)</li><li>The new-version notice also shows on the first screen</li><li>Longer loading screens, about 3 seconds, so you can read the history fact</li><li>Time Freeze now works on any timed question, not only the boss</li></ul></div>
         <div class="card rel rv"><div class="v"><b>1.5.1</b><span>October 30, 2026</span><br><span class="tag">Earlier</span></div><ul><li>Long quiz answers now show in full</li><li>The Kaalaman attack comes back faster (6 seconds)</li><li>Works on 32-bit phones and tablets too</li></ul></div>
         <div class="card rel rv"><div class="v"><b>1.5.0</b><span>October 30, 2026</span><br><span class="tag">Earlier</span></div><ul><li>28 badges to win, in tin, silver and gold. Earn one and you get coins. See them in Profile, under MGA BADGE</li><li>A new Tindahan (shop) with four big cards: hearts, 50/50, Shield and Time Freeze</li><li>A new how-to-play guide: six short pages with moving pictures</li><li>A start-up screen, and a loading screen before every level with a history fact</li><li>A new app icon</li><li>Your hero walks in on the hero screen, and picking or buying a hero has its own little show</li></ul></div>
         <div class="card rel rv"><div class="v"><b>1.4.0</b><span>October 30, 2026</span><br><span class="tag">Earlier</span></div><ul><li>Play as a guest: try the game without a class code. A guest plays only the first era, nothing goes to the teacher, and it starts fresh every time</li><li>Your coins are saved on the server, so they stay when you change phones</li><li>The game tells you when a new version is ready, with a Download button</li><li>Gate, pause screen and round Jump and Attack buttons from 1.3.3 are in too</li></ul></div>
@@ -221,6 +222,13 @@
   </section>
 </main>
 
+<dialog class="card tester" id="tester" aria-labelledby="tester-h">
+  <span class="role">For testers only</span>
+  <h3 id="tester-h">ChronoQuest TEST</h3>
+  <p>This is the tester build. It installs as a separate app named ChronoQuest TEST, next to the real game, and it has a Test Mode switch in Settings.</p>
+  <a class="btn shine" href="/downloads/chronoquest-tester.apk" data-tester><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M12 4v12M6 11l6 6 6-6M5 21h14"/></svg>Download tester <small>v<span data-tester-version></span> · <span data-tester-size></span></small></a>
+  <button class="btn line sm" type="button" data-close>Close</button>
+</dialog>
 <footer>
   <div class="wrap">
     <a class="brand" href="#top"><span class="tile">CQ</span>ChronoQuest</a>
