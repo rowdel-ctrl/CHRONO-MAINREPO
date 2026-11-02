@@ -515,3 +515,10 @@ footer nav a:hover { color: var(--ink); }
 .dz.dz-frag .dz-req li { flex-wrap: wrap; }
 .dz.dz-frag .dz-q { grid-template-columns: 24px minmax(0, 1fr) auto; }
 .dz .dz-reason { border: 2.5px solid var(--b); border-radius: 12px; padding: 8px 12px; min-height: 62px; font-size: 12px; font-weight: 500; line-height: 1.45; color: #111827; background: #F0FDF4; }
+
+/* hidden tester download: opens when the logo is tapped 5 times */
+.tester { width: min(92vw, 440px); margin: auto; }
+.tester::backdrop { background: rgba(20, 14, 31, .75); }
+.tester h3 { margin-top: 4px; }
+.tester .btn { width: 100%; margin-top: 14px; }
+.tester .btn.line { color: var(--card-ink); border-color: var(--line); }
