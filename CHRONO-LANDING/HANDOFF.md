@@ -3,6 +3,21 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-03 (**student 1.6.2 public + hidden TEST 1.6.2 are LIVE**; the 1.6.1 and 1.6.2 swaps are not committed)
+**From:** Claude Code (Sonnet 5.5)
+- Why: the 1.6.1 builds had `appVersion = '1.6.0'` in `app_info.dart` (pubspec said 1.6.1), so the new-version card said "1.6.0 > 1.6.1" forever; the user saw it on their phone (screenshot). I checked the compiled code of both APKs (only "1.6.0" inside), put a BUG request for GAME on the board; GAME fixed it and built 1.6.2 (version code 2190).
+- Checked 1.6.2 before deploy: aapt2 package version 1.6.2 for both, compiled code has "1.6.2" and no 1.6.0 or 1.6.1, three chips each. Page: student and tester files swapped, `config.js` 1.6.2, `latest.json` 1.6.2 (two Taglish notes), What's new 1.6.2 card ("Show 12 earlier versions"), Chrome 5-tap test passed.
+- Deployed at the user's "Deploy". Live: student sha256 `cf3f9570…` (88,198,357 bytes) and tester `81cbd0a4…` (88,198,373 bytes) match local; live `latest.json` 1.6.2; live page has the 1.6.2 card and the tester dialog. Not tried on a phone yet (the user is about to install it: the corner should read v1.6.2 and the card should be gone).
+
+---
+
+**Date:** 2026-11-02 (later: **student 1.6.1 public + hidden TEST 1.6.1 are LIVE**; not committed)
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (1.6.1, version code 2189 same as 1.6.0), user: "Swap and deploy". aapt2: student `com.chronoquest.chronoquest` 1.6.1, TEST `...chronoquest.test` 1.6.1-test, three chips each (84 MB). Copied over `public/downloads/chronoquest.apk` and `chronoquest-tester.apk`; `config.js` 1.6.1; `latest.json` 1.6.1 (four Taglish notes); What's new 1.6.1 card (1.6.0 folded, "Show 11 earlier versions").
+- Checked in Chrome before deploy (5 taps open, 4 and slow taps do not, 1.6.1 and 84 MB shown). Live after deploy: student sha256 `acfd7d4d…` (88,198,357 bytes) and tester `fa8e667d…` (88,198,373 bytes) match local; live `latest.json` 1.6.1; live page has the 1.6.1 card and the tester dialog. Not tried on a phone or the tablet.
+
+---
+
 **Date:** 2026-11-02 (student 1.6.0 + hidden tester 1.6.0 **LIVE**; committed and pushed to `v2-phase-4` and `main`)
 **From:** Claude Code (Sonnet 5.5)
 - User: put both 1.6.0 builds on the page, student as the public one, tester hidden behind the logo tapped 5 times in a row (2 s between taps). Checked with aapt2: student `com.chronoquest.chronoquest` 1.6.0 (2189), TEST `...chronoquest.test` 1.6.0-test (2189), both libflutter/libapp for arm64, armeabi-v7a, x86_64 (83 MB). Used the plain GAME files, not the later `-rules-` TEST.

@@ -10,7 +10,7 @@ export const config = {
   // The APK file. By default it is served by this site from public/downloads/.
   // Set VITE_APK_URL to host it somewhere else (for example a GitHub Release).
   apkUrl: env.VITE_APK_URL || '/downloads/chronoquest.apk',
-  apkVersion: env.VITE_APK_VERSION || '1.6.0',
+  apkVersion: env.VITE_APK_VERSION || '1.6.2',
   // The tester build (package .test, has the Test Mode switch). No link to it on the page:
   // it opens from the logo, tapped 5 times in a row.
   testerUrl: env.VITE_TESTER_URL || '/downloads/chronoquest-tester.apk',
