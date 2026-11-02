@@ -1,10 +1,9 @@
 {
-  "version": "1.6.0",
+  "version": "1.6.2",
   "required": false,
   "notes": [
-    "Bagong itsura ng mundo ng laro sa bawat era",
-    "Patong-patong na tanawin, may liwanag at hamog",
-    "May damo at dahon sa harap habang tumatakbo"
+    "Naayos ang mensaheng laging nagsasabing may bagong version",
+    "Pareho pa rin ang laro tulad ng 1.6.1"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
