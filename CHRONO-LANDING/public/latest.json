@@ -1,9 +1,10 @@
 {
-  "version": "1.6.2",
+  "version": "1.6.3",
   "required": false,
   "notes": [
-    "Naayos ang mensaheng laging nagsasabing may bagong version",
-    "Pareho pa rin ang laro tulad ng 1.6.1"
+    "Kumikinang ang boss bago ang bawat tanong",
+    "Nasa isang scroll ang tanong sa boss fight, malayo sa iyo",
+    "May palaso sa gilid ng screen na nagtuturo sa scroll"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
