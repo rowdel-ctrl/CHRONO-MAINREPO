@@ -3,6 +3,13 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-03 (later: **student 1.6.3 public + hidden TEST 1.6.3 are LIVE**; not committed)
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (1.6.3, version code 2191), user: "Deploy". aapt2: student `com.chronoquest.chronoquest` 1.6.3, TEST `...chronoquest.test` 1.6.3-test, three chips each; compiled code has "1.6.3" and no older number. Page: both files swapped, `config.js` 1.6.3, `latest.json` 1.6.3 (three Taglish notes), What's new 1.6.3 card ("Show 13 earlier versions"), Chrome 5-tap test passed.
+- Live after deploy: student sha256 `f8f3afba…` (88,329,693 bytes) and tester `11dbddcf…` (88,329,709 bytes) match local; live `latest.json` 1.6.3; live page has the 1.6.3 card and the tester dialog. Not tried on a phone or the tablet.
+
+---
+
 **Date:** 2026-11-03 (**student 1.6.2 public + hidden TEST 1.6.2 are LIVE**; the 1.6.1 and 1.6.2 swaps are not committed)
 **From:** Claude Code (Sonnet 5.5)
 - Why: the 1.6.1 builds had `appVersion = '1.6.0'` in `app_info.dart` (pubspec said 1.6.1), so the new-version card said "1.6.0 > 1.6.1" forever; the user saw it on their phone (screenshot). I checked the compiled code of both APKs (only "1.6.0" inside), put a BUG request for GAME on the board; GAME fixed it and built 1.6.2 (version code 2190).
