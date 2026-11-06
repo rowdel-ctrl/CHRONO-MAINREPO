@@ -3,6 +3,14 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-07 (**hidden TEST 1.7.0 is LIVE**; student 1.6.3 stays public; not committed)
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (also messaged me), the user: "Deploy". TEST 1.7.0 (`com.chronoquest.chronoquest.test`, 1.7.0-test, version code 2201, three chips, 92,574,365 bytes, shown as 88 MB): aapt2 checked, compiled code says 1.7.0. New art: Juan and Maria free heroes, five bought heroes, new attack pictures, enemies and bosses.
+- Page: tester file swapped; `config.js` has a separate `testerVersion` 1.7.0 (student `apkVersion` stays 1.6.3); the tester dialog shows v1.7.0 and a "New in this build" line. No public What's new card (the top card matches the public student build); `latest.json` stays 1.6.3 until a student 1.7.0 exists.
+- Live: student sha256 `f8f3afba…` (88,329,693) and tester `434850b8…` (92,574,365) match local; live `latest.json` 1.6.3. Chrome 5-tap test passed before deploy. Not tried on a phone. Still to do when the student 1.7.0 comes: `latest.json` 1.7.0, What's new card, new hero pictures on the page (still the old five heroes).
+
+---
+
 **Date:** 2026-11-03 (later: **student 1.6.3 public + hidden TEST 1.6.3 are LIVE**; not committed)
 **From:** Claude Code (Sonnet 5.5)
 - GAME request (1.6.3, version code 2191), user: "Deploy". aapt2: student `com.chronoquest.chronoquest` 1.6.3, TEST `...chronoquest.test` 1.6.3-test, three chips each; compiled code has "1.6.3" and no older number. Page: both files swapped, `config.js` 1.6.3, `latest.json` 1.6.3 (three Taglish notes), What's new 1.6.3 card ("Show 13 earlier versions"), Chrome 5-tap test passed.
