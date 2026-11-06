@@ -6,7 +6,7 @@ import './style.css';
 function setAll(sel, fn) { document.querySelectorAll(sel).forEach(fn); }
 setAll('[data-apk]', function (a) { a.href = config.apkUrl; a.setAttribute('download', 'chronoquest.apk'); });
 setAll('[data-tester]', function (a) { a.href = config.testerUrl; a.setAttribute('download', 'chronoquest-tester.apk'); });
-setAll('[data-tester-version]', function (n) { n.textContent = config.apkVersion; });
+setAll('[data-tester-version]', function (n) { n.textContent = config.testerVersion; });
 setAll('[data-tester-size]', function (n) { n.textContent = config.testerSize; });
 setAll('[data-dash]', function (a) { a.href = config.dashboardUrl.replace(/\/$/, '') + '/login'; });
 setAll('[data-apk-version]', function (n) { n.textContent = config.apkVersion; });
