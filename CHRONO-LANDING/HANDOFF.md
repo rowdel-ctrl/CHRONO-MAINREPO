@@ -3,6 +3,13 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-07 (later: **TEST 1.7.1 PREPARED on the page, NOT deployed yet**; waiting for the user's "Deploy")
+**From:** Claude Code (Sonnet 5.5)
+- GAME request: TEST 1.7.1 (`com.chronoquest.chronoquest.test`, 1.7.1-test, version code 2204, three chips, 92,639,901 bytes, shown as 88 MB; new menu background, star lanterns instead of the turning rays). aapt2 checked, compiled code says 1.7.1 and no 1.7.0.
+- Local only: tester file swapped, `config.js` testerVersion 1.7.1, tester box line mentions the new menu background; Chrome 5-tap test passed. Student 1.6.3 and `latest.json` 1.6.3 unchanged. **The live site still has TEST 1.7.0.** After "Deploy": compare live hashes, delete the GAME request line on the board.
+
+---
+
 **Date:** 2026-11-07 (**hidden TEST 1.7.0 is LIVE**; student 1.6.3 stays public; not committed)
 **From:** Claude Code (Sonnet 5.5)
 - GAME request (also messaged me), the user: "Deploy". TEST 1.7.0 (`com.chronoquest.chronoquest.test`, 1.7.0-test, version code 2201, three chips, 92,574,365 bytes, shown as 88 MB): aapt2 checked, compiled code says 1.7.0. New art: Juan and Maria free heroes, five bought heroes, new attack pictures, enemies and bosses.
