@@ -3,10 +3,10 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
-**Date:** 2026-11-07 (later: **TEST 1.7.1 PREPARED on the page, NOT deployed yet**; waiting for the user's "Deploy")
+**Date:** 2026-11-07 (later: **hidden TEST 1.7.1 is LIVE**; student 1.6.3 stays public; committed as prepared in `84e094c` / `63aadef`, the live-state notes are not committed)
 **From:** Claude Code (Sonnet 5.5)
 - GAME request: TEST 1.7.1 (`com.chronoquest.chronoquest.test`, 1.7.1-test, version code 2204, three chips, 92,639,901 bytes, shown as 88 MB; new menu background, star lanterns instead of the turning rays). aapt2 checked, compiled code says 1.7.1 and no 1.7.0.
-- Local only: tester file swapped, `config.js` testerVersion 1.7.1, tester box line mentions the new menu background; Chrome 5-tap test passed. Student 1.6.3 and `latest.json` 1.6.3 unchanged. **The live site still has TEST 1.7.0.** After "Deploy": compare live hashes, delete the GAME request line on the board.
+- Local only: tester file swapped, `config.js` testerVersion 1.7.1, tester box line mentions the new menu background; Chrome 5-tap test passed. Student 1.6.3 and `latest.json` 1.6.3 unchanged. Deployed at the user's "Deploy" (2026-11-07). Live: tester sha256 `d9f53f9b…` (92,639,901 bytes) and student `f8f3afba…` (88,329,693) match local; live `latest.json` still 1.6.3; live page has the tester box with the star-lanterns line. Not tried on a phone.
 
 ---
 
