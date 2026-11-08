@@ -1,10 +1,11 @@
 {
-  "version": "1.6.3",
+  "version": "1.8.0",
   "required": false,
   "notes": [
-    "Kumikinang ang boss bago ang bawat tanong",
-    "Nasa isang scroll ang tanong sa boss fight, malayo sa iyo",
-    "May palaso sa gilid ng screen na nagtuturo sa scroll"
+    "Bagong art ng mga bayani, kalaban at boss",
+    "Si Maria Clara ang bagong bayani, 8 na lahat",
+    "60 bagong larawan ng artifact",
+    "Bagong menu na may mga parol sa gabi"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
