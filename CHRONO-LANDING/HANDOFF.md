@@ -3,6 +3,15 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-08 (night) (**root clean-up at the user's request**; not committed yet)
+**From:** Claude Code (Sonnet 5.5)
+- **Root:** the four old game notes moved to `docs/game/` (`git mv`) with `docs/README.md`; `LEVEL-TOPICS.md` stays at the root because the dashboard script `CBACK/scripts/sync-content.js` reads it from there; `CLAUDE.md` structure list updated; stray `=` file deleted. `capstone/` (git-ignored) sorted into `srs/`, `manuscript-review/`, `final-terms/`, `presentation-guides/`, `users-manual/`, `testing/`, with a list of every move in `capstone/ORGANIZED.txt`.
+- **Landing:** 7 unused Rizal and Spanish soldier sprites deleted; the two 1.4.0 QR poster PDFs untracked (ignored, files still on disk; rebuild from `posters/source`); `package-lock.json` now tracked (negation line in the root `.gitignore`).
+- **Game and dashboard (user said do them too and mention on the board):** game `6889cc9` and `688c3fc` on `feat/maria-clara-artifacts` (quest scaffolding, 3 unused backgrounds, `windows/`; analyze clean, 1,430 tests pass); dashboard lockfiles on branch `chore/lockfiles` (`94e2ea1`, not merged, so no deploy). Old APKs in the game `build/` and `build/web` deleted. FYI lines added to the board requests table for GAME and DASHBOARD. The GAME chat had its own uncommitted files (`.gitignore`, `HANDOFF.md`, `tools/art-import/*`); none were touched.
+- **Correction:** I said earlier my handoff was over its size limit; it is 178 lines against about 200, and the game (363) and dashboard (343) handoffs are also within their limits, so nothing was trimmed.
+
+---
+
 **Date:** 2026-11-08 (later) (**new pictures LIVE: game screens, hero animation, dashboard section**; committed fb1e920 on v2-phase-4, 7efb03e on main)
 **From:** Claude Code (Sonnet 5.5), with two helpers (one for the game shots, one for the dashboard pictures)
 - The user: "Update the screenshots, use 2 subagents if needed specially the dashboard". The user chose "Redraw to match today's dashboard" (still no real dashboard screenshots).
