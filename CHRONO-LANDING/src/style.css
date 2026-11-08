@@ -1,13 +1,13 @@
 /* Layout: full-width bands with a centered .wrap. The original game look (night, parchment, gold, chunky outlines),
    fluid type and grids, plus a looping runner scene, a ticker, scroll reveals and hover animations. */
 :root {
-  --rizal-1: url("/art/rizal_walk_1.png");
-  --rizal-2: url("/art/rizal_walk_2.png");
-  --rizal-3: url("/art/rizal_walk_3.png");
-  --rizal-4: url("/art/rizal_walk_4.png");
-  --rizal-j: url("/art/rizal_jump.png");
-  --spanish-1: url("/art/spanish_soldier_1.png");
-  --spanish-2: url("/art/spanish_soldier_2.png");
+  --rizal-1: url("/art/boy_walk_1.png");
+  --rizal-2: url("/art/boy_walk_2.png");
+  --rizal-3: url("/art/boy_walk_3.png");
+  --rizal-4: url("/art/boy_walk_4.png");
+  --rizal-j: url("/art/boy_jump.png");
+  --spanish-1: url("/art/dark_spirit_1.png");
+  --spanish-2: url("/art/dark_spirit_2.png");
   --heart: url("/art/heart_full.png");
   --star: url("/art/star_full.png");
   --shield: url("/art/shield.png");
@@ -64,9 +64,10 @@ h3 { font-size: var(--step-1); }
 
 /* pixel sprites: one data URI each, set once as a variable */
 .sp { background-repeat: no-repeat; background-size: 100% 100%; background-image: var(--f1); image-rendering: pixelated; }
-.sp.ch { aspect-ratio: 52 / 68; }
-.sp.en { aspect-ratio: 52 / 64; }
+.sp.ch { aspect-ratio: 304 / 300; }
+.sp.en { aspect-ratio: 354 / 270; }
 .sp.bs { aspect-ratio: 80 / 90; }
+.sp.ch, .sp.en { image-rendering: auto; }
 .sp.cn { aspect-ratio: 1; background-image: var(--coin); }
 .walk { animation: walk .6s linear infinite; }
 @keyframes walk { 0%, 24.99% { background-image: var(--f1); } 25%, 49.99% { background-image: var(--f2); } 50%, 74.99% { background-image: var(--f3); } 75%, 100% { background-image: var(--f4); } }
@@ -147,17 +148,17 @@ h3 { font-size: var(--step-1); }
 @keyframes pan2 { to { background-position-x: calc(-93.08 * var(--u)); } }
 .ground { position: absolute; left: 0; right: 0; bottom: 0; height: calc(14 * var(--u)); background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 calc(2.4 * var(--u)), transparent calc(2.4 * var(--u)) calc(14.25 * var(--u))), var(--ground); border-top: calc(2 * var(--u)) solid var(--ground-top); animation: pan3 .5s linear infinite; }
 @keyframes pan3 { to { background-position-x: calc(-14.25 * var(--u)); } }
-.runner { position: absolute; left: 14%; bottom: calc(14 * var(--u)); width: calc(17 * var(--u)); aspect-ratio: 52 / 68; animation: hop 4s infinite; }
+.runner { position: absolute; left: 14%; bottom: calc(14 * var(--u)); width: calc(22 * var(--u)); aspect-ratio: 304 / 300; animation: hop 4s infinite; }
 .runner .sp { position: absolute; inset: 0; }
 .runner .w { animation: walk .6s linear infinite, showw 4s linear infinite; }
 .runner .j { background-image: var(--rizal-j); animation: showj 4s linear infinite; }
 @keyframes hop { 0%, 50% { transform: translateY(0); animation-timing-function: ease-out; } 72% { transform: translateY(calc(-13 * var(--u))); animation-timing-function: ease-in; } 94%, 100% { transform: translateY(0); } }
 @keyframes showw { 0%, 52% { visibility: visible; } 52.01%, 94% { visibility: hidden; } 94.01%, 100% { visibility: visible; } }
 @keyframes showj { 0%, 52% { visibility: hidden; } 52.01%, 94% { visibility: visible; } 94.01%, 100% { visibility: hidden; } }
-.foe { position: absolute; left: 0; bottom: calc(14 * var(--u)); width: calc(14 * var(--u)); animation: run 4s linear infinite; }
+.foe { position: absolute; left: 0; bottom: calc(14 * var(--u)); width: calc(18 * var(--u)); animation: run 4s linear infinite; }
 .foe .sp { width: 100%; --f1: var(--spanish-1); --f2: var(--spanish-2); animation: walk2 .5s linear infinite; }
 @keyframes walk2 { 0%, 49.99% { background-image: var(--f1); } 50%, 100% { background-image: var(--f2); } }
-@keyframes run { from { transform: translateX(calc(100 * var(--u))); } to { transform: translateX(calc(-14 * var(--u))); } }
+@keyframes run { from { transform: translateX(calc(100 * var(--u))); } to { transform: translateX(calc(-18 * var(--u))); } }
 .coins { position: absolute; left: 50%; bottom: calc(25 * var(--u)); width: calc(22 * var(--u)); height: calc(9 * var(--u)); transform: translateX(-50%); }
 .coins .sp { position: absolute; width: calc(5.4 * var(--u)); animation: spin 1s ease-in-out infinite; }
 .coins .sp:nth-child(1) { left: 0; bottom: 0; }
@@ -426,16 +427,9 @@ footer nav a:hover { color: var(--ink); }
 .dz .dz-row:first-child { border-top: 0; }
 .dz .dz-row.dz-danger { background: #FEF2F2; box-shadow: inset 4px 0 0 var(--red); }
 .dz .dz-grow { flex: 1; min-width: 0; }
-.dz .dz-rk { width: 22px; height: 22px; border-radius: 50%; background: #FEE2E2; color: var(--red); display: grid; place-items: center; font-weight: 600; font-size: 10.5px; flex: none; }
 .dz .dz-link { color: var(--ps); font-weight: 600; font-size: 11.5px; }
 .dz .dz-dd { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 14px; border: 2.5px solid var(--b); border-radius: 12px; background: #fff; font-weight: 600; font-size: 12px; }
 .dz .dz-dd .dz-lab { font-size: 9.5px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--m); }
-.dz table { border-collapse: collapse; width: 100%; color: #111827; font: inherit; }
-.dz th { text-align: left; font-size: 9.5px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--m); padding: 8px 12px; background: #F0FDF4; border-block: 2px solid var(--b); white-space: nowrap; }
-.dz td { padding: 9px 12px; border-top: 2px solid var(--b); font-size: 12px; vertical-align: middle; }
-.dz tbody tr:first-child td { border-top: 0; }
-.dz .dz-who { display: flex; align-items: center; gap: 9px; min-width: 0; }
-.dz .dz-who .dz-nmx { white-space: nowrap; }
 .dz .dz-timer { padding: 10px 14px; display: grid; gap: 6px; }
 .dz .dz-timer .dz-t1 { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .dz .dz-sw { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; font-size: 13px; }
@@ -479,10 +473,6 @@ footer nav a:hover { color: var(--ink); }
 .dz .dz-stp .dz-sb { width: 28px; height: 28px; border-radius: 9px; border: 2.5px solid var(--b); display: grid; place-items: center; color: var(--ps); background: #fff; }
 .dz .dz-stp .dz-val { min-width: 62px; text-align: center; font-weight: 600; font-size: 13px; line-height: 1.2; }
 .dz .dz-stp .dz-val small { display: block; font-size: 9px; font-weight: 500; color: var(--m); letter-spacing: .08em; text-transform: uppercase; }
-.dz .dz-info { background: #E0F2FE; border-radius: 16px; padding: 12px 16px; color: #075985; font-size: 12px; }
-.dz .dz-info b { display: flex; align-items: center; gap: 8px; font-family: "Fredoka One", cursive; font-weight: 400; font-size: 14px; margin-bottom: 4px; }
-.dz .dz-sec { padding: 12px 14px; display: grid; gap: 9px; }
-.dz .dz-sec h3 { font-family: "Fredoka One", cursive; font-weight: 400; font-size: 17px; color: var(--pd); text-transform: none; line-height: 1.2; }
 .dz .dz-code { border: 2px dashed var(--b); border-radius: 12px; background: #F0FDF4; padding: 7px 12px; display: flex; justify-content: space-between; align-items: center; }
 .dz .dz-code b { display: block; font-family: "Fira Code", monospace; font-weight: 600; font-size: 17px; letter-spacing: .14em; }
 .dz .dz-req { background: var(--yl); border: 2.5px solid var(--yb); border-radius: 16px; padding: 11px 14px; display: grid; gap: 8px; }
@@ -490,31 +480,245 @@ footer nav a:hover { color: var(--ink); }
 .dz .dz-req .dz-n { background: #B45309; color: #fff; border-radius: 999px; padding: 0 10px; font: 700 11px/1.7 "Poppins"; }
 .dz .dz-req li { list-style: none; display: flex; align-items: center; gap: 10px; justify-content: space-between; background: #fff; border: 2px solid var(--b); border-radius: 12px; padding: 8px 12px; }
 .dz .dz-req ul { padding: 0; display: grid; gap: 7px; }
-.dz .dz-q { display: grid; grid-template-columns: 24px minmax(0, 1fr) 96px; gap: 12px; padding: 12px 14px; align-items: start; }
-.dz .dz-q p { font-weight: 600; font-size: 12.5px; line-height: 1.4; }
-.dz .dz-opts { display: grid; gap: 5px; margin-top: 8px; }
-.dz .dz-opt { display: grid; grid-template-columns: 18px minmax(0, 1fr) 36px; gap: 8px; align-items: center; font-size: 11px; }
-.dz .dz-opt .dz-l { font-weight: 700; color: var(--m); }
-.dz .dz-opt .dz-bar { height: 12px; background: var(--pill); position: relative; }
-.dz .dz-opt .dz-bar i { background: #CBD5E1; }
-.dz .dz-opt .dz-t { text-align: right; font-weight: 600; font-size: 10.5px; }
-.dz .dz-opt.dz-ok .dz-bar i { background: var(--p); }
-.dz .dz-opt.dz-bad .dz-bar i { background: var(--red); }
-.dz .dz-opt.dz-ok .dz-l { color: var(--ps); }
-.dz .dz-rate { text-align: right; }
-.dz .dz-rate b { display: block; font-family: "Fredoka One", cursive; font-weight: 400; font-size: 26px; line-height: 1.1; color: var(--red); }
 .dz .dz-acts { display: flex; gap: 7px; }
 .dz.dz-frag { padding: 16px; }
 .dz.dz-frag .dz-stack { display: grid; gap: 12px; }
 .dz.dz-frag.dz-mini { border: 3px solid var(--line); border-radius: 6px; box-shadow: 0 5px 0 var(--line); }
-.dz.dz-frag .dz-eras { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 .dz.dz-frag .dz-save { position: static; flex-wrap: wrap; }
 .dz.dz-frag .dz-modal { width: 100%; box-shadow: none; border-radius: 16px; }
-.dz.dz-frag .dz-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; align-items: start; }
-.dz.dz-frag .dz-tw { overflow-x: auto; }
-.dz.dz-frag .dz-req li { flex-wrap: wrap; }
-.dz.dz-frag .dz-q { grid-template-columns: 24px minmax(0, 1fr) auto; }
 .dz .dz-reason { border: 2.5px solid var(--b); border-radius: 12px; padding: 8px 12px; min-height: 62px; font-size: 12px; font-weight: 500; line-height: 1.45; color: #111827; background: #F0FDF4; }
+
+/* the dashboard's own frame (sidebar, top bar, page) so every picture looks like a real dashboard page. Narrow pictures get the icon rail the real dashboard shows on a tablet. */
+.dz .dz-b { font-weight: 600; color: #111827; }
+.dz .dz-stack { display: grid; gap: 12px; min-width: 0; }
+.dz.dz-app { padding: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); container-type: inline-size; container-name: dzapp; }
+.dz-app .dz-side { background: var(--f); border-right: 2.5px solid var(--p); display: flex; flex-direction: column; align-items: center; gap: 3px; width: 44px; padding: 9px 6px; min-width: 0; }
+.dz-app .dz-logo { display: flex; align-items: center; gap: 8px; padding: 0 0 9px; }
+.dz-app .dz-cq { width: 28px; height: 28px; border-radius: 9px; background: var(--y); box-shadow: 0 2px 0 var(--ys); color: var(--pd); display: grid; place-items: center; font: 400 12px "Fredoka One", cursive; flex: none; }
+.dz-app .dz-bn { display: none; }
+.dz-app .dz-bn b { display: block; font: 400 15px/1 "Fredoka One", cursive; color: var(--y); }
+.dz-app .dz-bn small { display: block; margin-top: 3px; font-size: 6.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(74, 222, 128, .75); white-space: nowrap; }
+.dz-app .dz-nav { display: grid; gap: 3px; width: 100%; align-content: start; flex: 1; }
+.dz-app .dz-ni { display: flex; align-items: center; justify-content: center; gap: 9px; height: 30px; border-radius: 10px; color: rgba(255, 255, 255, .55); font-weight: 600; font-size: 9.5px; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.dz-app .dz-ni > span { display: none; }
+.dz-app .dz-ni.dz-act { background: var(--p); color: #052E16; box-shadow: 0 2px 0 var(--ps), 0 3px 10px rgba(34, 197, 94, .35); }
+.dz-app .dz-sw2 { color: rgba(74, 222, 128, .85); border: 1.5px solid rgba(74, 222, 128, .3); width: 100%; margin-bottom: 4px; }
+.dz-app .dz-me { display: flex; align-items: center; gap: 8px; padding: 6px 0 0; border-top: 1px solid rgba(255, 255, 255, .1); width: 100%; justify-content: center; }
+.dz-app .dz-me .dz-av { width: 28px; height: 28px; background: var(--sky); color: #082F49; box-shadow: 0 2px 0 #0369A1; border: 0; font-size: 11px; }
+.dz-app .dz-mt { display: none; min-width: 0; }
+.dz-app .dz-mt b { display: block; color: #fff; font-weight: 600; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-app .dz-mt small { display: block; font-size: 7.5px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: rgba(74, 222, 128, .75); }
+.dz-app .dz-pg { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+.dz-app .dz-top { min-height: 42px; background: #fff; border-bottom: 2.5px solid var(--b); display: flex; align-items: center; gap: 10px; padding: 6px 12px; }
+.dz-app .dz-top h5 { flex: 1; min-width: 0; margin: 0; font: 400 14px/1.2 "Fredoka One", cursive; letter-spacing: .02em; color: var(--pd); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: none; }
+.dz-app .dz-ta { display: none; gap: 6px; }
+.dz-app .dz-date { display: none; font-size: 8px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ps); white-space: nowrap; }
+.dz-app .dz-uname { display: none; font-size: 10.5px; font-weight: 600; color: var(--s2); white-space: nowrap; }
+.dz-app .dz-body { padding: 12px; background: #F0FDF4; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.dz-app .dz-body > * { min-width: 0; }
+@container dzapp (min-width: 560px) {
+  .dz.dz-app .dz-side { width: 158px; align-items: stretch; padding: 12px 10px 10px; }
+  .dz.dz-app .dz-bn { display: block; }
+  .dz.dz-app .dz-ni { justify-content: flex-start; padding: 0 10px; }
+  .dz.dz-app .dz-ni > span { display: inline; }
+  .dz.dz-app .dz-me { justify-content: flex-start; padding: 8px 4px 0; }
+  .dz.dz-app .dz-mt { display: block; }
+  .dz.dz-app .dz-ta { display: flex; }
+  .dz.dz-app .dz-date, .dz.dz-app .dz-uname { display: block; }
+  .dz.dz-app .dz-body { padding: 14px; }
+  .dz.dz-app .dz-eras { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dz.dz-app .dz-era .dz-hd { grid-template-columns: 36px minmax(0, 1fr) 14px; grid-template-areas: "chip . go" "title title title"; row-gap: 8px; }
+  .dz.dz-app .dz-era .dz-tchip { grid-area: chip; }
+  .dz.dz-app .dz-era .dz-hd > svg { grid-area: go; align-self: center; }
+  .dz.dz-app .dz-era h4 { grid-area: title; font-size: 12px; }
+  .dz.dz-app .dz-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dz.dz-app .dz-ia-detail { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+}
+@container dzapp (min-width: 440px) {
+  .dz.dz-app .dz-two2, .dz.dz-app .dz-reps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dz.dz-app .dz-two2.dz-one { grid-template-columns: minmax(0, 1fr); }
+}
+@container dzapp (min-width: 440px) {
+  .dz.dz-app .dz-sst-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@container dzapp (max-width: 559px) {
+  .dz.dz-app .dz-wide { display: none; }
+}
+
+/* shared pieces of the pages */
+.dz .dz-step h6 { margin: 0; font: 400 16px/1.2 "Fredoka One", cursive; color: var(--pd); letter-spacing: .02em; text-transform: none; }
+.dz .dz-step p { font-size: 11px; color: var(--m); margin-top: 3px; }
+.dz .dz-grp { display: grid; gap: 8px; min-width: 0; }
+.dz .dz-eras { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.dz .dz-dots i.dz-s { background: var(--y); }
+.dz .dz-era h4 { overflow-wrap: break-word; hyphens: none; }
+.dz .dz-sec2 .dz-acts { gap: 6px; }
+.dz .dz-sec2 .dz-acts .dz-btn { padding: 0 8px; min-width: 0; }
+.dz .dz-erow { flex-wrap: wrap; }
+.dz-app .dz-save { position: static; flex-wrap: wrap; }
+.dz .dz-crumb { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; font-size: 11px; font-weight: 600; color: var(--m); }
+.dz .dz-crumb a { color: var(--pd); }
+.dz .dz-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dz .dz-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 12px; border-radius: 999px; border: 2.5px solid var(--b); background: #fff; font-weight: 600; font-size: 11px; color: var(--s2); }
+.dz .dz-chip b { font-size: 9.5px; font-weight: 600; padding: 0 6px; border-radius: 99px; background: var(--pill); }
+.dz .dz-chip.dz-on { background: var(--p); border-color: var(--p); color: #052E16; box-shadow: 0 3px 0 var(--ps); }
+.dz .dz-chip.dz-on b { background: rgba(255, 255, 255, .5); }
+.dz .dz-sub { font-size: 11px; color: var(--m); font-weight: 300; }
+.dz .dz-sm2 { font-weight: 600; color: var(--s2); }
+.dz .dz-nw { white-space: nowrap; }
+.dz .dz-pill.dz-sk { background: #E0F2FE; color: #075985; }
+.dz .dz-tags { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 5px; }
+
+/* one level: objective, then the questions */
+.dz .dz-obj { background: var(--f); color: #fff; border-radius: 14px; padding: 12px 14px; display: grid; gap: 9px; box-shadow: 0 3px 0 var(--pd); }
+.dz .dz-eb { display: flex; align-items: center; gap: 8px; font-size: 9px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: #86EFAC; }
+.dz .dz-tip { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #6EE7B7; color: #A7F3D0; display: grid; place-items: center; font: 600 11px/1 "Poppins"; font-style: normal; text-transform: none; letter-spacing: 0; flex: none; }
+.dz .dz-ol { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 9px; align-items: start; }
+.dz .dz-ol p { font: 400 14px/1.35 "Fredoka One", cursive; }
+.dz .dz-mk { width: 18px; height: 18px; border-radius: 50%; background: var(--p); color: #052E16; display: grid; place-items: center; margin-top: 2px; }
+.dz .dz-qcard { overflow: hidden; }
+.dz .dz-qh { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; padding: 10px 12px 4px; }
+.dz .dz-qh h6 { margin: 0; font: 400 15px/1.2 "Fredoka One", cursive; color: #111827; text-transform: none; letter-spacing: .02em; }
+.dz .dz-qact { display: flex; align-items: center; gap: 10px; }
+.dz .dz-ask { padding: 2px 12px 6px; font-size: 11.5px; font-weight: 600; }
+.dz .dz-mode { display: grid; gap: 6px; padding: 0 12px 8px; justify-items: start; }
+.dz .dz-cover { display: flex; align-items: center; gap: 10px; padding: 2px 12px 10px; font-size: 11.5px; white-space: nowrap; }
+.dz .dz-colh { padding: 7px 12px 6px; border-top: 2px solid var(--b); font-size: 8.5px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--m); }
+.dz .dz-qr { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; padding: 9px 12px; border-top: 2px solid var(--b); }
+.dz .dz-qn { width: 24px; height: 24px; border-radius: 50%; background: var(--b); color: var(--pd); display: grid; place-items: center; font-weight: 600; font-size: 11px; }
+.dz .dz-qt { font-size: 11.5px; font-weight: 500; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* timer and levels */
+.dz .dz-lvs { display: grid; gap: 8px; }
+.dz .dz-lv { border: 2px solid var(--b); border-radius: 12px; background: #fff; padding: 8px 11px; display: grid; gap: 6px; min-width: 0; }
+.dz .dz-lv-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.dz .dz-lv-top b { display: block; font-weight: 600; font-size: 12px; }
+.dz .dz-lv-top small { font-size: 10px; font-weight: 300; color: var(--m); }
+.dz .dz-lv-st { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.dz .dz-lv-obj { font-size: 11px; line-height: 1.4; color: var(--s2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dz .dz-lv-foot { display: flex; align-items: center; gap: 8px; }
+.dz .dz-lv-foot .dz-bar { flex: 1; height: 6px; }
+.dz .dz-lv-foot em { font-style: normal; font-size: 11px; font-weight: 600; }
+.dz .dz-tm { border-radius: 99px; padding: 0 8px; font-size: 10px; font-weight: 600; background: #E0F2FE; color: #0369A1; white-space: nowrap; }
+.dz .dz-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--p); }
+.dz .dz-tr.dz-boss b, .dz .dz-tr.dz-boss small { color: var(--m); }
+
+/* sections */
+.dz .dz-how { display: inline-flex; align-items: center; gap: 8px; justify-self: start; min-height: 30px; padding: 0 12px; border-radius: 999px; background: #E0F2FE; color: #075985; font-weight: 600; font-size: 11.5px; }
+.dz .dz-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+.dz .dz-sec2 { background: #fff; border: 2.5px solid var(--b); border-radius: 16px; box-shadow: 0 4px 0 var(--b); padding: 12px; display: grid; gap: 9px; min-width: 0; }
+.dz .dz-sec2 h3 { font: 400 15px/1.2 "Fredoka One", cursive; color: var(--pd); text-transform: none; letter-spacing: .02em; }
+.dz .dz-sec-top { display: flex; justify-content: space-between; }
+.dz .dz-cnt { display: flex; gap: 7px; align-items: center; font-weight: 600; font-size: 12px; }
+.dz .dz-code2 { font-family: "Fira Code", monospace; letter-spacing: .12em; font-size: 13px; color: #111827; margin-left: 4px; }
+.dz .dz-qrbox { padding: 8px; background: #fff; border: 2.5px solid var(--b); border-radius: 14px; line-height: 0; }
+
+/* item analysis */
+.dz .dz-iac { overflow: hidden; }
+.dz .dz-ia-h { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 12px 6px; }
+.dz .dz-ia-h h6 { margin: 0; font: 400 15px/1.2 "Fredoka One", cursive; text-transform: none; letter-spacing: .02em; color: #111827; }
+.dz .dz-ia { border-top: 2px solid var(--b); }
+.dz .dz-ia-head { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; }
+.dz .dz-ia.dz-open .dz-ia-head { background: #F0FDF4; }
+.dz .dz-ia-rk { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; background: var(--pill); color: var(--s2); }
+.dz .dz-ia.dz-very .dz-ia-rk { background: #FEE2E2; color: var(--red); }
+.dz .dz-ia-head p { font-size: 11.5px; font-weight: 600; line-height: 1.4; margin-bottom: 3px; }
+.dz .dz-era-tag { font-size: 9px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--m); }
+.dz .dz-ia-rate { text-align: right; }
+.dz .dz-ia-rate b { display: block; font: 400 19px/1 "Fredoka One", cursive; }
+.dz .dz-ia.dz-very .dz-ia-rate b { color: var(--red); }
+.dz .dz-ia-rate .dz-sm { display: block; margin-top: 3px; font-size: 10px; }
+.dz .dz-ia-detail { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 4px 12px 12px; background: #F0FDF4; }
+.dz .dz-h5 { font-size: 8.5px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--m); margin-bottom: 7px; }
+.dz .dz-or { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: start; margin-bottom: 6px; font-size: 11px; }
+.dz .dz-ltr { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font-weight: 600; font-size: 11px; background: #fff; border: 2px solid var(--b); }
+.dz .dz-or.dz-ok .dz-ltr { background: var(--p); border-color: var(--p); color: #fff; }
+.dz .dz-or.dz-bad .dz-ltr { background: var(--red); border-color: var(--red); color: #fff; }
+.dz .dz-ot { line-height: 1.35; padding-top: 3px; }
+.dz .dz-or.dz-ok .dz-ot { font-weight: 600; }
+.dz .dz-ct { font-weight: 600; padding-top: 3px; white-space: nowrap; }
+.dz .dz-ct span { font-weight: 400; color: var(--m); }
+.dz .dz-who2 { display: flex; flex-wrap: wrap; gap: 5px; }
+.dz .dz-who2 .dz-pill { background: #fff; border: 2px solid var(--b); }
+.dz .dz-time { margin-top: 9px; font-weight: 600; }
+.dz .dz-time small { font-weight: 300; color: var(--m); margin-left: 4px; font-size: 11px; }
+
+/* my students */
+.dz .dz-req { background: var(--yl); border: 2.5px solid var(--yb); border-radius: 16px; padding: 10px 12px; display: grid; gap: 8px; }
+.dz-app .dz-req li { flex-wrap: wrap; }
+.dz .dz-sst-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.dz .dz-req .dz-n { white-space: nowrap; }
+.dz .dz-sst { border: 2.5px solid var(--b); border-radius: 12px; background: #fff; padding: 6px 10px; display: grid; }
+.dz .dz-sst b { font: 400 19px/1.1 "Fredoka One", cursive; }
+.dz .dz-sst span { font-size: 10px; color: var(--m); font-weight: 500; }
+.dz .dz-sst.dz-warn b { color: var(--red); }
+
+/* principal */
+.dz .dz-wait { background: var(--yl); border-color: var(--y); padding: 12px 14px; display: grid; gap: 9px; box-shadow: 0 4px 0 var(--yb); }
+.dz .dz-wait-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.dz .dz-wait-n { font: 400 36px/1 "Fredoka One", cursive; color: #854D0E; }
+.dz .dz-wait-t { font: 400 14px/1.2 "Fredoka One", cursive; color: #111827; }
+.dz .dz-wait-go { margin-left: auto; }
+.dz .dz-wait ul { list-style: none; padding: 0; display: grid; gap: 7px; }
+.dz .dz-wait li { display: grid; gap: 2px; font-size: 11.5px; padding-top: 7px; border-top: 1px solid var(--yb); }
+.dz .dz-wait li span { color: var(--s2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dz .dz-hero { padding: 14px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 20px; align-items: center; }
+.dz .dz-hero-l { display: grid; gap: 4px; justify-items: start; }
+.dz .dz-big { font: 400 46px/1 "Fredoka One", cursive; color: var(--pd); }
+.dz .dz-big small { font: 400 20px "Poppins"; color: var(--m); margin-left: 2px; }
+.dz .dz-trend { display: inline-block; font-size: 10.5px; font-weight: 600; border-radius: 999px; padding: 2px 10px; background: var(--b); color: var(--pd); }
+.dz .dz-hero-s { min-width: 0; }
+.dz .dz-sp-l { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 10px; color: var(--m); }
+.dz .dz-hero-p { grid-column: 1 / -1; display: grid; gap: 6px; font-size: 12px; }
+.dz .dz-hero-p b { font: 400 20px "Fredoka One", cursive; color: var(--pd); }
+.dz .dz-two2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+.dz .dz-pc { padding: 0 0 12px; min-width: 0; }
+.dz .dz-pc.dz-flush { padding-bottom: 0; overflow: hidden; }
+.dz .dz-ch { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 11px 12px 8px; }
+.dz .dz-ch h6 { margin: 0; font: 400 14px/1.2 "Fredoka One", cursive; text-transform: none; letter-spacing: .02em; color: #111827; }
+.dz .dz-ch small { display: block; margin-top: 2px; font: 300 10.5px/1.35 "Poppins"; color: var(--m); letter-spacing: 0; }
+.dz .dz-pbars { display: grid; gap: 7px; padding: 0 12px; }
+.dz .dz-grp2 { font-size: 8.5px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--m); margin-top: 3px; }
+.dz .dz-pbar { display: grid; grid-template-columns: minmax(70px, 38%) minmax(0, 1fr) 34px; gap: 8px; align-items: center; font-size: 11px; }
+.dz .dz-pn { line-height: 1.25; overflow-wrap: break-word; }
+.dz .dz-pbar b { text-align: right; font-weight: 600; }
+.dz .dz-pc .dz-row { padding: 9px 12px; }
+.dz .dz-cf { padding: 9px 12px; border-top: 2px solid var(--b); display: flex; justify-content: flex-end; }
+
+/* approvals and reports */
+.dz .dz-pq { padding: 12px; display: grid; gap: 10px; }
+.dz .dz-pq-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.dz .dz-pq-text { font-size: 12.5px; line-height: 1.45; font-weight: 600; }
+.dz .dz-pq-opts { list-style: none; padding: 0; display: grid; gap: 5px; }
+.dz .dz-pq-opts li { display: grid; grid-template-columns: 20px minmax(0, 1fr) 16px; align-items: center; gap: 8px; font-size: 11.5px; padding: 5px 9px; border: 2px solid var(--b); border-radius: 11px; }
+.dz .dz-pq-opts li b { font: 400 12px "Fredoka One", cursive; color: var(--m); }
+.dz .dz-pq-opts li.dz-ok { background: var(--b); color: var(--pd); border-color: var(--p); }
+.dz .dz-pq-opts li.dz-ok b { color: var(--pd); }
+.dz .dz-pq-acts { display: flex; justify-content: flex-end; gap: 8px; }
+.dz .dz-reps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.dz .dz-rep { padding: 11px 12px; display: grid; gap: 8px; align-content: space-between; justify-items: start; }
+.dz .dz-rep h6 { margin: 0; font: 400 14px/1.2 "Fredoka One", cursive; color: #111827; text-transform: none; letter-spacing: .02em; }
+.dz .dz-rep p { font-size: 11px; line-height: 1.4; color: var(--s2); }
+
+/* admin: dashboard, sign-up and the decline window */
+.dz .dz-hd2 { padding: 10px 14px; }
+.dz .dz-title { font: 400 16px/1.2 "Fredoka One", cursive; }
+.dz .dz-kpi { padding: 11px 14px 12px; display: grid; gap: 4px; align-content: start; }
+.dz .dz-kv { font: 400 28px/1.05 "Fredoka One", cursive; color: var(--pd); }
+.dz .dz-auth { background: #fff; border: 2.5px solid var(--b); border-radius: 20px; box-shadow: 0 6px 0 var(--b); padding: 18px; display: grid; gap: 7px; text-align: center; max-width: 340px; margin: 0 auto; width: 100%; }
+.dz .dz-brand { display: flex; align-items: center; justify-content: center; gap: 8px; font: 400 17px "Fredoka One", cursive; color: var(--p); }
+.dz .dz-cq2 { width: 32px; height: 32px; border-radius: 9px; background: var(--p); color: var(--y); display: grid; place-items: center; font: 400 13px "Fredoka One", cursive; }
+.dz .dz-at { font: 400 17px/1.2 "Fredoka One", cursive; color: #111827; margin-top: 4px; }
+.dz .dz-lab2 { text-align: left; font-size: 8.5px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--m); margin-top: 4px; }
+.dz .dz-pick { display: flex; gap: 8px; }
+.dz .dz-pick > span { flex: 1; padding: 7px 6px; border-radius: 12px; border: 1.5px solid var(--b); color: var(--s2); text-align: center; }
+.dz .dz-pick b { display: block; font-size: 12px; font-weight: 500; }
+.dz .dz-pick small { display: block; font-size: 10px; opacity: .8; }
+.dz .dz-pick > span.dz-on { border-color: var(--p); background: rgba(250, 204, 21, .2); color: var(--p); }
+.dz .dz-pick > span.dz-on b { font-weight: 600; }
+.dz .dz-input { text-align: left; border: 1.5px solid var(--b); border-radius: 11px; padding: 8px 11px; font-size: 12px; background: #fff; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dz .dz-cnt2 { display: flex; justify-content: space-between; gap: 10px; margin-top: 5px; }
+.dz .dz-cnt2 span:last-child { white-space: nowrap; }
 
 /* hidden tester download: opens when the logo is tapped 5 times */
 .tester { width: min(92vw, 440px); margin: auto; }
