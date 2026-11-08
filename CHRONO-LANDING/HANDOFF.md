@@ -3,6 +3,17 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-08 (later) (**new pictures built locally: game screens, hero animation, dashboard section**; NOT deployed, NOT committed)
+**From:** Claude Code (Sonnet 5.5), with two helpers (one for the game shots, one for the dashboard pictures)
+- The user: "Update the screenshots, use 2 subagents if needed specially the dashboard". The user chose "Redraw to match today's dashboard" (still no real dashboard screenshots).
+- **Game screens:** all nine retaken from the 1.8.0 game tree (Flutter web profile build, 873x393, branch feat/maria-clara-artifacts; only the git-ignored build/web was touched) and a tenth added, `boss.webp` (Bakunawa, "Tanong 1 ng 22"). Character shows Maria Clara and the roster of eight; run shows Juan and the dark spirit; welcome/eras/shop/profile are on the parol night. Shop and profile show zeros and "Student" (web build, no account). Intro line now says build 1.8.0; captions for hero/run/shop rewritten; boss card added after run.
+- **Hero animation** (top of the page): Juan (`boy_walk_1-4`, `boy_jump`) and the dark spirit (`dark_spirit_1-2`) copied from the game assets into `public/art/` (old rizal/spanish files still there, now unused); CSS vars/aspect ratios changed, smooth scaling for those two.
+- **Dashboard section (#teachers):** now six steps (Write, Time, Share, Follow, For the principal, For admins), pictures redrawn in HTML/CSS inside a drawn dashboard frame, copied from today's CDASH code (read only), made-up names only ("Sample Elementary School"). New `dz-app` CSS block in style.css; old unused dz- rules removed. Phone widths show the icon-only sidebar (the real phone bottom bar is not drawn).
+- Checked: build passes, Chrome at 390 and 1280 px: no horizontal scroll, no console errors, hero and carousel look right. NOT checked: every dashboard picture at 820 px by me (helper did), phone. Still old: `og.jpg`, QR posters (1.4.0), gameplay clip and quiz screenshot placeholders.
+- **Next:** deploy when the user says "Deploy", then curl the live page for the new shots; commit on "PPP".
+
+---
+
 **Date:** 2026-11-08 (**student 1.8.0 public + hidden TEST 1.8.0 are LIVE**; not committed)
 **From:** Claude Code (Sonnet 5.5)
 - GAME request (1.8.0 student and tester, version code 2210), the user: "Yes" to the swap and "And deploy". aapt2: student `com.chronoquest.chronoquest` 1.8.0, TEST `...chronoquest.test` 1.8.0-test, three chips each, compiled code has "1.8.0" and no 1.7.1 (93,563,188 and 93,563,204 bytes, shown as 89 MB). New: Maria Clara (8th hero), 60 era artifact icons, power-up fixes, star-lantern menus, all the 1.7.x art.
