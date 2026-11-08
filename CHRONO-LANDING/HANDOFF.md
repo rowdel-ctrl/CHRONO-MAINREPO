@@ -3,6 +3,14 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-08 (**student 1.8.0 public + hidden TEST 1.8.0 are LIVE**; not committed)
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (1.8.0 student and tester, version code 2210), the user: "Yes" to the swap and "And deploy". aapt2: student `com.chronoquest.chronoquest` 1.8.0, TEST `...chronoquest.test` 1.8.0-test, three chips each, compiled code has "1.8.0" and no 1.7.1 (93,563,188 and 93,563,204 bytes, shown as 89 MB). New: Maria Clara (8th hero), 60 era artifact icons, power-up fixes, star-lantern menus, all the 1.7.x art.
+- Page: both files swapped; `config.js` apkVersion and testerVersion 1.8.0; `latest.json` 1.8.0 (four Taglish notes, so every older install sees the update card); What's new 1.8.0 card ("Show 14 earlier versions"; it also covers the 1.7.x art the public never had); tester box line updated. NOT done: the page's hero pictures still show the old five heroes (needs new screenshots).
+- Chrome 5-tap test passed before deploy. Live: student sha256 `e955009d…` (93,563,188) and tester `c4c8397f…` (93,563,204) match local; live `latest.json` 1.8.0. Not tried on a phone or the tablet.
+
+---
+
 **Date:** 2026-11-07 (later: **hidden TEST 1.7.1 is LIVE**; student 1.6.3 stays public; committed as prepared in `84e094c` / `63aadef`, the live-state notes are not committed)
 **From:** Claude Code (Sonnet 5.5)
 - GAME request: TEST 1.7.1 (`com.chronoquest.chronoquest.test`, 1.7.1-test, version code 2204, three chips, 92,639,901 bytes, shown as 88 MB; new menu background, star lanterns instead of the turning rays). aapt2 checked, compiled code says 1.7.1 and no 1.7.0.
