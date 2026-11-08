@@ -3,6 +3,14 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-08 (night, later) (**student 1.8.1 public + hidden TEST 1.8.1 are LIVE**; committed on the user's "PPP")
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (1.8.1 student and tester, versionCode 2216). The user: "Check board, PPP and merge", then "Deploy". aapt2: student `com.chronoquest.chronoquest` 1.8.1, TEST `...chronoquest.test` 1.8.1-test (label "ChronoQuest TEST"), three chips each; compiled `libapp.so` says only "1.8.1". Sizes 85,434,172 (student) and 85,434,188 (TEST), about 81 MB on the page.
+- Page: both files swapped; `config.js` apkVersion and testerVersion 1.8.1; `latest.json` 1.8.1 (four Taglish notes: new art, Maria Clara, longer story before each era, parol menu); What's new has a 1.8.1 card (Latest) and 1.8.0 moved into the fold ("Show 15 earlier versions"); tester box line updated. Chrome 5-tap test passed.
+- **Live check:** student sha256 `4a0f1a2d…` and TEST `9f42069e…` match local (byte sizes too); live `latest.json` 1.8.1; live page has the 1.8.1 card. Not tried on a phone or the tablet. One slip while editing: the 1.8.0 card first landed outside the fold; caught by the build check and fixed before deploy.
+
+---
+
 **Date:** 2026-11-08 (night) (**root clean-up at the user's request**; not committed yet)
 **From:** Claude Code (Sonnet 5.5)
 - **Root:** the four old game notes moved to `docs/game/` (`git mv`) with `docs/README.md`; `LEVEL-TOPICS.md` stays at the root because the dashboard script `CBACK/scripts/sync-content.js` reads it from there; `CLAUDE.md` structure list updated; stray `=` file deleted. `capstone/` (git-ignored) sorted into `srs/`, `manuscript-review/`, `final-terms/`, `presentation-guides/`, `users-manual/`, `testing/`, with a list of every move in `capstone/ORGANIZED.txt`.
