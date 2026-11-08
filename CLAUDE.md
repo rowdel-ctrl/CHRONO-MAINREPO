@@ -26,6 +26,8 @@ At the start of a session read the root `HANDOFF.md`, then the top entry of your
 
 ```
 CHRONO/
+├── docs/                  # Project-wide notes (game design, old checklists); see docs/README.md
+├── LEVEL-TOPICS.md        # DepEd competency per level; the dashboard sync script reads this file
 ├── CHRONO-GAMEAPP/        # Flutter mobile game app
 │   ├── lib/               # Flutter source code
 │   ├── assets/            # Game assets (backgrounds, characters, sounds, etc.)

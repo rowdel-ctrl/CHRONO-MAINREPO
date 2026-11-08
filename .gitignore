@@ -44,3 +44,6 @@ coverage/
 
 # Capstone manuscript (never commit)
 capstone/
+
+# Keep the landing page lockfile so every install gets the same versions
+!CHRONO-LANDING/package-lock.json
