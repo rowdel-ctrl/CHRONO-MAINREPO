@@ -3,6 +3,15 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-10 (**student 1.9.0 public + hidden TEST 1.9.0 BUILT on the page, NOT deployed**; committed on the user's "PPP merge")
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (1.9.0 student and tester, versionCode 2217). The user: "Check board, then PPP merge after build" (no "Deploy" yet). aapt2: student `com.chronoquest.chronoquest` 1.9.0, TEST `...chronoquest.test` 1.9.0-test (label "ChronoQuest TEST"), three chips each; compiled `libapp.so` says only "1.9.0". Student 85,188,576 bytes (sha `fc2c40de…`), TEST 85,188,592 (sha `e60562ed…`), about 81 MB on the page.
+- Page: both files copied into `public/downloads/`; `config.js` apkVersion and testerVersion 1.9.0; `latest.json` 1.9.0 (four Taglish notes: new screens, boss arenas, Codex, Next waits); What's new has a 1.9.0 card (Latest, eight bullets) and 1.8.1 moved into the fold ("Show 16 earlier versions"); tester box line updated. Build passes; Chrome 5-tap test passed (4 taps closed, 5 open, hrefs and sizes right, slow taps do not count, no tester link outside the dialog, no console errors).
+- **LIVE site is still 1.8.1** until the user says "Deploy". After deploy: compare live sha256 and sizes, check `latest.json`.
+- **Not done:** the carousel screenshots still show the 1.8.0 screens, so they are older than nine of the redesigned screens (GAME said so on the board). Retake them when the user wants.
+
+---
+
 **Date:** 2026-11-08 (night, later) (**student 1.8.1 public + hidden TEST 1.8.1 are LIVE**; committed on the user's "PPP")
 **From:** Claude Code (Sonnet 5.5)
 - GAME request (1.8.1 student and tester, versionCode 2216). The user: "Check board, PPP and merge", then "Deploy". aapt2: student `com.chronoquest.chronoquest` 1.8.1, TEST `...chronoquest.test` 1.8.1-test (label "ChronoQuest TEST"), three chips each; compiled `libapp.so` says only "1.8.1". Sizes 85,434,172 (student) and 85,434,188 (TEST), about 81 MB on the page.
