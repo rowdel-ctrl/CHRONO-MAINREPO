@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 // The page shows the real size of the APK that sits in public/downloads.
 // If the file is missing (for example when the APK is hosted elsewhere) the
@@ -34,5 +35,9 @@ export default defineConfig({
     __TESTER_SIZE__: JSON.stringify(apkSize('chronoquest-tester.apk')),
   },
   server: { host: '127.0.0.1', port: 5174 },
-  build: { target: 'es2019' },
+  build: {
+    target: 'es2019',
+    // two pages: the home page and What's new
+    rollupOptions: { input: { main: fileURLToPath(new URL('./index.html', import.meta.url)), news: fileURLToPath(new URL('./whats-new.html', import.meta.url)) } },
+  },
 });

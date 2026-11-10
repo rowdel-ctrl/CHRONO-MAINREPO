@@ -57,20 +57,12 @@ setAll('[data-email]', function (n) { n.textContent = config.contactEmail; });
   menu.addEventListener('click', function () { var open = nav.hidden; nav.hidden = !open; menu.setAttribute('aria-expanded', String(open)); });
   nav.addEventListener('click', function (e) { if (mq.matches && e.target.closest('a')) sync(); });
 
-  /* screens rail */
-  var rail = document.getElementById('rail'), prev = document.getElementById('prev'), next = document.getElementById('next');
-  function step() { var c = rail.querySelector('.phone'); return c ? c.getBoundingClientRect().width + 24 : 300; }
-  function edges() { prev.disabled = rail.scrollLeft < 4; next.disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4; }
-  prev.addEventListener('click', function () { rail.scrollBy({ left: -step(), behavior: 'smooth' }); });
-  next.addEventListener('click', function () { rail.scrollBy({ left: step(), behavior: 'smooth' }); });
-  rail.addEventListener('scroll', edges, { passive: true });
-  window.addEventListener('resize', edges);
-  edges();
-
   /* ticker: duplicate the era names so the loop is seamless */
   var track = document.getElementById('track');
-  track.innerHTML += track.innerHTML;
-  Array.prototype.forEach.call(track.children, function (s, i) { if (i >= track.children.length / 2) s.setAttribute('aria-hidden', 'true'); });
+  if (track) {
+    track.innerHTML += track.innerHTML;
+    Array.prototype.forEach.call(track.children, function (s, i) { if (i >= track.children.length / 2) s.setAttribute('aria-hidden', 'true'); });
+  }
 
   /* scroll progress bar */
   var prog = document.getElementById('prog'), tick = false;
@@ -85,10 +77,32 @@ setAll('[data-email]', function (n) { n.textContent = config.contactEmail; });
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  /* hero scene pauses when off screen */
-  var stage = document.getElementById('stage');
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (es) { stage.classList.toggle('off', !es[0].isIntersecting); }).observe(stage);
+  /* hero clip: plays only while it is on screen, and not at all if the visitor prefers less motion */
+  var hv = document.getElementById('hvid');
+  if (hv) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { hv.removeAttribute('autoplay'); hv.pause(); }
+    else if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { if (es[0].isIntersecting) { var p = hv.play(); if (p && p.catch) p.catch(function () {}); } else hv.pause(); }).observe(hv);
+    }
+  }
+
+  /* wide screens drift slowly while you scroll */
+  var wides = Array.prototype.slice.call(document.querySelectorAll('.wide-img'));
+  var wtick = false;
+  function drift() {
+    wtick = false;
+    var vh = window.innerHeight;
+    wides.forEach(function (w) {
+      var r = w.getBoundingClientRect();
+      if (r.bottom < -80 || r.top > vh + 80) return;
+      var p = (r.top + r.height / 2 - vh / 2) / vh;
+      w.style.setProperty('--py', (Math.max(-1, Math.min(1, p)) * -26).toFixed(1) + 'px');
+    });
+  }
+  if (wides.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.addEventListener('scroll', function () { if (!wtick) { wtick = true; requestAnimationFrame(drift); } }, { passive: true });
+    window.addEventListener('resize', drift);
+    drift();
   }
 
   /* reveal on scroll: only hide things once we know we can show them again */
@@ -106,19 +120,6 @@ setAll('[data-email]', function (n) { n.textContent = config.contactEmail; });
     items.forEach(function (el) { io.observe(el); });
   }
 
-  /* tap a hero to make them run on touch screens */
-  document.querySelectorAll('.hcard').forEach(function (c) {
-    c.addEventListener('click', function () { c.classList.add('tap'); setTimeout(function () { c.classList.remove('tap'); }, 2400); });
-  });
-})();
-
-/* old iPhones (before iOS 16) do not know cqw: size the hero scene in pixels instead */
-(function () {
-  var st = document.getElementById('stage');
-  if (!st || (window.CSS && CSS.supports && CSS.supports('width', '1cqw'))) return;
-  function fit() { st.style.setProperty('--u', (st.clientWidth / 100) + 'px'); }
-  fit();
-  window.addEventListener('resize', fit);
 })();
 
 /* iPhone and iPad cannot install an APK: say so instead of offering a download that goes nowhere */
