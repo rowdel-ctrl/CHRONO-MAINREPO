@@ -1,11 +1,11 @@
 {
-  "version": "1.8.1",
+  "version": "1.9.0",
   "required": false,
   "notes": [
-    "Bagong art ng mga bayani, kalaban at boss",
-    "Si Maria Clara ang bagong bayani, 8 na lahat",
-    "Mas mahabang kwento bago ang bawat panahon (5 o 6 na card)",
-    "Bagong menu na may mga parol sa gabi"
+    "Bagong itsura ng unang screen, hero screen at Profile",
+    "Bagong boss arena na may entablado at tore",
+    "Codex na may sampung puwesto para sa artifact",
+    "Hintayin munang mabasa ang card bago ang susunod"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
