@@ -3,6 +3,14 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-11 (later) (**student 1.11.1 public + hidden TEST 1.11.1 are LIVE**; committed on the user's "PPP deploy")
+**From:** Claude Code (Sonnet 5.5)
+- No board request line existed; the user asked on seeing the new files in the game `build/` folder (they came after 1.11.0, `Nov 10 21:16/21:19`). aapt2: student `com.chronoquest.chronoquest` 1.11.1 (versionCode 2224), TEST `...chronoquest.test` 1.11.1-test (label "ChronoQuest TEST"), three chips each; `libapp.so` says only "1.11.1". Student 86,255,728 bytes (sha `e00034c3…`), TEST 86,255,744 (sha `88d25c0a…`), 82 MB on the page. What changed vs 1.11.0 comes from the GAME handoff (skip button on a history story already read, UNCOMMITTED in the game); GAME has not confirmed this build.
+- Page: both files swapped; `config.js` and `latest.json` 1.11.1 (first note: skip a story you have read); What's new 1.11.1 card (19 cards); tester box and hero text updated. Build passes; Chrome 5-tap test passed, no console errors.
+- **Deployed at the user's "PPP deploy"** (once this time). Live check: student and TEST sha256 and byte sizes match local; live `latest.json` 1.11.1; live page shows v1.11.1 and the 1.11.1 card. Not tried on a phone or the tablet. Wide screens still from 1.9.0; level-complete picture still missing.
+
+---
+
 **Date:** 2026-11-11 (**student 1.11.0 public + hidden TEST 1.11.0 are LIVE**; committed on the user's "PPP deploy")
 **From:** Claude Code (Sonnet 5.5)
 - GAME requests 1.10.0 and 1.11.0 (both on the board); 1.11.0 is newer, so only 1.11.0 went on the page and both request lines are handled (1.10.0 was never public; the 1.11.0 What's new card covers both). aapt2: student `com.chronoquest.chronoquest` 1.11.0 (versionCode 2223), TEST `...chronoquest.test` 1.11.0-test (label "ChronoQuest TEST"), three chips each; compiled `libapp.so` says only "1.11.0". Student 86,255,728 bytes (sha `aa0d3f3b…`), TEST 86,255,744 (sha `90d21d4c…`), 82 MB on the page.
