@@ -1,11 +1,11 @@
 {
-  "version": "1.9.0",
+  "version": "1.11.0",
   "required": false,
   "notes": [
-    "Bagong itsura ng unang screen, hero screen at Profile",
-    "Bagong boss arena na may entablado at tore",
-    "Codex na may sampung puwesto para sa artifact",
-    "Hintayin munang mabasa ang card bago ang susunod"
+    "May sariling atake na ang bawat bayani",
+    "Bagong laban sa boss: ibinabato ng boss ang atake, at ang sagot mo ang magpapabalik nito",
+    "Mas maraming sorpresa sa matataas na level, at gintong artifact na may bonus round",
+    "Mas mabilis ang mga humahabol, at may babala bago sumabog ang ilang kalaban"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
