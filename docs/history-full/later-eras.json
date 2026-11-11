@@ -1,0 +1,391 @@
+{
+  "note": "Full background history for the three later eras, one block per level (same order as the question sub-topics). Written 2026-11-11. Simple Taglish. '**word**' = bold. 'check' lists facts written from memory that were NOT confirmed on the web: verify them against NHCP / Official Gazette before the build.",
+  "sources": [
+    "https://nhcp.gov.ph/andres-bonifacio-and-the-katipunan/",
+    "https://www.britannica.com/topic/Katipunan",
+    "https://guides.loc.gov/world-of-1898/katipunan",
+    "https://www.britannica.com/biography/Andres-Bonifacio",
+    "https://nhcp.gov.ph/news_and_updates/nhcp-commemorates-the-126th-death-anniversary-of-andres-bonifacio/",
+    "https://nhcp.gov.ph/betrayal-of-trust-the-san-juan-del-monte-bridge-incident/",
+    "https://www.britannica.com/event/Philippine-American-War",
+    "https://guides.loc.gov/world-of-1898/emilio-aguinaldo-famy",
+    "https://nhcp.gov.ph/the-first-philippine-republic/",
+    "https://en.wikipedia.org/wiki/Malolos_Congress",
+    "https://mb.com.ph/2026/06/12/remembering-june-12-1898",
+    "https://en.wikipedia.org/wiki/Teresa_Magbanua",
+    "https://en.wikipedia.org/wiki/Battle_of_Tirad_Pass",
+    "https://usa.inquirer.net/140586/december-1898-spanish-american-war-formally-over",
+    "https://en.wikipedia.org/wiki/Benevolent_assimilation",
+    "https://www.britannica.com/topic/Philippine-Commissions",
+    "https://nhcp.gov.ph/the-history-of-the-first-philippine-assembly-1907-1916/",
+    "https://www.britannica.com/event/Jones-Act-United-States-1916",
+    "https://mirror.officialgazette.gov.ph/constitutions/the-jones-law-of-1916/",
+    "https://www.britannica.com/topic/Tydings-McDuffie-Act",
+    "https://nhcp.gov.ph/the-constitution-of-the-philippine-commonwealth/",
+    "https://www.nationalww2museum.org/war/articles/macarthur-returns-philippines",
+    "https://www.britannica.com/place/Corregidor-Island",
+    "https://www.britannica.com/event/World-War-II/The-Philippines-and-Borneo-from-September-1944",
+    "https://www.nationalww2museum.org/war/articles/july-4-1946-philippines-independence",
+    "https://en.wikipedia.org/wiki/Second_Philippine_Republic",
+    "https://en.wikipedia.org/wiki/KALIBAPI",
+    "https://en.wikipedia.org/wiki/Josefa_Llanes_Escoda",
+    "https://en.wikipedia.org/wiki/Jos%C3%A9_Abad_Santos",
+    "https://www.britannica.com/event/Bell-Trade-Act",
+    "https://www.britannica.com/topic/Parity-Amendment",
+    "https://www.officialgazette.gov.ph/constitutions/constitution-25-years/",
+    "https://en.wikisource.org/wiki/Proclamation_No._2045_(Marcos)",
+    "https://en.wikipedia.org/wiki/Martial_law_under_Ferdinand_Marcos",
+    "https://newsinfo.inquirer.net/?p=579772",
+    "https://www.rappler.com/nation/audio-jaime-cardinal-sin-1986-appeal-go-edsa-support-fidel-ramos-juan-ponce-enrile/"
+  ],
+  "american": [
+    {
+      "level": 1,
+      "title": "Ang Katipunan",
+      "paragraphs": [
+        "Noong **Hulyo 7, 1892**, itinatag ang **Kataastaasan, Kagalang-galangang Katipunan ng mga Anak ng Bayan**, o **Katipunan**. Si **Andres Bonifacio** ang naging pinakakilalang pinuno nito. Ang layunin: makamit ang kalayaan ng Pilipinas mula sa Espanya sa pamamagitan ng pagkakaisa at, kung kailangan, ng himagsikan.",
+        "Lihim ang samahan. Ang mga bagong kasapi ay nanunumpa at gumagawa ng **sandugo**: pumipirma sila gamit ang sarili nilang dugo, bilang tanda ng katapatan at pagkakaisa. May tatlong antas ang pagkakasapi: **katipon**, **kawal**, at **bayani**.",
+        "Ang opisyal na pahayagan ng Katipunan ay ang **Kalayaan**, na pinamatnugutan ni **Emilio Jacinto**. Isinulat din ni Jacinto ang **Kartilya ng Katipunan**, ang mga aral na gabay ng mga kasapi. Si **Gregoria de Jesus**, asawa ni Bonifacio, ay kilala sa Katipunan bilang **Lakambini**. Sa Cavite, naging kilala ang dalawang sangay nito: ang **Magdalo** at ang **Magdiwang**."
+      ],
+      "terms": [
+        ["Katipunan", "Ang lihim na samahang itinatag ni Bonifacio para sa kalayaan."],
+        ["Sandugo", "Pagpirma gamit ang sariling dugo bilang tanda ng katapatan."],
+        ["Kartilya", "Mga aral na gabay ng mga Katipunero, isinulat ni Emilio Jacinto."],
+        ["Kalayaan", "Ang pahayagan ng Katipunan."]
+      ],
+      "check": ["tatlong antas (katipon, kawal, bayani)", "Magdalo at Magdiwang bilang dalawang sangay sa Cavite", "Gregoria de Jesus bilang Lakambini"]
+    },
+    {
+      "level": 2,
+      "title": "Ang Himagsikan ng 1896",
+      "paragraphs": [
+        "Noong **Agosto 1896**, natuklasan ng mga Espanyol ang plano ng Katipunan, kaya napilitan ang mga pinuno na magsimula nang mas maaga. Noong **Agosto 23, 1896**, nagtipon ang mga Katipunero sa **Pugad Lawin** (o Balintawak) at pinunit ang kanilang **sedula** o cedula, tanda ng pagtanggi sa pamamahala ng Espanya. Ito ang **Sigaw ng Pugad Lawin**.",
+        "Noong **Agosto 30, 1896**, sinalakay ng mga Katipunero sa pamumuno ni Bonifacio ang **San Juan del Monte**, ang unang malaking pag-atake nila. Bilang tugon, idineklara ni Gobernador-Heneral **Ramon Blanco** ang **batas militar** sa walong lalawigan.",
+        "Mabilis na lumaganap ang himagsikan sa **Cavite**. Nagtagumpay ang mga rebolusyonaryo ng Cavite sa **Imus** noong Setyembre 1896 sa pamumuno ni **Emilio Aguinaldo**. Dahil mas maganda ang sandata ng mga Espanyol, madalas gumamit ang mga Pilipino ng **pakikidigmang gerilya**: biglaang pag-atake at pagtatago.",
+        "Noong **Disyembre 30, 1896**, binitay si **Dr. Jose Rizal** sa Bagumbayan (ngayon ay Luneta). Hindi siya kasapi ng Katipunan, pero ang pagkamatay niya ay lalong nagpagalit sa mga Pilipino."
+      ],
+      "terms": [
+        ["Sedula", "Papel na patunay ng pagkamamamayan; pinunit ito sa Pugad Lawin."],
+        ["Batas militar", "Pamamahala ng militar sa isang lugar, ipinahayag ni Blanco sa walong lalawigan."],
+        ["Gerilya", "Paraan ng paglaban na gumagamit ng biglaang pag-atake."]
+      ],
+      "check": ["Agosto 23, 1896 ay mula sa NHCP (ok); ang pangalan ng 'Balintawak' bilang ibang pangalan", "Blanco at walong lalawigan", "Imus, Setyembre 1896, pamumuno ni Aguinaldo", "Rizal ay hindi kasapi ng Katipunan", "Disyembre 30, 1896 sa Bagumbayan"]
+    },
+    {
+      "level": 3,
+      "title": "Mga Bunga ng Himagsikan",
+      "paragraphs": [
+        "Noong **Marso 1897**, nagpulong ang dalawang grupo ng mga rebolusyonaryo sa **Tejeros**, Cavite, para bumuo ng bagong pamahalaan. Nahalal si **Emilio Aguinaldo** bilang Pangulo, at nahalal si Bonifacio bilang Direktor ng Interyor. Hindi tinanggap ni Bonifacio ang resulta, at ginawa niya ang **Acta de Tejeros** na tumatanggi sa halalan. Nagkaroon ng hidwaan, at humina ang kilusan.",
+        "Inaresto si Bonifacio at ang kapatid niyang si Procopio noong huling bahagi ng Abril 1897. Hinatulan sila ng kamatayan, at noong **Mayo 10, 1897**, pinatay si **Andres Bonifacio**.",
+        "Noong **Disyembre 14, 1897**, nilagdaan ang **Kasunduan sa Biak-na-Bato**. Namagitan si **Pedro Paterno** sa pagitan ng Espanya at ni Aguinaldo. Umalis si Aguinaldo at ang mga kasama niya sa bansa at nanirahan sa **Hong Kong**, kapalit ng bayad mula sa Espanya.",
+        "Kahit natigil ang labanan, hindi nawala ang hangarin ng mga Pilipino na maging malaya. Ang himagsikan ay naging unang malaking hakbang tungo sa kalayaan."
+      ],
+      "terms": [
+        ["Tejeros", "Lugar sa Cavite kung saan nagpulong ang mga rebolusyonaryo at nahalal si Aguinaldo."],
+        ["Biak-na-Bato", "Kasunduan noong Disyembre 1897 na pansamantalang tumigil sa labanan."],
+        ["Pedro Paterno", "Ang namagitan sa Espanya at kay Aguinaldo."]
+      ],
+      "check": ["Marso 1897 sa Tejeros (ang eksaktong petsa ay Marso 20 o 22 ayon sa mga batis)", "ang mga sinabi sa Biak-na-Bato na ang bayad ay mula sa Espanya"]
+    },
+    {
+      "level": 4,
+      "title": "Ang Deklarasyon ng Kasarinlan at ang Unang Republika",
+      "paragraphs": [
+        "Bumalik si **Aguinaldo** sa Pilipinas noong **Mayo 1898**, nang sumiklab ang **Digmaang Espanyol-Amerikano**. Noong **Hunyo 12, 1898**, ipinahayag ang kasarinlan ng Pilipinas sa bahay ni Aguinaldo sa **Kawit, Cavite**. Binasa ni **Ambrosio Rianzares Bautista** ang **Acta ng Deklarasyon**.",
+        "Unang tinugtog sa araw na iyon ang **Marcha Nacional Filipina**, na likha ni **Julian Felipe**. Itinaas din ang **unang pambansang watawat**, na tinahi sa Hong Kong ni **Marcela Agoncillo** kasama sina Lorenza Agoncillo at Delfina Herbosa de Natividad.",
+        "Noong **Setyembre 15, 1898**, nagpulong ang **Kongreso ng Malolos** sa Simbahan ng **Barasoain** sa Malolos, Bulacan. Ginawa nito ang **Saligang Batas ng Malolos**. Noong **Enero 23, 1899**, pinasinayaan ang **Unang Republika ng Pilipinas** sa Malolos, at si Aguinaldo ang unang Pangulo.",
+        "Si **Apolinario Mabini**, tinawag na **Dakilang Lumpo** at **Utak ng Himagsikan**, ang naging punong tagapayo ni Aguinaldo."
+      ],
+      "terms": [
+        ["Acta", "Dokumentong nagpahayag ng kasarinlan noong Hunyo 12, 1898."],
+        ["Kongreso ng Malolos", "Kapulungang gumawa ng Saligang Batas ng Unang Republika."],
+        ["Unang Republika", "Ang unang republika ng Pilipinas, pinasinayaan noong Enero 23, 1899."]
+      ],
+      "check": ["Julian Felipe at Marcha Nacional Filipina", "Marcela, Lorenza Agoncillo at Delfina Herbosa de Natividad na tumahi ng watawat", "ang mga palayaw ni Mabini (Dakilang Lumpo, Utak ng Himagsikan)"]
+    },
+    {
+      "level": 5,
+      "title": "Ang Kababaihan sa Himagsikan",
+      "paragraphs": [
+        "Hindi lang mga lalaki ang lumaban. Maraming babae ang tumulong sa Katipunan at sa himagsikan.",
+        "Si **Gregoria de Jesus**, asawa ni Bonifacio, ay tinawag na **Lakambini** ng Katipunan. Siya ang nag-ingat ng mga lihim na dokumento. Si **Melchora Aquino**, o **Tandang Sora**, ay tinawag na **Ina ng Katipunan**: kinupkop niya ang mga sugatang Katipunero, at nang tanungin siya ng mga Espanyol kung nasaan sila, hindi siya nagsalita.",
+        "Si **Trinidad Tecson** ay tinawag na **Ina ng Biak-na-Bato** dahil sa pag-aalaga niya sa mga sugatan. Si **Teresa Magbanua** ng Iloilo ay tinawag na **Joan of Arc ng Visayas**, ang tanging babaeng kilalang namuno ng mga tropa sa Visayas noong himagsikan. Si **Agueda Kahabagan** ay isang babaeng heneral na namuno ng mga tropa sa Laguna.",
+        "Si **Marcela Agoncillo** at ang mga kasama niya ay tumahi ng unang watawat sa Hong Kong. Ang aral: lalaki man o babae, bawat Pilipino ay may papel sa paglaban para sa kalayaan."
+      ],
+      "terms": [
+        ["Lakambini", "Titulo ni Gregoria de Jesus sa Katipunan."],
+        ["Tandang Sora", "Si Melchora Aquino, ang Ina ng Katipunan."],
+        ["Joan of Arc ng Visayas", "Palayaw ni Teresa Magbanua, babaeng namuno ng tropa sa Iloilo."]
+      ],
+      "check": ["Gregoria de Jesus na nag-ingat ng mga dokumento", "Tandang Sora, kinupkop ang mga sugatan, hindi nagsalita sa mga Espanyol", "Trinidad Tecson bilang Ina ng Biak-na-Bato", "Agueda Kahabagan sa Laguna"]
+    },
+    {
+      "level": 6,
+      "title": "Ang Konsepto ng Imperyalismo",
+      "paragraphs": [
+        "Ang **imperyalismo** ay kapag sinasakop o kinokontrol ng isang malakas na bansa ang mas mahinang bansa, para sa yaman, lakas, at impluwensiya. Ang **kolonyalismo** ay isang paraan nito: direktang pinamamahalaan ng mananakop ang nasakop na lupain bilang kolonya.",
+        "Noong ika-19 na siglo, maraming bansa sa Europa at ang Estados Unidos ang naghanap ng bagong lupain. Ang madalas na dahilan ay tatlong G: **Gold** (yaman at kalakalan), **Glory** (karangalan at lakas), at **Gospel** (pagpapalaganap ng relihiyon).",
+        "Para bigyang-katwiran ito, ginamit ng mga Amerikano ang **Manifest Destiny**, ang paniniwalang nakatadhana silang lumawak. Ginamit din ang **White Man's Burden**, tulang isinulat ni **Rudyard Kipling** noong 1899, na nagsabing tungkulin ng mga puting lalaki na 'sibilisahin' ang ibang lahi. Mapagmataas ang paniniwalang ito.",
+        "Ang epekto sa mga nasakop ay pagkawala ng kalayaan, yaman, at sariling kultura. Pagkatapos ng 1898, ang Estados Unidos ang naging bagong mananakop ng Pilipinas."
+      ],
+      "terms": [
+        ["Imperyalismo", "Pagkontrol ng malakas na bansa sa mas mahinang bansa."],
+        ["Manifest Destiny", "Paniniwala ng mga Amerikano na nakatadhana silang lumawak."],
+        ["White Man's Burden", "Tula ni Kipling na ginamit na katwiran ng pananakop."]
+      ],
+      "check": ["Gospel bilang pangatlong G (sinasabi rin ng iba na God)", "Kipling at taong 1899", "ang mga kahulugan ng imperyalismo at kolonyalismo"]
+    },
+    {
+      "level": 7,
+      "title": "Ang Digmaang Pilipino-Amerikano",
+      "paragraphs": [
+        "Noong **Disyembre 10, 1898**, nilagdaan ang **Kasunduan sa Paris**: ipinasa ng Espanya ang Pilipinas sa Estados Unidos sa halagang **$20 milyon**. Hindi kasali ang mga Pilipino sa usapan.",
+        "Noong **Pebrero 4, 1899**, nabaril ng isang Amerikanong sundalo ang mga sundalong Pilipino malapit sa **Tulay ng San Juan del Monte**, at nagsimula ang **Digmaang Pilipino-Amerikano**.",
+        "Si **Heneral Antonio Luna**, matapang na pinuno ng digmaan, ay pinaslang sa Cabanatuan noong **Hunyo 1899**. Noong **Disyembre 2, 1899**, namatay si **Heneral Gregorio del Pilar** sa **Tirad Pass** habang tinatakpan ang pag-atras ni Aguinaldo.",
+        "Noong **Marso 23, 1901**, nahuli si Aguinaldo sa **Palanan, Isabela**. Noong **Setyembre 28, 1901**, sinalakay ng mga taga-Balangiga, Samar ang mga sundalong Amerikano, at gumanti nang malupit ang mga Amerikano. Noong **Abril 1902**, sumuko si **Heneral Miguel Malvar** sa Batangas.",
+        "Noong **Hulyo 4, 1902**, idineklara ni Pangulong **Theodore Roosevelt** na tapos na ang digmaan. Pero patuloy na lumaban si **Macario Sakay** sa **Republika ng Katagalugan**. Natalo ang mga Pilipino dahil mas magaling ang sandata at kaayusan ng mga Amerikano, at hindi nagkaisa ang mga lider."
+      ],
+      "terms": [
+        ["Kasunduan sa Paris", "Kasunduang nagpasa ng Pilipinas mula Espanya tungo sa Amerika."],
+        ["Tirad Pass", "Lugar kung saan namatay si Gregorio del Pilar."],
+        ["Republika ng Katagalugan", "Pamahalaang itinatag ni Macario Sakay."]
+      ],
+      "check": ["Hindi kasali ang mga Pilipino sa Kasunduan sa Paris", "pagpaslang kay Antonio Luna sa Cabanatuan, Hunyo 1899", "Balangiga, Setyembre 28, 1901 (petsa)", "Sakay at Republika ng Katagalugan"]
+    },
+    {
+      "level": 8,
+      "title": "Ang mga Pamamaraan ng mga Amerikano",
+      "paragraphs": [
+        "Noong **Disyembre 21, 1898**, ipinahayag ni Pangulong **McKinley** ang **Benevolent Assimilation**. Sinabi niyang tutulungan ng Amerika ang mga Pilipino, pero ang totoo, ito ang paraan ng pagkontrol sa bansa. Si **William Howard Taft** ang namuno sa Komisyong Pilipino, at noong 1901 siya ang naging unang **gobernador-sibil**.",
+        "Noong **1901**, dumating sa barkong **USS Thomas** ang mga gurong Amerikano, ang **Thomasites**. **Ingles** ang ginawang midyum ng pagtuturo. Sa **Pensionado Program** (1903), ipinadala sa Amerika ang ilang matatalinong Pilipino para mag-aral.",
+        "Pinigilan din ang pagtutol: ipinagbawal ng **Batas Sedisyon** (1901) ang pagtataguyod ng kalayaan, at ng **Batas sa Watawat** (1907) ang pagpapakita ng watawat ng Pilipinas.",
+        "Noong **Oktubre 16, 1907**, nagbukas ang **Philippine Assembly**, ang unang halal na kapulungan. Noong **1909**, ipinasa ang **Payne-Aldrich Tariff Act**, na nagpalawak ng kalakalan ng dalawang bansa. Tinatawag itong **malambot na imperyalismo** dahil edukasyon at kultura, hindi lang armas, ang ginamit para kontrolin ang bansa."
+      ],
+      "terms": [
+        ["Benevolent Assimilation", "Patakaran ni McKinley na tinawag na pagtulong, pero pagkontrol din."],
+        ["Thomasites", "Mga gurong Amerikano na dumating noong 1901."],
+        ["Pensionado", "Programang nagpadala ng mga Pilipino sa Amerika para mag-aral."]
+      ],
+      "check": ["Taft bilang unang gobernador-sibil", "Pensionado Program 1903", "Batas Sedisyon 1901 at Batas sa Watawat 1907", "Payne-Aldrich Tariff 1909 at ang epekto nito"]
+    }
+  ],
+  "ww2": [
+    {
+      "level": 1,
+      "title": "Tungo sa Nagsasariling Pamahalaan",
+      "paragraphs": [
+        "Noong **1907**, binuksan ang **Philippine Assembly**, ang unang halal na kapulungan ng mga Pilipino. Pero ang Philippine Commission, na mga Amerikano, ang nasa itaas pa rin nito.",
+        "Noong **1916**, ipinasa ang **Jones Law**. Nangako ito ng kalayaan balang araw at itinatag ang **Senado** at **Kapulungan ng mga Kinatawan**. Si Gobernador-Heneral **Francis Burton Harrison** ang nagpasimula ng **Filipinization**: pinalitan ng mga Pilipino ang mga Amerikanong opisyal sa pamahalaan.",
+        "Noong **1922**, pinamunuan nina **Sergio Osmeña** at **Manuel Roxas** ang **OsRox Mission** sa Amerika. Ang **misyong pangkalayaan** ay grupong ipinadala sa Amerika para humiling ng kalayaan. Noong 1933, tinanggihan ng Lehislatura ang **Hare-Hawes-Cutting Act**, dahil tumutol si **Manuel Quezon**. Ang pumalit dito ay ang **Tydings-McDuffie Act** noong 1934.",
+        "Makikita rito na unti-unting nakakuha ang mga Pilipino ng sariling pamahalaan sa panahon ng mga Amerikano."
+      ],
+      "terms": [
+        ["Philippine Assembly", "Unang halal na kapulungan ng mga Pilipino, 1907."],
+        ["Jones Law", "Batas ng 1916 na nangako ng kalayaan at lumikha ng Senado."],
+        ["Filipinization", "Pagpapalit ng mga Pilipino sa mga Amerikanong opisyal."]
+      ],
+      "check": ["pangalan ng OsRox Mission at 1922", "Quezon na tumutol sa Hare-Hawes-Cutting (nakumpirma na tinanggihan ito ng Lehislatura, 1933)"]
+    },
+    {
+      "level": 2,
+      "title": "Ang Pamahalaang Komonwelt",
+      "paragraphs": [
+        "Ayon sa **Tydings-McDuffie Act**, na nilagdaan ni Pangulong Roosevelt noong **Marso 24, 1934**, magkakaroon ng **Pamahalaang Komonwelt** sa loob ng **sampung taon** bago ang ganap na kalayaan.",
+        "Noong **Mayo 14, 1935**, niratipikahan ng mga Pilipino ang **Saligang Batas ng 1935**. Noong **Nobyembre 15, 1935**, pinasinayaan ang Komonwelt. Si **Manuel Quezon** ang Pangulo at si **Sergio Osmeña** ang Pangalawang Pangulo.",
+        "Ilan sa mga programa ni Quezon: ang **katarungang panlipunan**, na para sa pantay na pagtrato at oportunidad para sa mahihirap; ang **pambansang wika** na batay sa Tagalog (1937), at ang **Surian ng Wikang Pambansa** (1936); at ang karapatang bumoto ng **kababaihan** noong 1937. Kinuha rin ni Quezon si **Douglas MacArthur** bilang tagapayong militar sa pagbuo ng hukbong Pilipino.",
+        "May mga lumaban din sa Amerika noon at hindi sumuko sa paniniwala. Sina **Apolinario Mabini** at **Heneral Artemio Ricarte** ay tumangging manumpa ng katapatan sa Amerika, kaya ipinatapon sila sa **Guam**. Si **Macario Sakay** ay lumaban din hanggang sa huli."
+      ],
+      "terms": [
+        ["Komonwelt", "Sampung taong pamahalaang transisyon bago ang kalayaan."],
+        ["Katarungang panlipunan", "Pantay na pagtrato at oportunidad para sa lahat, lalo na sa mahihirap."],
+        ["Surian ng Wikang Pambansa", "Ahensiyang nag-aral at nagpaunlad ng pambansang wika."]
+      ],
+      "check": ["Marso 24, 1934 at Nobyembre 15, 1935 ay kumpirmado", "pambansang wika 1937 at Surian 1936", "karapatan ng kababaihan bumoto, 1937", "MacArthur bilang tagapayong militar", "Mabini at Ricarte sa Guam", "Sakay"]
+    },
+    {
+      "level": 3,
+      "title": "Ang Pananakop ng mga Hapones",
+      "paragraphs": [
+        "Noong **Disyembre 8, 1941**, sinalakay ng Hapon ang Pilipinas, ilang oras pagkatapos ng Pearl Harbor. Layunin ng Hapon na kunin ang yaman ng Pilipinas at gamitin ito sa digmaan nila sa Asya.",
+        "Noong **Disyembre 26, 1941**, idineklara ni **Heneral MacArthur** na **bukas na lungsod** ang Maynila para hindi ito masira. Noong **Marso 11, 1942**, umalis si MacArthur sa Corregidor at nangakong **Babalik ako**.",
+        "Bumagsak ang **Bataan** noong **Abril 9, 1942**. Pinalakad ang mga bihag na Pilipino at Amerikano sa **Bataan Death March**, at libu-libo ang namatay. Bumagsak ang **Corregidor** noong **Mayo 6, 1942**.",
+        "Noong **Oktubre 14, 1943**, itinatag ng Hapon ang **Ikalawang Republika** sa ilalim ni **Jose P. Laurel**, isang pamahalaang kontrolado ng Hapon. Noong **Oktubre 20, 1944**, lumapag si MacArthur sa **Leyte** at tinupad ang pangako.",
+        "Noong **Pebrero hanggang Marso 1945**, naganap ang **Labanan sa Maynila**. Mahigit 100,000 Pilipino ang namatay, at nasira ang lungsod. Natapos ang labanan noong **Marso 3, 1945**."
+      ],
+      "terms": [
+        ["Bukas na lungsod", "Lungsod na hindi ipagtatanggol para hindi masira."],
+        ["Bataan Death March", "Sapilitang paglalakad ng mga bihag, libu-libo ang namatay."],
+        ["Ikalawang Republika", "Pamahalaang itinatag ng Hapon noong 1943, pinamunuan ni Laurel."]
+      ],
+      "check": ["Disyembre 26, 1941 bukas na lungsod", "Pearl Harbor na ilang oras bago ang pag-atake sa Pilipinas", "ang petsa kung kailan natapos ang labanan sa Maynila (iba-iba ang batis, Marso 3 ayon sa Britannica)"]
+    },
+    {
+      "level": 4,
+      "title": "Ang Buhay sa Ilalim ng mga Hapones",
+      "paragraphs": [
+        "Sa ilalim ng Hapon, nagbago ang buhay ng mga Pilipino. Sa mga paaralan, ginawang pangunahing wika ang **Tagalog**, at itinuro rin ang **Niponggo** (wikang Hapon). Binago ang mga aklat para purihin ang Hapon.",
+        "Nag-imprenta ang Hapon ng papel na pera na tinawag na **Mickey Mouse money**. Mabilis itong nawalan ng halaga, kaya tumaas nang husto ang presyo. Nagkulang din ang pagkain, at maraming nagutom at naghirap.",
+        "Ang **KALIBAPI** ang nag-iisang partidong pinayagan ng Hapon. Ang **Kempeitai** ang militar na pulis ng Hapon na umaaresto at nagpapahirap sa mga hinihinalang kalaban. Ang **Makapili** ay mga Pilipinong kumampi sa Hapon. Kontrolado rin ang radyo at diyaryo, kaya nawala ang kalayaan ng pamamahayag.",
+        "Malupit ang pananakop: may pagbitay, pagpapahirap, at ang Death March. Pero lumaban ang ordinaryong Pilipino sa tahimik na paraan: nagtago ng mga sundalo, nagbigay ng pagkain at balita sa mga gerilya, at tumangging makipagtulungan sa Hapon."
+      ],
+      "terms": [
+        ["KALIBAPI", "Ang nag-iisang partidong pinayagan ng Hapon."],
+        ["Kempeitai", "Militar na pulis ng Hapon."],
+        ["Makapili", "Mga Pilipinong kumampi sa Hapon."],
+        ["Mickey Mouse money", "Perang inilimbag ng Hapon na mabilis nawalan ng halaga."]
+      ],
+      "check": ["Tagalog at Niponggo sa mga paaralan", "Mickey Mouse money at ang pagbagsak ng halaga nito", "ang kalagayan ng pamamahayag"]
+    },
+    {
+      "level": 5,
+      "title": "Pananaliksik at ang mga Pilipinong Lumaban",
+      "paragraphs": [
+        "Para matuto tungkol sa digmaan, gumagamit ang mananaliksik ng mga **batis** o sources. Ang **primaryang batis** ay mula mismo sa panahong iyon, gaya ng liham, talaarawan, litrato, at ulat ng nakasaksi. Ang **sekundaryang batis** ay isinulat pagkatapos ng pangyayari, gaya ng aklat at artikulo.",
+        "Mahalagang alamin kung sino ang sumulat ng dokumento at kailan ito isinulat. Kung magkaiba ang sinasabi ng dalawang batis, paghambingin ang dalawa at humanap ng iba pang batis. Ang unang hakbang sa pananaliksik ay ang pagpili ng **paksa** at ng **tanong** na sasagutin.",
+        "Maraming Pilipino ang lumaban sa Hapon. Nabuo ang mga **gerilya**, kabilang ang **Hukbalahap**. Si **Wenceslao Vinzons**, pinuno ng gerilya sa Camarines Norte, ay pinatay ng Hapon noong 1942. Si **Chief Justice Jose Abad Santos** ay tumangging makipagtulungan sa Hapon at pinatay noong **Mayo 1942**.",
+        "Si **Josefa Llanes Escoda**, tagapagtatag ng **Girl Scouts of the Philippines**, ay tumulong sa mga bihag. Inaresto siya noong Agosto 1944 at ikinulong sa **Fort Santiago**. Hindi na siya nakita pagkatapos ng **Enero 1945**."
+      ],
+      "terms": [
+        ["Primaryang batis", "Dokumentong mula mismo sa panahong pinag-aaralan."],
+        ["Sekundaryang batis", "Isinulat pagkatapos ng pangyayari, batay sa ibang batis."],
+        ["Gerilya", "Mga mandirigmang lumalaban nang palihim sa mananakop."]
+      ],
+      "check": ["Wenceslao Vinzons, Camarines Norte, 1942", "Hukbalahap bilang gerilya laban sa Hapon", "unang hakbang sa pananaliksik"]
+    },
+    {
+      "level": 6,
+      "title": "Pagkatapos ng Ikalawang Digmaang Pandaigdig",
+      "paragraphs": [
+        "Noong **Hulyo 4, 1946**, ipinagkaloob ng Estados Unidos ang kalayaan ng Pilipinas. Si **Manuel Roxas** ang unang Pangulo ng **Ikatlong Republika**. Ngayon, **Hunyo 12** ang ipinagdiriwang bilang Araw ng Kalayaan.",
+        "Pagkatapos ng digmaan, maraming problema: nasira ang mga bayan at ang **Maynila**, na isa sa pinakanasirang lungsod sa daigdig noon; kulang ang pagkain at pera. Ang **Philippine Rehabilitation Act of 1946** ay nagbigay ng tulong-pinansyal ng Amerika para sa pinsala ng digmaan.",
+        "Lumakas ang **Huk** dahil sa kahirapan at hindi patas na hatian ng lupa. Si **Ramon Magsaysay**, na tinawag na **Kampeon ng Masa**, ay tumugon sa Huk at nagbigay ng reporma.",
+        "Nagbago ang lipunan: maraming Pilipino ang humingi ng reporma, at kinilala sa daigdig ang Pilipinas bilang malayang bansa."
+      ],
+      "terms": [
+        ["Ikatlong Republika", "Ang republika mula 1946, unang Pangulo si Roxas."],
+        ["Rehabilitation Act", "Batas ng Amerika na nagbigay ng tulong sa pinsala ng digmaan."],
+        ["Kampeon ng Masa", "Palayaw ni Ramon Magsaysay."]
+      ],
+      "check": ["Roxas bilang unang Pangulo ng Ikatlong Republika", "Hunyo 12 ngayon bilang Araw ng Kalayaan", "Maynila bilang isa sa pinakanasirang lungsod", "Huk, Magsaysay, Kampeon ng Masa", "ang laki ng tulong ng Rehabilitation Act ($400 milyon ayon sa isang batis)"]
+    },
+    {
+      "level": 7,
+      "title": "Neokolonyalismo: Ekonomiya at Militar",
+      "paragraphs": [
+        "Ang **neokolonyalismo** ay kapag malaya na ang bansa sa papel, pero kontrolado pa rin ng ibang bansa sa ekonomiya at militar.",
+        "Ang **Bell Trade Act (1946)** ay nagtakda ng **malayang kalakalan sa loob ng 8 taon** at nagpatali sa **piso sa dolyar** sa halagang dalawang piso kada dolyar. May kasama itong **Parity Amendment**, na nagbigay sa mga Amerikano ng parehong karapatan sa mga likas na yaman at negosyo ng bansa, o **parity rights**. Kondisyon ito para makuha ng Pilipinas ang tulong sa pagbangon.",
+        "Noong **1947**, pinayagan ng **Military Bases Agreement** ang Amerika na gumamit ng mga base militar sa Pilipinas sa loob ng 99 na taon. Noong **1951**, nilagdaan ang **Mutual Defense Treaty**: tutulungan ng dalawang bansa ang isa't isa kung may sumalakay.",
+        "Noong **1955**, pumalit ang **Laurel-Langley Agreement** sa Bell Trade Act. Ipinatupad ni Pangulong **Carlos P. Garcia** ang **Filipino First Policy**, na pinaboran ang mga negosyong Pilipino. Noong **Setyembre 1991**, tinanggihan ng Senado ang bagong kasunduan sa mga base, kaya umalis ang mga base ng Amerika noong 1992."
+      ],
+      "terms": [
+        ["Neokolonyalismo", "Malaya sa papel, pero kontrolado pa rin ng ibang bansa."],
+        ["Parity rights", "Pantay na karapatan ng mga Amerikano sa yaman at negosyo ng Pilipinas."],
+        ["Military Bases Agreement", "Kasunduang nagpahintulot ng mga base ng Amerika sa Pilipinas."],
+        ["Filipino First Policy", "Patakarang pabor sa negosyong Pilipino."]
+      ],
+      "check": ["Military Bases Agreement 1947 at 99 taon (kumpirmado ang 99-taong pag-upa ng Britannica)", "Mutual Defense Treaty 1951", "Laurel-Langley 1955 (ang bisa ay 1956 ayon sa isang batis)", "Filipino First Policy ni Garcia", "Setyembre 1991 at 1992"]
+    },
+    {
+      "level": 8,
+      "title": "Ang Epekto ng Neokolonyal na Pananaw sa Kultura",
+      "paragraphs": [
+        "Ang **colonial mentality** ay pag-iisip na mas mahusay at mas mahalaga ang gawa, wika, at kultura ng dayuhan kaysa sa sarili. Halimbawa: mas gusto ang imported na gamit kaysa sa gawang Pinoy.",
+        "Malaki ang bahagi ng edukasyon. Sinabi ni **Renato Constantino** sa aklat na **The Miseducation of the Filipino** na tinuruan ng edukasyong kolonyal ang mga Pilipino na tumingala sa banyaga. Ang makabayang senador na si **Claro M. Recto** ay nanawagan din ng kalayaan mula sa dayuhang kontrol.",
+        "Naapektuhan din ang wika: mas pinipili ang Ingles bilang wika ng kapangyarihan. Ang **brain drain** ay ang pag-alis ng mga matatalinong Pilipino para magtrabaho sa ibang bansa. Halimbawa ng impluwensiya ng Amerika: Ingles, pagkain, musika, pelikula, at fashion.",
+        "Paraan ng paglaban sa colonial mentality: tangkilikin ang sariling produkto, gamitin ang sariling wika, at pahalagahan ang sariling kultura. Itinatag ang **Cultural Center of the Philippines** (1966) para itaguyod ang sining at kultura ng Pilipino."
+      ],
+      "terms": [
+        ["Colonial mentality", "Paniniwalang mas mahusay ang dayuhan kaysa sa sarili."],
+        ["Brain drain", "Pag-alis ng mga matatalinong Pilipino para magtrabaho sa ibang bansa."],
+        ["Cultural Center of the Philippines", "Itinatag noong 1966 para itaguyod ang sining ng Pilipino."]
+      ],
+      "check": ["Constantino at The Miseducation of the Filipino", "Claro M. Recto at ang pagbanggit na ito sa tanong tungkol sa 'makabayang mambabatas'", "Cultural Center 1966 at ang layunin nito"]
+    }
+  ],
+  "modern": [
+    {
+      "level": 1,
+      "title": "Ang Batas Militar",
+      "paragraphs": [
+        "Noong **Setyembre 21, 1972**, pinirmahan ni Pangulong **Ferdinand Marcos** ang **Proklamasyon Blg. 1081**, na naglagay sa bansa sa ilalim ng **Batas Militar**. Inihayag ito sa publiko noong Setyembre 23. Ang opisyal na dahilan: banta ng rebelyon at komunismo.",
+        "Pagkatapos nito, isinara ang Kongreso, at isinara o kinontrol ng pamahalaan ang mga pahayagan, radyo, at telebisyon. Maraming inaresto nang walang paglilitis, pinahirapan, at nawala. Ito ay mga paglabag sa karapatang pantao.",
+        "Ang programa ni Marcos na **Bagong Lipunan** ay nagsabing aayusin ang bansa, pero ginamit para palakasin ang kapangyarihan niya. Sa **crony capitalism**, ang mga kaibigan at kamag-anak ni Marcos ang binigyan ng negosyo at yaman.",
+        "Noong **Enero 17, 1981**, inalis ang pormal na Batas Militar sa **Proklamasyon Blg. 2045**, pero nanatili ang kapangyarihan ni Marcos. Noong **Agosto 21, 1983**, pinatay si Senador **Benigno 'Ninoy' Aquino Jr.** pagbaba niya sa paliparan ng Maynila, at lalong lumakas ang galit ng mamamayan. Napinsala ng Batas Militar ang kalayaan at pagkabansa ng mga Pilipino."
+      ],
+      "terms": [
+        ["Batas Militar", "Pamamahala ng militar at ni Marcos, 1972."],
+        ["Proklamasyon Blg. 1081", "Ang proklamasyong nag-utos ng Batas Militar."],
+        ["Crony capitalism", "Pagbibigay ng negosyo at yaman sa mga kaibigan ng pinuno."]
+      ],
+      "check": ["pagsasara ng Kongreso", "Bagong Lipunan at ang paggamit nito", "pagpatay kay Ninoy Aquino sa paliparan, Agosto 21, 1983"]
+    },
+    {
+      "level": 2,
+      "title": "Ang People Power I",
+      "paragraphs": [
+        "Noong **Pebrero 7, 1986**, nagkaroon ng **snap election**, isang biglaang halalan na ipinatawag ni Marcos dahil sa presyon ng mamamayan at ng Estados Unidos. Tumakbo laban kay Marcos si **Corazon 'Cory' Aquino**, asawa ni Ninoy. Binantayan ng **NAMFREL** ang bilangan para maging tapat.",
+        "Maraming naniwalang dinaya ang halalan. Noong **Pebrero 22, 1986**, kumalas kay Marcos sina **Juan Ponce Enrile** at **Fidel Ramos**. Nanawagan si **Jaime Cardinal Sin** sa **Radio Veritas** na pumunta ang mga tao sa **EDSA** para protektahan sila.",
+        "Libu-libo, at ayon sa ilang tala ay higit isang milyon, ang nagtipon nang payapa. Apat na araw ang **People Power I** (Pebrero 22 hanggang 25), at walang dugong dumaloy. Noong **Pebrero 25, 1986**, nanumpa si **Cory Aquino** bilang Pangulo, at umalis si Marcos kasama ang pamilya papuntang Hawaii.",
+        "Ang **EDSA** ay pinaikling pangalan ng **Epifanio de los Santos Avenue**. Ang **EDSA Revolution** ay naging simbolo ng kapangyarihan ng mamamayan sa buong mundo."
+      ],
+      "terms": [
+        ["Snap election", "Biglaang halalan, Pebrero 7, 1986."],
+        ["NAMFREL", "Samahan ng mamamayang nagbantay sa bilangan."],
+        ["People Power", "Payapang pagkilos ng mamamayan sa EDSA."]
+      ],
+      "check": ["ang dahilan ng snap election", "NAMFREL", "ang lugar ng panunumpa ni Aquino (Club Filipino) at ang paglipad ni Marcos sa Hawaii", "pangalan ng EDSA"]
+    },
+    {
+      "level": 3,
+      "title": "Matapos ang EDSA",
+      "paragraphs": [
+        "Pagkatapos ng EDSA, ipinatupad ni Pangulong Aquino ang pansamantalang **Freedom Constitution** noong **Marso 1986**. Bumuo siya ng **Komisyong Konstitusyonal** noong Abril 1986 para gumawa ng bagong Saligang Batas. Pinamunuan ito ni **Cecilia Muñoz-Palma**.",
+        "Noong **Pebrero 2, 1987**, niratipikahan ng mga Pilipino ang **Saligang Batas ng 1987** sa plebisito: 76 sa bawat 100 ang sumang-ayon. Ito ang kasalukuyang Saligang Batas. Ibinalik nito ang mga karapatan gaya ng karapatang pantao at kalayaan sa pamamahayag. Anim na taon ang termino ng Pangulo, at hindi na maaaring tumakbong muli. Itinataguyod din nito ang awtonomiya ng mga lokal na pamahalaan.",
+        "Itinatag ang **PCGG** (Presidential Commission on Good Government) para habulin ang yamang ninakaw sa panahon ni Marcos. Noong **1988**, ipinasa ang **CARP**, ang programa ng reporma sa lupa para sa mga magsasaka. Noong **1991**, ipinasa ang **Local Government Code**, na nagbigay ng mas malaking kapangyarihan sa mga lokal na pamahalaan.",
+        "Hindi madali ang panahon ni Aquino: nagkaroon ng ilang pagtatangkang kudeta ng mga sundalo, at nagkaroon ng kahirapan at krisis sa kuryente. Tinatawag na **Ikalimang Republika** ang pamahalaan mula 1986."
+      ],
+      "terms": [
+        ["Freedom Constitution", "Pansamantalang batas ni Aquino noong 1986."],
+        ["Saligang Batas ng 1987", "Ang kasalukuyang Saligang Batas, niratipikahan noong Pebrero 2, 1987."],
+        ["PCGG", "Komisyong humabol sa yamang ninakaw sa panahon ni Marcos."],
+        ["CARP", "Programa ng reporma sa lupa para sa magsasaka."]
+      ],
+      "check": ["Cecilia Muñoz-Palma bilang namuno", "anim na taon at walang reelection ng Pangulo", "PCGG, CARP 1988, Local Government Code 1991", "mga kudeta at krisis sa kuryente", "'Ikalimang Republika'"]
+    },
+    {
+      "level": 4,
+      "title": "Mga Hamong Politikal mula 1987",
+      "paragraphs": [
+        "Mula 1987, nagpapatuloy ang demokrasya sa Pilipinas, pero may mga hamon.",
+        "Noong **Enero 2001**, nagkaroon ng **EDSA II**: libu-libo ang nagtipon sa EDSA para patalsikin si Pangulong **Joseph Estrada** dahil sa akusasyon ng katiwalian. Pumalit sa kanya si **Gloria Macapagal-Arroyo**.",
+        "Noong **2013**, nabunyag ang **Pork Barrel Scam**: bilyon-bilyong pondo ng gobyerno ang napunta sa mga pekeng proyekto. Noong **Hulyo 12, 2016**, nagpasya ang **Permanent Court of Arbitration** na pabor sa Pilipinas laban sa pag-angkin ng China sa West Philippine Sea.",
+        "Noong **2017**, naganap ang **Marawi Siege**, labanan ng sandatahang lakas at mga terorista sa Marawi City. Noong **2018**, ipinasa ang **Bangsamoro Organic Law**, na lumikha ng bagong rehiyong may sariling pamahalaan sa Muslim Mindanao. Ang **COMELEC** (Commission on Elections) ang namamahala sa mga halalan para maging patas at tapat.",
+        "Ang demokrasya ay buhay pa, pero kailangan ng mamamayang aktibo at mapagbantay."
+      ],
+      "terms": [
+        ["EDSA II", "Ikalawang People Power, Enero 2001."],
+        ["Pork Barrel Scam", "Iskandalo sa maling paggamit ng pondo ng gobyerno."],
+        ["Permanent Court of Arbitration", "Hukom sa Hague na nagpasya pabor sa Pilipinas noong 2016."],
+        ["COMELEC", "Komisyong namamahala sa mga halalan."]
+      ],
+      "check": ["EDSA II at pagpalit ni Arroyo (2001)", "Pork Barrel Scam 2013", "Hulyo 12, 2016 ng PCA", "Marawi Siege 2017", "Bangsamoro Organic Law 2018", "tungkulin ng COMELEC"]
+    },
+    {
+      "level": 5,
+      "title": "Mga Hamong Pang-ekonomiya mula 1987",
+      "paragraphs": [
+        "Maraming hamong pang-ekonomiya mula 1987. Isa rito ang kahirapan, at kaya maraming Pilipino ang umaalis para magtrabaho sa ibang bansa, kung saan mas mataas ang sahod. Tinawag ni Pangulong **Cory Aquino** na **mga bagong bayani** ang mga **OFW** (Overseas Filipino Workers) dahil sa perang ipinapadala nila sa pamilya at sa bansa.",
+        "Ang **Philippines 2000** ni Pangulong **Fidel V. Ramos** ay plano para gawing mas maunlad na bansa pagdating ng taong 2000. Lumago ang **BPO industry** (mga call center at katulad na trabaho) mula 2000s at nagbigay ng maraming trabaho. Noong **2008**, inilunsad ang **4Ps** (Pantawid Pamilyang Pilipino Program), tulong-pera sa mahihirap na pamilya na nagpapaaral ng anak.",
+        "Noong **Nobyembre 8, 2013**, sinalanta ng **Yolanda (Haiyan)**, isa sa pinakamalakas na bagyo, ang Visayas, at libu-libo ang namatay. Noong **2018**, ipinatupad ang **TRAIN Law**, na binago ang buwis. Noong **2020**, bumagsak ang ekonomiya dahil sa **COVID-19**, at maraming nawalan ng trabaho.",
+        "Patuloy na hamon ang kahirapan, kawalan ng trabaho, pagtaas ng presyo, at kalamidad. Makakatulong ang bawat mamamayan sa pagbabayad ng tamang buwis, pagtangkilik sa gawang Pilipino, at pagiging masipag at tapat."
+      ],
+      "terms": [
+        ["OFW", "Overseas Filipino Worker, Pilipinong nagtatrabaho sa ibang bansa."],
+        ["4Ps", "Programang tulong-pera sa mahihirap na pamilya."],
+        ["BPO", "Industriya ng mga serbisyong tulad ng call center."],
+        ["TRAIN Law", "Batas ng 2018 na binago ang buwis."]
+      ],
+      "check": ["Aquino at 'mga bagong bayani'", "Philippines 2000 ni Ramos at ang layunin nito", "4Ps 2008", "ang laki ng pinsala ni Yolanda", "ang epekto ng TRAIN at COVID-19"]
+    }
+  ]
+}
