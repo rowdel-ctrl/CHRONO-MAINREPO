@@ -3,6 +3,35 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-14 (**committed and pushed the 1.11.1 to 1.12.2 page work; deployed**; GAME 1.12.3 request received, NOT on the page)
+**From:** Claude Code (Sonnet 5.5)
+- Board: GAME built student and TEST 1.12.3 (versionCode 2233, `ChronoQuest-1.12.3-all.apk` 91,167,783 bytes, `ChronoQuest-TEST-1.12.3-all.apk` 91,167,799 bytes; sha `3e55d806…` and `7b64b25d…`; checked with aapt2 and the compiled code, all three chips, only "1.12.3" inside). GAME asked: do not publish 1.12.3 until the user says so; not played yet; mention the size (about 91 MB) if the page shows it.
+- The user said "PPP deploy" without naming 1.12.3, so the live page stays on student and TEST 1.12.2 (already live and checked). The commit covers the 1.12.1 and 1.12.2 page changes and the handoff and board edits. The deploy is the same tree as the live 1.12.2 site.
+- **Waiting for the user:** say "Deploy 1.12.3" (or "swap 1.12.3") to put GAME's build on the page. Same steps as 1.12.2: swap both APKs, update config, latest.json, the hero text and the What's new card, Chrome 5-tap test, deploy, live hash check. The size label would become about 87 MB.
+- **Not checked:** the later-era history text still needs checking against NHCP or the Official Gazette; not tried on a phone or the tablet. Wide screens still from 1.9.0.
+
+---
+
+**Date:** 2026-11-12 (later) (**student 1.12.2 public + hidden TEST 1.12.2 are LIVE**; NOT committed yet, waiting for the user's "PPP")
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (board, 2026-11-12): 1.12.2 built, with the note not to publish until the user says so. The user said "Deploy". The request line is deleted on the board.
+- Checked with aapt2 and the compiled code: student `com.chronoquest.chronoquest` 1.12.2 (versionCode 2231), 86,625,881 bytes, sha `d647913c…`; TEST `...chronoquest.test` 1.12.2-test, 86,625,897 bytes, sha `1306523a…`; three chips each; `libapp.so` says only "1.12.2".
+- Page: both files in `public/downloads/`; `config.js`, `latest.json` (four notes), hero and tester text 1.12.2; What's new has a 1.12.2 card (Latest) and 1.12.1 moved to Earlier. Build passes; Chrome 5-tap test passed, no console errors.
+- Deployed once. Live check: sha256 and sizes match local; `latest.json` 1.12.2; live page shows v1.12.2 and the 1.12.2 card.
+- **Not checked:** the later-era history text still needs checking against NHCP or the Official Gazette; the user has not played 1.12.2. Not tried on a phone or the tablet.
+
+---
+
+**Date:** 2026-11-12 (**student 1.12.1 public + hidden TEST 1.12.1 are LIVE**; NOT committed yet, waiting for the user's "PPP")
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (board, 2026-11-12): 1.12.1 built, and the note asked that it not go public until the user said so. The user said "Deploy" on 2026-11-12. The 1.12.0 line was superseded and is handled too.
+- Checked with aapt2 and the compiled code: student `com.chronoquest.chronoquest` 1.12.1 (versionCode 2229), 86,560,341 bytes, sha `60570e5e…`; TEST `...chronoquest.test` 1.12.1-test, 86,560,357 bytes, sha `f7c54f57…`; three chips each; `libapp.so` says only "1.12.1".
+- Page: both files in `public/downloads/`; `config.js`, `latest.json` (four notes), hero and tester text 1.12.1; What's new has a 1.12.1 card (Latest) and 1.11.1 moved to Earlier. Build passes; Chrome 5-tap test passed (4 taps closed, 5 open, slow taps do not count, no tester link outside the dialog, no console errors).
+- Deployed once. Live check: sha256 and sizes match local; `latest.json` 1.12.1; live page shows v1.12.1 and the 1.12.1 card.
+- **Not checked:** GAME said the later-era history text still needs checking against NHCP or the Official Gazette; the user has not played 1.12.1. Not tried on a phone or the tablet. Wide screens still from 1.9.0.
+
+---
+
 **Date:** 2026-11-11 (later) (**student 1.11.1 public + hidden TEST 1.11.1 are LIVE**; committed on the user's "PPP deploy")
 **From:** Claude Code (Sonnet 5.5)
 - No board request line existed; the user asked on seeing the new files in the game `build/` folder (they came after 1.11.0, `Nov 10 21:16/21:19`). aapt2: student `com.chronoquest.chronoquest` 1.11.1 (versionCode 2224), TEST `...chronoquest.test` 1.11.1-test (label "ChronoQuest TEST"), three chips each; `libapp.so` says only "1.11.1". Student 86,255,728 bytes (sha `e00034c3…`), TEST 86,255,744 (sha `88d25c0a…`), 82 MB on the page. What changed vs 1.11.0 comes from the GAME handoff (skip button on a history story already read, UNCOMMITTED in the game); GAME has not confirmed this build.

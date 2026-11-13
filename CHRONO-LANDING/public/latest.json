@@ -1,11 +1,11 @@
 {
-  "version": "1.11.1",
+  "version": "1.12.2",
   "required": false,
   "notes": [
-    "Kapag nabasa mo na ang kasaysayan ng isang era, puwede mo na itong laktawan",
-    "May sariling atake na ang bawat bayani",
-    "Bagong laban sa boss: ibinabato ng boss ang atake, at ang sagot mo ang magpapabalik nito",
-    "Mas maraming sorpresa sa matataas na level, at gintong artifact na may bonus round"
+    "Mas maayos na laban sa boss: tumatalsik ang bayani kapag natamaan",
+    "Ang alon ng minions ay nagsisimula sa sahig na malapit sa bayani",
+    "May palatandaan na tumuturo sa rune na wala sa screen",
+    "Mas maraming kwento sa bawat era, at buong kwento para sa bawat kabanata"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
