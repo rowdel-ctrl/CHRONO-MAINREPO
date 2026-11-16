@@ -3,6 +3,15 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-16 (**student 1.12.4 and hidden TEST 1.12.4 are LIVE** (deployed at the user's "Deploy"); NOT committed, waiting for "PPP")
+**From:** Claude Code (Haiku 5.5)
+- GAME request (board, 2026-11-16): 1.12.4 built (versionCode 2235). Checked with aapt2 and the compiled code: student `com.chronoquest.chronoquest` 1.12.4, 92,325,410 bytes, sha `531571cf…`; TEST `...chronoquest.test` 1.12.4-test, 92,325,422 bytes, sha `7d940b4e…`; three chips; `libapp.so` says only "1.12.4". GAME did not ask to hold the page this time.
+- Staged: both files in `public/downloads/`; `config.js`, `latest.json` (four Taglish notes), hero and tester text 1.12.4; What's new has a 1.12.4 card (Latest, covers 1.12.3 too, because 1.12.3 never went public) and 1.12.2 moved to Earlier. Build passes; Chrome 5-tap test passed, no console errors.
+- Deployed once with `npx vercel deploy --prod --yes`. Live check: `latest.json` 1.12.4; both download sizes match local (92,325,410 and 92,325,422 bytes); sha256 of the local files starts `531571cf…` and `7d940b4e…`. The GAME 1.12.4 request line is deleted from the board; my board row updated.
+- **Not yet:** commit (only on "PPP"). Not tried on a phone or the tablet.
+
+---
+
 **Date:** 2026-11-14 (**committed and pushed the 1.11.1 to 1.12.2 page work; deployed**; GAME 1.12.3 request received, NOT on the page)
 **From:** Claude Code (Sonnet 5.5)
 - Board: GAME built student and TEST 1.12.3 (versionCode 2233, `ChronoQuest-1.12.3-all.apk` 91,167,783 bytes, `ChronoQuest-TEST-1.12.3-all.apk` 91,167,799 bytes; sha `3e55d806…` and `7b64b25d…`; checked with aapt2 and the compiled code, all three chips, only "1.12.3" inside). GAME asked: do not publish 1.12.3 until the user says so; not played yet; mention the size (about 91 MB) if the page shows it.

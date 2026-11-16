@@ -1,11 +1,11 @@
 {
-  "version": "1.12.2",
+  "version": "1.12.4",
   "required": false,
   "notes": [
-    "Mas maayos na laban sa boss: tumatalsik ang bayani kapag natamaan",
-    "Ang alon ng minions ay nagsisimula sa sahig na malapit sa bayani",
-    "May palatandaan na tumuturo sa rune na wala sa screen",
-    "Mas maraming kwento sa bawat era, at buong kwento para sa bawat kabanata"
+    "Bagong musika at tunog: bawat yugto ng boss, tagumpay sa era, at bonus round",
+    "Bagong mga gate at kuweba: may pipe na kailangang puntahan, at may tanong sa ilalim",
+    "Gintong runner sa bawat era, at sariling tunog ang atake ng bawat bayani",
+    "Mas mahal na ang presyo sa tindahan at sa pagpili ng bayani"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
