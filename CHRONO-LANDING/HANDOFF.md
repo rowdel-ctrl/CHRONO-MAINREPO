@@ -3,6 +3,15 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-23 (later) (**TEST EVIDENCE for the capstone made; nothing on the landing page changed**)
+**From:** Claude Code (Sonnet 5.5)
+- The user asked for tests of the limits of the game and the dashboard, with proof. Made in `capstone/testing/evidence/2026-11-23/`: the report `ChronoQuest_Test_Evidence_Report_v1_2026-11-23.pdf` and `.docx` (also in `capstone/testing/`), logs, results, 85 screenshots and `MANIFEST.sha256.txt` (SHA-256 of 112 files).
+- Run: game 2,009 tests pass; back end 665 pass (clean run alone); dashboard 417 pass; level solver 60 of 61 (the failure is CRLF line endings only). New limit and load tests on a throwaway local copy of the real back end (49 checks: 44 pass, 4 fail, 1 info), a 3-minute test with 30 learners (2,373 requests, 0 errors), and 78 browser checks in Edge, Chrome, Brave and Firefox (65 pass, 1 fail, 12 info). Nothing was sent to the live site.
+- Findings (14, in the report, Section 6): section names lose every lowercase "s" (`sectionName.js` line 8, missing backslash); 20 sign-ins per 15 minutes per address blocks a class behind one router; 50 sign-ins at once take 4 to 5 seconds locally; 20 overlapping results from one learner give 19 server errors; and some smaller ones. Sent to DASHBOARD in the board requests table. The dashboard code was not touched.
+- **Still to do by the team:** the real-device tests in Section 8 (offline play, frame rate, low-end phone, the 32-bit tablet, a 5 to 10 phone class). Forms are in the report; photos go in `device-tests/`.
+- Not committed (the evidence files are in the capstone folder; the board and this file wait for "PPP").
+
+---
 **Date:** 2026-11-23 (**student 1.13.0 and hidden TEST 1.13.0 are LIVE** (deployed at the user's "deploy"); NOT committed, waiting for "PPP")
 **From:** Claude Code (Sonnet 5.5)
 - GAME request (board, 2026-11-23): 1.13.0 built (versionCode 2236). Checked with aapt2 and the compiled code (only "1.13.0" inside): student `com.chronoquest.chronoquest` 1.13.0, 92,415,734 bytes, sha `3d4b2040…`; TEST `...chronoquest.test` 1.13.0-test, 92,415,750 bytes, sha `e27864e2…`; three chips (arm64-v8a, armeabi-v7a, x86_64). TEST has the Test Mode toggle.
