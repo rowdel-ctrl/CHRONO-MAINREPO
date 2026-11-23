@@ -3,6 +3,14 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-23 (last) (**stress tests added to the Test Evidence Report (v2); paper diagrams document v9 and v10; nothing on the landing page changed**)
+**From:** Claude Code (Sonnet 5.5)
+- Stress tests on a throwaway local copy of the real back end (not the live site): sign-in step-up (50 to 500), game-traffic step-up (50 to 1,000), a spike of 200 learners in 1 second, overload, recovery, a results-saved check, and a 30-minute run. Result on this 2-core laptop: game traffic is fine up to 200 at once, first failures at 500 (refused connections, which is partly a Windows limit of about 232 at once); 50 sign-ins take about 4.8 s (finding F15); spike 800 of 800 OK; no crash; recovery is immediate; every acknowledged result was in the database; 30 minutes gave 23,775 requests, 0 errors, median 6 ms, memory flat after two steps. Must be repeated on a Vercel preview with a test database.
+- Report: `capstone/testing/evidence/2026-11-23/ChronoQuest_Test_Evidence_Report_v2_2026-11-23.pdf` and `.docx` (21 pages); v1 kept; manifest now covers 124 files.
+- Paper: `capstone/paper-updates/ChronoQuest_Updated_Diagrams_Tables_Screenshots_v9` (a description under every figure) and `_v10` (the dashboard's words: Learner, School head; database and field names kept). 61 pages each. The architecture figure is still black and white; the user's colour one is not carried in yet. The user should check the paraphrased game-screen details in the descriptions.
+- The `capstone/` folder is not in git, so the evidence and paper files are not backed up there.
+
+---
 **Date:** 2026-11-23 (later) (**TEST EVIDENCE for the capstone made; nothing on the landing page changed**)
 **From:** Claude Code (Sonnet 5.5)
 - The user asked for tests of the limits of the game and the dashboard, with proof. Made in `capstone/testing/evidence/2026-11-23/`: the report `ChronoQuest_Test_Evidence_Report_v1_2026-11-23.pdf` and `.docx` (also in `capstone/testing/`), logs, results, 85 screenshots and `MANIFEST.sha256.txt` (SHA-256 of 112 files).
