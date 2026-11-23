@@ -1,11 +1,10 @@
 {
-  "version": "1.12.4",
+  "version": "1.13.0",
   "required": false,
   "notes": [
-    "Bagong musika at tunog: bawat yugto ng boss, tagumpay sa era, at bonus round",
-    "Bagong mga gate at kuweba: may pipe na kailangang puntahan, at may tanong sa ilalim",
-    "Gintong runner sa bawat era, at sariling tunog ang atake ng bawat bayani",
-    "Mas mahal na ang presyo sa tindahan at sa pagpili ng bayani"
+    "May lesson card na bago ang bawat level: basahin muna ang aralin bago maglaro",
+    "May paliwanag na sa bawat tanong kapag mali ang sagot",
+    "Mas malinaw na ang mensahe kapag na-lock ang sign-in: nakalagay ang minuto at itanong sa teacher"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"

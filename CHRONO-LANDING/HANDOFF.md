@@ -3,6 +3,14 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-23 (**student 1.13.0 and hidden TEST 1.13.0 are LIVE** (deployed at the user's "deploy"); NOT committed, waiting for "PPP")
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (board, 2026-11-23): 1.13.0 built (versionCode 2236). Checked with aapt2 and the compiled code (only "1.13.0" inside): student `com.chronoquest.chronoquest` 1.13.0, 92,415,734 bytes, sha `3d4b2040…`; TEST `...chronoquest.test` 1.13.0-test, 92,415,750 bytes, sha `e27864e2…`; three chips (arm64-v8a, armeabi-v7a, x86_64). TEST has the Test Mode toggle.
+- Page: both files in `public/downloads/`; `config.js`, `latest.json` (three Taglish notes), hero and tester text 1.13.0; What's new has a 1.13.0 card (Latest) and 1.12.4 moved to Earlier. The size label reads 88 MB. Local test: the 5-tap dialog opens, no console errors.
+- Deployed once. Live check: `latest.json` 1.13.0; download sizes match local (92,415,734 and 92,415,750); live page shows v1.13.0 and the 1.13.0 card. The GAME request line is deleted on the board and my row is updated.
+- **Not yet:** commit (only on "PPP"). Not tried on a phone or the tablet. The wide screens are still from 1.9.0.
+
+---
 **Date:** 2026-11-16 (**student 1.12.4 and hidden TEST 1.12.4 are LIVE** (deployed at the user's "Deploy"); NOT committed, waiting for "PPP")
 **From:** Claude Code (Haiku 5.5)
 - GAME request (board, 2026-11-16): 1.12.4 built (versionCode 2235). Checked with aapt2 and the compiled code: student `com.chronoquest.chronoquest` 1.12.4, 92,325,410 bytes, sha `531571cf…`; TEST `...chronoquest.test` 1.12.4-test, 92,325,422 bytes, sha `7d940b4e…`; three chips; `libapp.so` says only "1.12.4". GAME did not ask to hold the page this time.
