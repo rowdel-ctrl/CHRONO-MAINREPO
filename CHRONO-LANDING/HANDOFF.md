@@ -3,6 +3,14 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-24 (**hidden TEST 1.13.2 is LIVE** (deployed at the user's "Deploy"); student stays 1.13.0; NOT committed, waiting for "PPP")
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (board, 2026-11-24): tester 1.13.2 (versionCode 2238, `ChronoQuest-TEST-1.13.2-all.apk`, 92,415,746 bytes, sha `f19636ac…`). Checked with aapt2: `com.chronoquest.chronoquest.test`, `1.13.2-test`. It has the Test Mode toggle; Test Mode now skips only the lesson card's reading time (question timer, boss clock and golden portal still run). Swapping it removes nothing else from the tester.
+- Page: file copied to `public/downloads/chronoquest-tester.apk`; `config.js` testerVersion 1.13.2; the tester dialog in `index.html` starts with the Test Mode note; What's new has a 1.13.2 card ("Tester only") above 1.13.0, and I moved the 1.12.1 card down to its place (it was out of order). `latest.json` unchanged (student 1.13.0).
+- Deployed once. Live check: tester file size 92,415,746 and student 92,415,734 match local; What's new shows 1.13.2 and 1.13.0; the tester dialog text is live. Did not run the 5-tap browser test this time. The GAME request line is deleted from the board and my row is updated.
+- **Not yet:** commit (only on "PPP"). Not tried on a phone or the tablet.
+
+---
 **Date:** 2026-11-23 (last) (**stress tests added to the Test Evidence Report (v2); paper diagrams document v9 and v10; nothing on the landing page changed**)
 **From:** Claude Code (Sonnet 5.5)
 - Stress tests on a throwaway local copy of the real back end (not the live site): sign-in step-up (50 to 500), game-traffic step-up (50 to 1,000), a spike of 200 learners in 1 second, overload, recovery, a results-saved check, and a 30-minute run. Result on this 2-core laptop: game traffic is fine up to 200 at once, first failures at 500 (refused connections, which is partly a Windows limit of about 232 at once); 50 sign-ins take about 4.8 s (finding F15); spike 800 of 800 OK; no crash; recovery is immediate; every acknowledged result was in the database; 30 minutes gave 23,775 requests, 0 errors, median 6 ms, memory flat after two steps. Must be repeated on a Vercel preview with a test database.
