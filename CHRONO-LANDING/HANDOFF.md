@@ -3,6 +3,16 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-26 (**student 1.15.0 and hidden TEST 1.15.0 are LIVE** (deployed at the user's "Deploy"); NOT committed, waiting for "PPP"; 1.13.2 work committed cd7f68d and pushed earlier)
+- **Deployed once. Live check:** both download sizes match local (92,694,262 and 92,694,278); `latest.json` 1.15.0; What's new shows the 1.15.0 card; the page shows v1.15.0. GAME's request line is deleted from the board and my row is updated. (The lines below were written before the deploy.)
+**From:** Claude Code (Sonnet 5.5)
+- GAME request (board, 2026-11-26): student `ChronoQuest-1.15.0-all.apk` (92,694,262 bytes, versionCode 2241, sha `12278a22…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.15.0-all.apk` (92,694,278 bytes, `1.15.0-test`, sha `12046e5b…`, WITH Test Mode). Checked with aapt2 (package, version, three chips) and sha: they match GAME's line.
+- Page: both files copied to `public/downloads/` (`chronoquest.apk`, `chronoquest-tester.apk`); `config.js` 1.15.0 for both; `latest.json` 1.15.0 with three Taglish notes (ULITIN, boss explanation and SUSUNOD, calmer menus and music); hero and screens line say v1.15.0; tester dialog text updated; What's new has a 1.15.0 card (Latest); 1.13.0 and 1.13.2 are Earlier. The size label still reads 88 MB (92.7 MB is 88.4 MiB).
+- NOT on the page, on purpose (GAME: they need the DASHBOARD server part): moving up to a new school year, and one account on one phone at a time. Add them when DASHBOARD says they are live.
+- Checks: `npm run build` passes; browser test on the built page: 5 taps on the logo open the tester dialog, version 1.15.0, no console errors. The GAME 1.15.0 request line stays on the board until the deploy is done.
+- **Next:** "Deploy", then a live check of both file sizes and `latest.json`, then delete the GAME line. Commit only on "PPP". Not tried on a phone or the tablet.
+
+---
 **Date:** 2026-11-24 (**hidden TEST 1.13.2 is LIVE** (deployed at the user's "Deploy"); student stays 1.13.0; NOT committed, waiting for "PPP")
 **From:** Claude Code (Sonnet 5.5)
 - GAME request (board, 2026-11-24): tester 1.13.2 (versionCode 2238, `ChronoQuest-TEST-1.13.2-all.apk`, 92,415,746 bytes, sha `f19636ac…`). Checked with aapt2: `com.chronoquest.chronoquest.test`, `1.13.2-test`. It has the Test Mode toggle; Test Mode now skips only the lesson card's reading time (question timer, boss clock and golden portal still run). Swapping it removes nothing else from the tester.
