@@ -3,6 +3,25 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
+**Date:** 2026-11-28 (**student 1.17.5 and hidden TEST 1.17.5 are LIVE** (deployed at the user's "adn deploy"); NOT committed, waiting for "PPP"; 1.16.0 committed 7aa4c7d)
+**From:** Claude Code (Haiku 5.5)
+- GAME's URGENT request on the board (1.17.5 replaces 1.17.0; it fixes the stuck first screen after a reinstall): student `ChronoQuest-1.17.5-all.apk` (95,093,314 bytes, versionCode 2250, sha `206a5648…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.17.5-all.apk` (95,093,338 bytes, `1.17.5-test`, sha `464f2438…`, WITH Test Mode). Checked with aapt2 (package, version, chips arm64, armeabi-v7a, x86_64) and sha: they match GAME's line.
+- Page: both files copied to `public/downloads/`; `config.js` 1.17.5; `latest.json` 1.17.5 with four Taglish notes (tap twice to confirm, finished levels come back, bigger question cards on tablets, stuck-screen fix); hero and screens line say v1.17.5; tester dialog says it is the same as the public 1.17.5 plus the new items; What's new has a 1.17.5 card (Latest), 1.17.0 is Earlier.
+- Checks: `npm run build` passes. Deployed once (`vercel deploy --prod --yes`, status Ready). Live: both download sizes match (95,093,314 and 95,093,338); `latest.json` 1.17.5; What's new shows 1.17.5; the page shows v1.17.5 and no 1.17.0 text. The browser tap test was not run.
+- GAME's 1.17.5 request line is deleted from the board. Not tried on a phone or the tablet. The level-restore point is only tested by GAME, not seen on a device.
+- **Not yet:** commit (only on "PPP").
+
+---
+**Date:** 2026-11-28 (earlier: **student 1.17.0 and hidden TEST 1.17.0 were LIVE**; NOT committed)
+**From:** Claude Code (Haiku 5.5)
+- GAME request (board, 2026-11-28): student `ChronoQuest-1.17.0-all.apk` (94,944,930 bytes, versionCode 2244, sha `42a96728…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.17.0-all.apk` (94,944,946 bytes, `1.17.0-test`, sha `aabc1e23…`, WITH Test Mode and the "Panoorin ang chain break" button in Settings). Checked with aapt2 (package, version, chips arm64, armeabi-v7a, x86_64) and sha: they match GAME's line.
+- Page: both files copied to `public/downloads/`; `config.js` 1.17.0 for both; `latest.json` 1.17.0 with four Taglish notes (books on a shelf, chains break after the boss, longer boss defeat with medal, new music and sounds); hero and screens line say v1.17.0; tester dialog says the chain break button is in Settings; What's new has a 1.17.0 card (Latest), 1.16.0 is Earlier.
+- Checks: `npm run build` passes. The browser tap test could not run (puppeteer-core is no longer installed on this PC), so the tester dialog was not clicked in a browser this time.
+- Deployed. Live check: both download sizes match local (94,944,930 and 94,944,946); `latest.json` 1.17.0; What's new shows the 1.17.0 card; the page shows v1.17.0. Note: the first deploy command ran twice by mistake; both are READY and the production URL serves the latest.
+- GAME's 1.17.0 request line is deleted from the board. Not tried on a phone or the tablet.
+- **Not yet:** commit (only on "PPP").
+
+---
 **Date:** 2026-11-27 (**student 1.16.0 and hidden TEST 1.16.0 are LIVE** (deployed at the user's "Deploy"); NOT committed, waiting for "PPP"; 1.15.0 work committed c237f0e)
 **From:** Claude Code (Haiku 5.5)
 - GAME request (board, 2026-11-27): student `ChronoQuest-1.16.0-all.apk` (92,747,838 bytes, versionCode 2242, sha `9d6e1367…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.16.0-all.apk` (92,747,854 bytes, `1.16.0-test`, sha `5276c86f…`, WITH Test Mode). Checked with aapt2 (package, version, three chips) and sha: they match GAME's line.
