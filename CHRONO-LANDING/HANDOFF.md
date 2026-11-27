@@ -3,7 +3,17 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
-**Date:** 2026-11-26 (**student 1.15.0 and hidden TEST 1.15.0 are LIVE** (deployed at the user's "Deploy"); NOT committed, waiting for "PPP"; 1.13.2 work committed cd7f68d and pushed earlier)
+**Date:** 2026-11-27 (**student 1.16.0 and hidden TEST 1.16.0 are LIVE** (deployed at the user's "Deploy"); NOT committed, waiting for "PPP"; 1.15.0 work committed c237f0e)
+**From:** Claude Code (Haiku 5.5)
+- GAME request (board, 2026-11-27): student `ChronoQuest-1.16.0-all.apk` (92,747,838 bytes, versionCode 2242, sha `9d6e1367…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.16.0-all.apk` (92,747,854 bytes, `1.16.0-test`, sha `5276c86f…`, WITH Test Mode). Checked with aapt2 (package, version, three chips) and sha: they match GAME's line.
+- Page: both files copied to `public/downloads/`; `config.js` 1.16.0 for both; `latest.json` 1.16.0 with three Taglish notes (new questions with explanations, Grade 6 lessons and the clock, clean return to login); hero and screens line say v1.16.0; tester dialog text updated; What's new has a 1.16.0 card (Latest); 1.15.0 is Earlier.
+- Checks: `npm run build` passes; the 5-tap logo test on the built page opens the tester dialog, version 1.16.0, no console errors.
+- Deployed once. Live check: both download sizes match local (92,747,838 and 92,747,854); `latest.json` 1.16.0; What's new shows the 1.16.0 card; the page shows v1.16.0. GAME's 1.16.0 request line is deleted and my row is updated.
+- NOT on the page, on purpose: moving up a year and one account on one phone (GAME says they need DASHBOARD's next steps).
+- **Not yet:** commit (only on "PPP"). Not tried on a phone or the tablet.
+
+---
+**Date:** 2026-11-26 (**student 1.15.0 and hidden TEST 1.15.0 are LIVE** (deployed at the user's "Deploy"); committed c237f0e at "PPP")
 - **Deployed once. Live check:** both download sizes match local (92,694,262 and 92,694,278); `latest.json` 1.15.0; What's new shows the 1.15.0 card; the page shows v1.15.0. GAME's request line is deleted from the board and my row is updated. (The lines below were written before the deploy.)
 **From:** Claude Code (Sonnet 5.5)
 - GAME request (board, 2026-11-26): student `ChronoQuest-1.15.0-all.apk` (92,694,262 bytes, versionCode 2241, sha `12278a22…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.15.0-all.apk` (92,694,278 bytes, `1.15.0-test`, sha `12046e5b…`, WITH Test Mode). Checked with aapt2 (package, version, three chips) and sha: they match GAME's line.

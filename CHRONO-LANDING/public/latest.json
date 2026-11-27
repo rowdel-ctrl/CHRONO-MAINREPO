@@ -1,10 +1,10 @@
 {
-  "version": "1.15.0",
+  "version": "1.16.0",
   "required": false,
   "notes": [
-    "May ULITIN na sa pause menu: puwede mong ulitin ang level",
-    "Sa boss question, may paliwanag ang sagot at hihintayin mo ang SUSUNOD bago magpatuloy",
-    "Mas kalmado ang mga background ng menu, at humihinto na ang music pagkatapos ng level"
+    "Mas mahaba at bago na ang mga tanong, at may paliwanag ang bawat isa",
+    "May orasan na ang bawat tanong, at may bagong aralin sa Grade 6",
+    "Kapag hindi na kilala ng server ang login mo, babalik ka nang maayos sa login"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
