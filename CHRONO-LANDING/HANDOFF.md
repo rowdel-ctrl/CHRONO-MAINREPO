@@ -3,7 +3,17 @@
 > **Chat nickname: LANDING PAGE.** This file is for the public landing page only (`CHRONO-LANDING`). The board that shows all three chats is `../HANDOFF.md`. Game: `../CHRONO-GAMEAPP/HANDOFF.md`. Dashboard: `../CHRONO-DASHBOARD/HANDOFF.md`.
 > At the end of a session add a dated entry at the top (automatically, without asking). Keep the newest entry under one page. Keep this file under about 200 lines: when it grows past that, move the oldest entries in full to `docs/handoff-archive/`.
 
-**Date:** 2026-11-28 (**student 1.17.5 and hidden TEST 1.17.5 are LIVE** (deployed at the user's "adn deploy"); NOT committed, waiting for "PPP"; 1.16.0 committed 7aa4c7d)
+**Date:** 2026-11-28 (**student 1.18.0 and hidden TEST 1.18.0 are LIVE** (deployed at the user's "ppp and deploy"); committed and pushed with these files, commit "landing: student and TEST 1.18.0 live (GAME build)")
+**From:** Claude Code (Haiku 5.5)
+- GAME's 1.18.0 build (the boss fight update; the user said go): student `ChronoQuest-1.18.0-all.apk` (95,175,574 bytes, versionCode 2251, sha `e2fd8992…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.18.0-all.apk` (95,175,598 bytes, `1.18.0-test`, sha `b6d58434…`, WITH Test Mode). Checked with aapt2 (package, version, chips arm64, armeabi-v7a, x86_64) and sha: they match GAME's line.
+- Page: both files copied to `public/downloads/`; `config.js` 1.18.0; `latest.json` 1.18.0 with four Taglish notes (wider boss room, far minions with a red warning, drops, longer reach); hero and screens line say v1.18.0; tester dialog mentions the boss fight update; What's new has a 1.18.0 card (Latest), 1.17.5 is Earlier.
+- Checks: `npm run build` passes. Deployed once with `vercel deploy --prod --yes` (the output was long, so the status was read from the live site). Live: both download sizes match (95,175,574 and 95,175,598); `latest.json` 1.18.0; What's new shows 1.18.0; the page shows v1.18.0 and no 1.17.5. The browser tap test was not run.
+- Not tried on a phone or the tablet.
+- Board: GAME's 1.18.0 request sits in the status table (row starting "| GAME | LANDING PAGE |"), not in the requests table. Left as GAME wrote it; the GAME chat should move it.
+- **Not yet:** nothing else pending for this build.
+
+---
+**Date:** 2026-11-28 (earlier: **student 1.17.5 and hidden TEST 1.17.5 were LIVE** (deployed at the user's "adn deploy"); committed bec832d)
 **From:** Claude Code (Haiku 5.5)
 - GAME's URGENT request on the board (1.17.5 replaces 1.17.0; it fixes the stuck first screen after a reinstall): student `ChronoQuest-1.17.5-all.apk` (95,093,314 bytes, versionCode 2250, sha `206a5648…`, NO Test Mode) and TEST `ChronoQuest-TEST-1.17.5-all.apk` (95,093,338 bytes, `1.17.5-test`, sha `464f2438…`, WITH Test Mode). Checked with aapt2 (package, version, chips arm64, armeabi-v7a, x86_64) and sha: they match GAME's line.
 - Page: both files copied to `public/downloads/`; `config.js` 1.17.5; `latest.json` 1.17.5 with four Taglish notes (tap twice to confirm, finished levels come back, bigger question cards on tablets, stuck-screen fix); hero and screens line say v1.17.5; tester dialog says it is the same as the public 1.17.5 plus the new items; What's new has a 1.17.5 card (Latest), 1.17.0 is Earlier.

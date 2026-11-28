@@ -1,11 +1,11 @@
 {
-  "version": "1.17.5",
+  "version": "1.18.0",
   "required": false,
   "notes": [
-    "Pindutin nang isang beses ang sagot para piliin, tapos pindutin ulit para kumpirmahin",
-    "Bumabalik ang mga tapos na level kapag nag-sign in ulit o gumamit ng bagong phone",
-    "Mas malaki ang card ng tanong sa tablet, at nasa kaliwa ang teksto",
-    "Naayos: hindi na natitigil sa unang screen pagkatapos mag-reinstall"
+    "Mas malaki ang boss room, at sumusunod ang camera sa iyo",
+    "Lumilitaw ang mga kalaban nang malayo, may pulang babala muna",
+    "Maaaring makakuha ng puso o power-up mula sa natalong kalaban: lakad lang para kunin",
+    "Mas malayo ang abot nina Rizal, Maria Clara at Luna"
   ],
   "reason": "",
   "url": "https://chronoquest-five.vercel.app"
